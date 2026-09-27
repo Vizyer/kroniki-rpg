@@ -81,6 +81,24 @@ jobs:
           )
           foreach ($p in $required) { if (!(Test-Path $p)) { throw "Overlay missing: $p" } }
 
+      - name: Fix 0.9 Rust compile issues
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $systems = 'kroniki-rpg-godot/rust-core/src/systems.rs'
+          $src = Get-Content $systems -Raw
+          $src = $src.Replace('let out=apply_ai_patch(s,p);', 'let out=apply_ai_patch(s,&p);')
+          Set-Content -Path $systems -Value $src -Encoding utf8
+
+          $main = 'kroniki-rpg-godot/rust-core/src/main.rs'
+          $src = Get-Content $main -Raw
+          $src = $src.Replace(
+            'async fn ai_config_set(State(s):State<AppState>,Json(p):Json<Value>)->Json<Value>{let c=s.db.lock().unwrap();',
+            'async fn ai_config_set(State(s):State<AppState>,Json(p):Json<Value>)->Json<Value>{{let c=s.db.lock().unwrap();'
+          )
+          $src = $src.Replace('drop(c);ai_config_get(State(s)).await}', '}ai_config_get(State(s)).await}')
+          Set-Content -Path $main -Value $src -Encoding utf8
+
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
