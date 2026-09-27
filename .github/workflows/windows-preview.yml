@@ -1,0 +1,99 @@
+name: Kroniki RPG - Windows Preview Build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Reconstruct source archive
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          [IO.File]::WriteAllBytes('part00.bin', [Convert]::FromBase64String((Get-Content 'ci/source.part00.b64' -Raw)))
+          [IO.File]::WriteAllBytes('part01.bin', [Convert]::FromBase64String((Get-Content 'ci/source.part01.b64' -Raw)))
+          $parts = @(
+            'part00.bin',
+            'part01.bin',
+            'ci/bin/rest00.bin',
+            'ci/bin/rest01.bin',
+            'ci/bin/rest02.bin',
+            'ci/bin/rest03.bin',
+            'ci/bin/rest04.bin',
+            'ci/bin/rest05.bin',
+            'ci/bin/rest06.bin',
+            'ci/bin/rest07.bin'
+          )
+          $out = [IO.File]::Create((Join-Path $PWD 'source.tar.xz'))
+          try {
+            foreach ($p in $parts) {
+              $bytes = [IO.File]::ReadAllBytes((Join-Path $PWD $p))
+              $out.Write($bytes, 0, $bytes.Length)
+            }
+          } finally {
+            $out.Dispose()
+          }
+          tar -xJf source.tar.xz
+          if (!(Test-Path 'kroniki-rpg-godot/scripts/build_windows_release.ps1')) {
+            throw 'Source archive reconstruction failed.'
+          }
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            kroniki-rpg-godot/rust-core
+            kroniki-rpg-godot/launcher
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --yes --no-progress
+
+      - name: Build game, launcher and installer
+        shell: pwsh
+        working-directory: kroniki-rpg-godot
+        run: |
+          ./scripts/build_windows_release.ps1 -Version '0.8.1-preview.1' -Channel 'preview' -Repository 'Vizyer/kroniki-rpg' -GodotVersion '4.7.2'
+
+      - name: Verify outputs
+        shell: pwsh
+        working-directory: kroniki-rpg-godot
+        run: |
+          $required = @(
+            'build/KronikiRPG-Setup.exe',
+            'build/KronikiRPG-win-x64.zip',
+            'build/update-manifest.json',
+            'build/KronikiLauncher.exe',
+            'build/app/KronikiRPG.exe',
+            'build/app/kroniki_core.exe'
+          )
+          foreach ($p in $required) {
+            if (!(Test-Path $p)) { throw "Missing build output: $p" }
+          }
+          Get-FileHash build/KronikiRPG-Setup.exe -Algorithm SHA256
+          Get-ChildItem build -Recurse | Select-Object FullName,Length
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: KronikiRPG-0.8.1-preview.1-Windows
+          path: |
+            kroniki-rpg-godot/build/KronikiRPG-Setup.exe
+            kroniki-rpg-godot/build/KronikiRPG-win-x64.zip
+            kroniki-rpg-godot/build/update-manifest.json
+          if-no-files-found: error
+          retention-days: 30
