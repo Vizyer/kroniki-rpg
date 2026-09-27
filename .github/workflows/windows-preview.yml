@@ -87,7 +87,17 @@ jobs:
 
       - name: Install Inno Setup
         shell: pwsh
-        run: choco install innosetup --yes --no-progress
+        run: |
+          $ErrorActionPreference = 'Stop'
+          choco install innosetup --yes --no-progress
+          $candidates = @(
+            'C:\Program Files (x86)\Inno Setup 6',
+            'C:\Program Files\Inno Setup 6'
+          )
+          $inno = $candidates | Where-Object { Test-Path (Join-Path $_ 'ISCC.exe') } | Select-Object -First 1
+          if (!$inno) { throw 'Inno Setup installed but ISCC.exe was not found.' }
+          $inno | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          Write-Host "Inno Setup: $inno"
 
       - name: Build game, launcher and installer
         shell: pwsh
