@@ -274,8 +274,8 @@ jobs:
           if (!$coreProc.HasExited) { $coreProc.WaitForExit(5000) | Out-Null }
 
           Write-Host '==> Godot exported game headless boot'
-          & $game --headless --quit-after 2
-          if ($LASTEXITCODE -ne 0) { throw "Godot game smoke boot failed with exit code $LASTEXITCODE" }
+          $gameProc = Start-Process -FilePath $game -ArgumentList @('--headless','--quit-after','2') -Wait -PassThru
+          if ($gameProc.ExitCode -ne 0) { throw "Godot game smoke boot failed with exit code $($gameProc.ExitCode)" }
 
           if (!(Test-Path (Join-Path $dataDir 'kroniki.sqlite3'))) {
             throw 'Expected persistent SQLite save database was not created.'
