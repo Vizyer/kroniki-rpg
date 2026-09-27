@@ -113,37 +113,15 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $path = 'kroniki-rpg-godot/scripts/build_windows_release.ps1'
           $src = Get-Content $path -Raw
-          $old = @'
-Push-Location (Join-Path $Root 'godot')
-& $Godot --headless --editor --quit
-if ($LASTEXITCODE -ne 0) { throw 'Godot import failed' }
-& $Godot --headless --export-release 'Windows Desktop' (Join-Path $App 'KronikiRPG.exe')
-if ($LASTEXITCODE -ne 0) { throw 'Godot export failed' }
-Pop-Location
-'@
-          $new = @'
-$GodotProject = Join-Path $Root 'godot'
-
-function Invoke-GodotProcess([string[]]$Arguments, [string]$FailureMessage) {
-    $psi = [System.Diagnostics.ProcessStartInfo]::new()
-    $psi.FileName = $Godot
-    $psi.WorkingDirectory = $GodotProject
-    $psi.UseShellExecute = $false
-    foreach ($arg in $Arguments) { [void]$psi.ArgumentList.Add($arg) }
-    $proc = [System.Diagnostics.Process]::Start($psi)
-    $proc.WaitForExit()
-    if ($proc.ExitCode -ne 0) { throw "$FailureMessage (exit $($proc.ExitCode))" }
-}
-
-Invoke-GodotProcess @('--headless','--editor','--quit') 'Godot import failed'
-$GameExe = Join-Path $App 'KronikiRPG.exe'
-Invoke-GodotProcess @('--headless','--export-release','Windows Desktop',$GameExe) 'Godot export failed'
-if (!(Test-Path $GameExe)) { throw 'Godot export finished without KronikiRPG.exe' }
-'@
-          if (-not $src.Contains($old)) { throw 'Expected Godot export block not found.' }
-          $src = $src.Replace($old,$new)
+          $oldImport = '& $Godot --headless --editor --quit'
+          $newImport = "& `$Godot --headless --editor --quit`r`nGet-Process -Name ([IO.Path]::GetFileNameWithoutExtension(`$Godot)) -ErrorAction SilentlyContinue | Wait-Process"
+          $oldExport = "& `$Godot --headless --export-release 'Windows Desktop' (Join-Path `$App 'KronikiRPG.exe')"
+          $newExport = "& `$Godot --headless --export-release 'Windows Desktop' (Join-Path `$App 'KronikiRPG.exe')`r`nGet-Process -Name ([IO.Path]::GetFileNameWithoutExtension(`$Godot)) -ErrorAction SilentlyContinue | Wait-Process"
+          if (-not $src.Contains($oldImport)) { throw 'Godot import command not found.' }
+          if (-not $src.Contains($oldExport)) { throw 'Godot export command not found.' }
+          $src = $src.Replace($oldImport,$newImport).Replace($oldExport,$newExport)
+          $src = $src.Replace("Pop-Location", "Pop-Location`r`nif (!(Test-Path (Join-Path `$App 'KronikiRPG.exe'))) { throw 'Godot export finished without KronikiRPG.exe' }")
           Set-Content -Path $path -Value $src -Encoding utf8
-
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
