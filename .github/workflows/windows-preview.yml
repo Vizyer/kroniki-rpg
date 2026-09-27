@@ -99,6 +99,51 @@ jobs:
           $src = $src.Replace('drop(c);ai_config_get(State(s)).await}', '}ai_config_get(State(s)).await}')
           Set-Content -Path $main -Value $src -Encoding utf8
 
+          $gd = 'kroniki-rpg-godot/godot/scripts/main.gd'
+          $gsrc = Get-Content $gd -Raw
+          $gsrc = $gsrc.Replace(
+            '    var total:=state.world.hour*60+state.world.minute+mins; state.world.day+=int(total/1440); total%=1440; state.world.hour=int(total/60); state.world.minute=total%60; _update_status()',
+            '    var total:int = int(state.world.hour) * 60 + int(state.world.minute) + mins; state.world.day += int(total / 1440); total %= 1440; state.world.hour = int(total / 60); state.world.minute = total % 60; _update_status()'
+          )
+          Set-Content -Path $gd -Value $gsrc -Encoding utf8
+
+      - name: Patch Godot export to wait for process completion
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $path = 'kroniki-rpg-godot/scripts/build_windows_release.ps1'
+          $src = Get-Content $path -Raw
+          $old = @'
+Push-Location (Join-Path $Root 'godot')
+& $Godot --headless --editor --quit
+if ($LASTEXITCODE -ne 0) { throw 'Godot import failed' }
+& $Godot --headless --export-release 'Windows Desktop' (Join-Path $App 'KronikiRPG.exe')
+if ($LASTEXITCODE -ne 0) { throw 'Godot export failed' }
+Pop-Location
+'@
+          $new = @'
+$GodotProject = Join-Path $Root 'godot'
+
+function Invoke-GodotProcess([string[]]$Arguments, [string]$FailureMessage) {
+    $psi = [System.Diagnostics.ProcessStartInfo]::new()
+    $psi.FileName = $Godot
+    $psi.WorkingDirectory = $GodotProject
+    $psi.UseShellExecute = $false
+    foreach ($arg in $Arguments) { [void]$psi.ArgumentList.Add($arg) }
+    $proc = [System.Diagnostics.Process]::Start($psi)
+    $proc.WaitForExit()
+    if ($proc.ExitCode -ne 0) { throw "$FailureMessage (exit $($proc.ExitCode))" }
+}
+
+Invoke-GodotProcess @('--headless','--editor','--quit') 'Godot import failed'
+$GameExe = Join-Path $App 'KronikiRPG.exe'
+Invoke-GodotProcess @('--headless','--export-release','Windows Desktop',$GameExe) 'Godot export failed'
+if (!(Test-Path $GameExe)) { throw 'Godot export finished without KronikiRPG.exe' }
+'@
+          if (-not $src.Contains($old)) { throw 'Expected Godot export block not found.' }
+          $src = $src.Replace($old,$new)
+          Set-Content -Path $path -Value $src -Encoding utf8
+
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
