@@ -1,6 +1,8 @@
 name: Kroniki RPG - Windows Preview Build
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -53,34 +55,31 @@ jobs:
             throw 'Source archive reconstruction failed.'
           }
 
-      - name: Patch Inno Setup path in build script
+      - name: Apply 0.9 Core + AI-GM overlay
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $path = 'kroniki-rpg-godot/scripts/build_windows_release.ps1'
-          $src = Get-Content $path -Raw
-          $src = $src.Replace('"$env:ProgramFiles(x86)\Inno Setup 6\ISCC.exe"', '"${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"')
-          Set-Content -Path $path -Value $src -Encoding utf8
-
-      - name: Patch launcher for eframe 0.36
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $path = 'kroniki-rpg-godot/launcher/src/main.rs'
-          $src = Get-Content $path -Raw
-          $src = $src.Replace(
-            'fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {',
-            'fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {'
+          $b64 = ''
+          foreach ($p in @('ci/overlay09/p0.b64','ci/overlay09/p1.b64','ci/overlay09/p2.b64','ci/overlay09/p3.b64')) {
+            if (!(Test-Path $p)) { throw "Missing 0.9 overlay fragment: $p" }
+            $b64 += (Get-Content $p -Raw).Trim()
+          }
+          $bytes = [Convert]::FromBase64String($b64)
+          [IO.File]::WriteAllBytes((Join-Path $PWD 'overlay-0.9.tar.xz'), $bytes)
+          $size = (Get-Item 'overlay-0.9.tar.xz').Length
+          if ($size -ne 28524) { throw "Unexpected 0.9 overlay size: $size" }
+          $sha = (Get-FileHash 'overlay-0.9.tar.xz' -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($sha -ne '348b7761cdfab42b70f7c5626df5df3dbe66a5bfe1fa66bd2a06c2b1d59084be') {
+            throw "0.9 overlay SHA256 mismatch: $sha"
+          }
+          tar -xJf overlay-0.9.tar.xz -C kroniki-rpg-godot
+          if ($LASTEXITCODE -ne 0) { throw '0.9 overlay extraction failed.' }
+          $required = @(
+            'kroniki-rpg-godot/rust-core/src/systems.rs',
+            'kroniki-rpg-godot/rust-core/src/ai.rs',
+            'kroniki-rpg-godot/godot/scripts/main.gd'
           )
-          $src = $src.Replace(
-            'ctx.request_repaint_after(Duration::from_millis(100));',
-            'ui.ctx().request_repaint_after(Duration::from_millis(100));'
-          )
-          $src = $src.Replace(
-            'egui::CentralPanel::default().show(ctx, |ui| {',
-            'egui::CentralPanel::default().show(ui, |ui| {'
-          )
-          Set-Content -Path $path -Value $src -Encoding utf8
+          foreach ($p in $required) { if (!(Test-Path $p)) { throw "Overlay missing: $p" } }
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -91,6 +90,12 @@ jobs:
           workspaces: |
             kroniki-rpg-godot/rust-core
             kroniki-rpg-godot/launcher
+
+      - name: Test Rust Core
+        shell: pwsh
+        run: |
+          cargo test --manifest-path kroniki-rpg-godot/rust-core/Cargo.toml
+          if ($LASTEXITCODE -ne 0) { throw 'Rust Core tests failed.' }
 
       - name: Install Inno Setup
         shell: pwsh
@@ -110,7 +115,7 @@ jobs:
         shell: pwsh
         working-directory: kroniki-rpg-godot
         run: |
-          ./scripts/build_windows_release.ps1 -Version '0.8.1-preview.1' -Channel 'preview' -Repository 'Vizyer/kroniki-rpg' -GodotVersion '4.7.2'
+          ./scripts/build_windows_release.ps1 -Version '0.9.0-preview.1' -Channel 'preview' -Repository 'Vizyer/kroniki-rpg' -GodotVersion '4.7.2'
 
       - name: Verify outputs
         shell: pwsh
@@ -133,7 +138,7 @@ jobs:
       - name: Upload Windows installer
         uses: actions/upload-artifact@v4
         with:
-          name: KronikiRPG-0.8.1-preview.1-Windows
+          name: KronikiRPG-0.9.0-preview.1-Windows
           path: |
             kroniki-rpg-godot/build/KronikiRPG-Setup.exe
             kroniki-rpg-godot/build/KronikiRPG-win-x64.zip
