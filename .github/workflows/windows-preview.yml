@@ -21,11 +21,9 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          [IO.File]::WriteAllBytes('part00.bin', [Convert]::FromBase64String((Get-Content 'ci/source.part00.b64' -Raw)))
-          [IO.File]::WriteAllBytes('part01.bin', [Convert]::FromBase64String((Get-Content 'ci/source.part01.b64' -Raw)))
           $parts = @(
-            'part00.bin',
-            'part01.bin',
+            'ci/bin/head00.bin',
+            'ci/bin/head01.bin',
             'ci/bin/rest00.bin',
             'ci/bin/rest01.bin',
             'ci/bin/rest02.bin',
@@ -38,13 +36,21 @@ jobs:
           $out = [IO.File]::Create((Join-Path $PWD 'source.tar.xz'))
           try {
             foreach ($p in $parts) {
+              if (!(Test-Path $p)) { throw "Missing source fragment: $p" }
               $bytes = [IO.File]::ReadAllBytes((Join-Path $PWD $p))
               $out.Write($bytes, 0, $bytes.Length)
             }
           } finally {
             $out.Dispose()
           }
+          $size = (Get-Item 'source.tar.xz').Length
+          if ($size -ne 33684) { throw "Unexpected source archive size: $size" }
+          $sha = (Get-FileHash 'source.tar.xz' -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($sha -ne 'd8f2dba574f7975e872a88719090298321aaf4ef860ecd7ab0e1eae341eebccc') {
+            throw "Source archive SHA256 mismatch: $sha"
+          }
           tar -xJf source.tar.xz
+          if ($LASTEXITCODE -ne 0) { throw 'Source extraction failed.' }
           if (!(Test-Path 'kroniki-rpg-godot/scripts/build_windows_release.ps1')) {
             throw 'Source archive reconstruction failed.'
           }
