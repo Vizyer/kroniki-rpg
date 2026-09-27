@@ -107,6 +107,160 @@ jobs:
           )
           Set-Content -Path $gd -Value $gsrc -Encoding utf8
 
+      - name: Patch save UI and persistence
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $gd = 'kroniki-rpg-godot/godot/scripts/main.gd'
+          $src = Get-Content $gd -Raw
+          $src = $src.Replace(
+            'var save_id := -1',
+            "var save_id := -1`r`nvar save_feedback := \"\"`r`nvar save_pending_name := \"\""
+          )
+          $src = $src.Replace(
+            'var save:=Button.new(); save.text="ZAPISZ"; save.pressed.connect(_save); h.add_child(save)',
+            'var save:=Button.new(); save.text="ZAPISZ"; save.pressed.connect(_open_save_dialog); h.add_child(save)'
+          )
+
+          $oldSave = @'
+func _save() -> void:
+    var p={"name":"Autosave — "+state.character.name,"state":state}
+    if save_id > 0: p["id"]=save_id
+    core.request("/save",p)
+'@
+          $newSave = @'
+func _safe_character_name() -> String:
+    var character = state.get("character", {})
+    if character is Dictionary:
+        var n := str(character.get("name", "Postać")).strip_edges()
+        if n != "": return n
+    return "Postać"
+
+func _open_save_dialog() -> void:
+    overlay.visible = true
+    _clear(overlay)
+    var v := VBoxContainer.new()
+    v.add_theme_constant_override("separation", 10)
+    overlay.add_child(v)
+    v.add_child(_label("ZAPISZ GRĘ", 28, GOLD))
+    v.add_child(_label("Utwórz nowy zapis albo nadpisz aktualnie wczytany slot.", 14, MUTED))
+    var name := LineEdit.new()
+    name.text = _safe_character_name() + " — " + str(state.get("world", {}).get("location", "Zapis"))
+    name.placeholder_text = "Nazwa zapisu"
+    v.add_child(name)
+    var feedback := _label(save_feedback, 14, GREEN if save_feedback.begins_with("Zapisano") else RED)
+    feedback.visible = save_feedback != ""
+    v.add_child(feedback)
+    var h := HBoxContainer.new()
+    v.add_child(h)
+    h.add_child(_button("NOWY ZAPIS", func(): _save_game(name.text, false)))
+    if save_id > 0:
+        h.add_child(_button("NADPISZ BIEŻĄCY", func(): _save_game(name.text, true)))
+    h.add_child(_button("ANULUJ", func(): overlay.visible = false))
+
+func _save_game(name:String, overwrite:bool) -> void:
+    var clean_name := name.strip_edges()
+    if clean_name == "": clean_name = _safe_character_name() + " — zapis"
+    save_pending_name = clean_name
+    save_feedback = "Zapisywanie…"
+    var p := {"name": clean_name, "state": state}
+    if overwrite and save_id > 0: p["id"] = save_id
+    core.request("/save", p)
+'@
+          if (-not $src.Contains($oldSave)) { throw 'Expected save function block not found.' }
+          $src = $src.Replace($oldSave,$newSave)
+
+          $oldFail = @'
+    if not ok:
+        if route=="/action": pending_request_id=""; last_narration="Rdzeń gry nie odpowiedział. Twoja akcja nie została utracona; możesz spróbować ponownie."
+'@
+          $newFail = @'
+    if not ok:
+        if route == "/save":
+            save_feedback = "Nie udało się zapisać gry: " + str(data.get("error", "brak odpowiedzi Rust Core"))
+            save_pending_name = ""
+            overlay.visible = true
+            _clear(overlay)
+            var sv := VBoxContainer.new()
+            sv.add_theme_constant_override("separation", 10)
+            overlay.add_child(sv)
+            sv.add_child(_label("BŁĄD ZAPISU", 28, RED))
+            sv.add_child(_label(save_feedback, 15, TEXT))
+            sv.add_child(_button("ZAMKNIJ", func(): overlay.visible = false))
+            return
+        if route=="/action": pending_request_id=""; last_narration="Rdzeń gry nie odpowiedział. Twoja akcja nie została utracona; możesz spróbować ponownie."
+'@
+          if (-not $src.Contains($oldFail)) { throw 'Expected core failure block not found.' }
+          $src = $src.Replace($oldFail,$newFail)
+
+          $oldResponse = @'
+        "/save":
+            if bool(data.get("ok",false)): save_id=int(data.get("id",save_id))
+'@
+          $newResponse = @'
+        "/save":
+            if bool(data.get("ok", false)):
+                save_id = int(data.get("id", save_id))
+                save_feedback = "Zapisano: " + (save_pending_name if save_pending_name != "" else "gra")
+                save_pending_name = ""
+                overlay.visible = true
+                _clear(overlay)
+                var v := VBoxContainer.new()
+                v.add_theme_constant_override("separation", 10)
+                overlay.add_child(v)
+                v.add_child(_label("GRA ZAPISANA", 28, GREEN))
+                v.add_child(_label(save_feedback, 16, TEXT))
+                v.add_child(_button("WRÓĆ DO GRY", func(): overlay.visible = false))
+            else:
+                save_feedback = "Nie udało się zapisać gry: " + str(data.get("error", "nieznany błąd"))
+                save_pending_name = ""
+                overlay.visible = true
+                _clear(overlay)
+                var v := VBoxContainer.new()
+                v.add_theme_constant_override("separation", 10)
+                overlay.add_child(v)
+                v.add_child(_label("BŁĄD ZAPISU", 28, RED))
+                v.add_child(_label(save_feedback, 15, TEXT))
+                v.add_child(_button("ZAMKNIJ", func(): overlay.visible = false))
+'@
+          if (-not $src.Contains($oldResponse)) { throw 'Expected save response block not found.' }
+          $src = $src.Replace($oldResponse,$newResponse)
+          Set-Content -Path $gd -Value $src -Encoding utf8
+
+          $rust = 'kroniki-rpg-godot/rust-core/src/main.rs'
+          $rs = Get-Content $rust -Raw
+          $oldRust = @'
+async fn save(State(s):State<AppState>,Json(p):Json<Value>)->Json<Value>{
+    let name=p.get("name").and_then(Value::as_str).unwrap_or("Zapis");let st=migrate_state(p.get("state").cloned().unwrap_or(json!({})));let txt=serde_json::to_string(&st).unwrap_or_else(|_|"{}".into());let c=s.db.lock().unwrap();
+    if let Some(id)=p.get("id").and_then(Value::as_i64){let n=c.execute("UPDATE saves SET name=?1,state_json=?2,updated_at=CURRENT_TIMESTAMP WHERE id=?3",params![name,txt,id]).unwrap_or(0);return Json(json!({"ok":n>0,"id":id,"schema":SAVE_SCHEMA}));}
+    let _=c.execute("INSERT INTO saves(name,state_json) VALUES(?1,?2)",params![name,txt]);Json(json!({"ok":true,"id":c.last_insert_rowid(),"schema":SAVE_SCHEMA}))
+}
+'@
+          $newRust = @'
+async fn save(State(s):State<AppState>,Json(p):Json<Value>)->Json<Value>{
+    let name=p.get("name").and_then(Value::as_str).map(str::trim).filter(|x|!x.is_empty()).unwrap_or("Zapis");
+    let st=migrate_state(p.get("state").cloned().unwrap_or(json!({})));
+    let txt=match serde_json::to_string(&st){Ok(x)=>x,Err(e)=>return Json(json!({"ok":false,"error":format!("Nie można zakodować stanu zapisu: {e}")}))};
+    let c=s.db.lock().unwrap();
+    if let Some(id)=p.get("id").and_then(Value::as_i64){
+        return match c.execute("UPDATE saves SET name=?1,state_json=?2,updated_at=CURRENT_TIMESTAMP WHERE id=?3",params![name,txt,id]){
+            Ok(n) if n>0=>Json(json!({"ok":true,"id":id,"schema":SAVE_SCHEMA})),
+            Ok(_)=>Json(json!({"ok":false,"id":id,"error":"Nie znaleziono zapisu do nadpisania."})),
+            Err(e)=>Json(json!({"ok":false,"id":id,"error":e.to_string()})),
+        };
+    }
+    match c.execute("INSERT INTO saves(name,state_json) VALUES(?1,?2)",params![name,txt]){
+        Ok(1)=>Json(json!({"ok":true,"id":c.last_insert_rowid(),"schema":SAVE_SCHEMA})),
+        Ok(_)=>Json(json!({"ok":false,"error":"SQLite nie utworzył rekordu zapisu."})),
+        Err(e)=>Json(json!({"ok":false,"error":e.to_string()})),
+    }
+}
+'@
+          if (-not $rs.Contains($oldRust)) { throw 'Expected Rust save handler not found.' }
+          $rs = $rs.Replace($oldRust,$newRust)
+          Set-Content -Path $rust -Value $rs -Encoding utf8
+
       - name: Patch Godot export to wait for process completion
         shell: pwsh
         run: |
@@ -156,7 +310,7 @@ jobs:
         shell: pwsh
         working-directory: kroniki-rpg-godot
         run: |
-          ./scripts/build_windows_release.ps1 -Version '0.9.0-preview.1' -Channel 'preview' -Repository 'Vizyer/kroniki-rpg' -GodotVersion '4.7.2'
+          ./scripts/build_windows_release.ps1 -Version '0.9.0-preview.2' -Channel 'preview' -Repository 'Vizyer/kroniki-rpg' -GodotVersion '4.7.2'
 
       - name: Verify outputs
         shell: pwsh
@@ -285,7 +439,7 @@ jobs:
       - name: Upload Windows installer
         uses: actions/upload-artifact@v4
         with:
-          name: KronikiRPG-0.9.0-preview.1-Windows
+          name: KronikiRPG-0.9.0-preview.2-Windows
           path: |
             kroniki-rpg-godot/build/KronikiRPG-Setup.exe
             kroniki-rpg-godot/build/KronikiRPG-win-x64.zip
@@ -300,7 +454,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $ErrorActionPreference = 'Stop'
-          $tag = 'v0.9.0-preview.1'
+          $tag = 'v0.9.0-preview.2'
           $repo = '${{ github.repository }}'
           $assets = @('build/KronikiRPG-Setup.exe','build/KronikiRPG-win-x64.zip','build/update-manifest.json')
           gh release view $tag --repo $repo *> $null
@@ -308,7 +462,7 @@ jobs:
             gh release upload $tag @assets --repo $repo --clobber
             if ($LASTEXITCODE -ne 0) { throw 'GitHub Release asset update failed.' }
           } else {
-            gh release create $tag @assets --repo $repo --target '${{ github.sha }}' --title 'Kroniki RPG 0.9.0-preview.1' --notes 'Preview 0.9.0: Core Migration + AI-GM. Automatyczny build Windows z instalatorem, updaterem i testem trwałości zapisów.' --prerelease
+            gh release create $tag @assets --repo $repo --target '${{ github.sha }}' --title 'Kroniki RPG 0.9.0-preview.2' --notes 'Preview 0.9.0: Core Migration + AI-GM. Automatyczny build Windows z instalatorem, updaterem i testem trwałości zapisów.' --prerelease
             if ($LASTEXITCODE -ne 0) { throw 'GitHub Release creation failed.' }
           }
           gh release view $tag --repo $repo --json tagName,isPrerelease,url,assets
