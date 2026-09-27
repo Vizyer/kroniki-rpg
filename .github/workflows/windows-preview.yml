@@ -153,6 +153,112 @@ jobs:
           Get-FileHash build/KronikiRPG-Setup.exe -Algorithm SHA256
           Get-ChildItem build -Recurse | Select-Object FullName,Length
 
+      - name: Smoke test installed game and save persistence
+        shell: pwsh
+        working-directory: kroniki-rpg-godot
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $installDir = Join-Path $env:RUNNER_TEMP 'KronikiRPG-Smoke'
+          $dataDir = Join-Path $env:LOCALAPPDATA 'KronikiRPG'
+          if (Test-Path $installDir) { Remove-Item -Recurse -Force $installDir }
+          if (Test-Path $dataDir) { Remove-Item -Recurse -Force $dataDir }
+
+          Write-Host '==> Silent installer test'
+          $setup = (Resolve-Path 'build/KronikiRPG-Setup.exe').Path
+          $p = Start-Process -FilePath $setup -ArgumentList @(
+            '/VERYSILENT',
+            '/SUPPRESSMSGBOXES',
+            '/NORESTART',
+            '/SP-',
+            "/DIR=$installDir"
+          ) -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Installer failed with exit code $($p.ExitCode)" }
+
+          $launcher = Join-Path $installDir 'KronikiLauncher.exe'
+          $game = Join-Path $installDir 'app/KronikiRPG.exe'
+          $core = Join-Path $installDir 'app/kroniki_core.exe'
+          foreach ($required in @($launcher,$game,$core)) {
+            if (!(Test-Path $required)) { throw "Installed file missing: $required" }
+          }
+
+          function Wait-Core {
+            for ($i=0; $i -lt 60; $i++) {
+              try {
+                $h = Invoke-RestMethod -Uri 'http://127.0.0.1:17377/health' -TimeoutSec 1
+                if ($h.ok) { return }
+              } catch {}
+              Start-Sleep -Milliseconds 250
+            }
+            throw 'Rust Core did not become healthy.'
+          }
+
+          function Start-Core {
+            $proc = Start-Process -FilePath $core -WorkingDirectory (Split-Path $core) -PassThru
+            Wait-Core
+            return $proc
+          }
+
+          function Stop-Core {
+            try {
+              Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/shutdown' -ContentType 'application/json' -Body '{}' -TimeoutSec 3 | Out-Null
+            } catch {}
+            Start-Sleep -Milliseconds 700
+          }
+
+          Write-Host '==> Save -> shutdown -> restart -> load'
+          $coreProc = Start-Core
+          $marker = "ci-smoke-$env:GITHUB_RUN_ID"
+          $saveBody = @{
+            name = $marker
+            state = @{
+              smoke_marker = $marker
+              character = @{ name = 'CI Tester' }
+              world = @{ year = 1272; month = 6; day = 17; hour = 22; minute = 0 }
+            }
+          } | ConvertTo-Json -Depth 10
+          $saved = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save' -ContentType 'application/json' -Body $saveBody
+          if (!$saved.ok -or !$saved.id) { throw 'Save creation failed.' }
+          $saveId = [int64]$saved.id
+
+          $loaded = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save/load' -ContentType 'application/json' -Body (@{id=$saveId} | ConvertTo-Json)
+          if ($loaded.state.smoke_marker -ne $marker) { throw 'Immediate save load failed.' }
+
+          Stop-Core
+          if (!$coreProc.HasExited) { $coreProc.WaitForExit(5000) | Out-Null }
+
+          $coreProc = Start-Core
+          $loaded2 = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save/load' -ContentType 'application/json' -Body (@{id=$saveId} | ConvertTo-Json)
+          if ($loaded2.state.smoke_marker -ne $marker) { throw 'Save did not survive Core restart.' }
+          Stop-Core
+          if (!$coreProc.HasExited) { $coreProc.WaitForExit(5000) | Out-Null }
+
+          Write-Host '==> Simulated update package replacement'
+          $staging = Join-Path $env:RUNNER_TEMP 'KronikiRPG-Update-Staging'
+          if (Test-Path $staging) { Remove-Item -Recurse -Force $staging }
+          New-Item -ItemType Directory -Force -Path $staging | Out-Null
+          Expand-Archive -Path 'build/KronikiRPG-win-x64.zip' -DestinationPath $staging -Force
+          if (!(Test-Path (Join-Path $staging 'KronikiRPG.exe'))) { throw 'Update package missing game exe.' }
+          if (!(Test-Path (Join-Path $staging 'kroniki_core.exe'))) { throw 'Update package missing core exe.' }
+          Remove-Item -Recurse -Force (Join-Path $installDir 'app')
+          Move-Item -Path $staging -Destination (Join-Path $installDir 'app')
+          $core = Join-Path $installDir 'app/kroniki_core.exe'
+          $game = Join-Path $installDir 'app/KronikiRPG.exe'
+
+          $coreProc = Start-Core
+          $loaded3 = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save/load' -ContentType 'application/json' -Body (@{id=$saveId} | ConvertTo-Json)
+          if ($loaded3.state.smoke_marker -ne $marker) { throw 'Save did not survive app update replacement.' }
+          Stop-Core
+          if (!$coreProc.HasExited) { $coreProc.WaitForExit(5000) | Out-Null }
+
+          Write-Host '==> Godot exported game headless boot'
+          & $game --headless --quit-after 2
+          if ($LASTEXITCODE -ne 0) { throw "Godot game smoke boot failed with exit code $LASTEXITCODE" }
+
+          if (!(Test-Path (Join-Path $dataDir 'kroniki.sqlite3'))) {
+            throw 'Expected persistent SQLite save database was not created.'
+          }
+          Write-Host 'SMOKE TEST PASSED: install -> core -> save -> restart -> update replacement -> save preserved -> game boot'
+
       - name: Upload Windows installer
         uses: actions/upload-artifact@v4
         with:
