@@ -55,56 +55,13 @@ jobs:
             throw 'Source archive reconstruction failed.'
           }
 
-      - name: Patch Inno Setup detection
+      - name: Patch Inno Setup path in build script
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           $path = 'kroniki-rpg-godot/scripts/build_windows_release.ps1'
           $src = Get-Content $path -Raw
-          $old = @'
-$IsccCandidates = @(
-    "$env:ProgramFiles(x86)\Inno Setup 6\ISCC.exe",
-    "$env:ProgramFiles\Inno Setup 6\ISCC.exe"
-)
-$Iscc = $IsccCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
-if ($Iscc) {
-    & $Iscc "/DMyAppVersion=$Version" "/DBuildDir=$Build" (Join-Path $Root 'installer\KronikiRPG.iss')
-    if ($LASTEXITCODE -ne 0) { throw 'Inno Setup failed' }
-} else {
-    Write-Warning 'Brak Inno Setup — pomijam Setup.exe. Pipeline GitHub instaluje go automatycznie.'
-}
-'@
-          $new = @'
-$IsccCandidates = @()
-if (${env:ProgramFiles(x86)}) {
-    $IsccCandidates += (Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe')
-}
-if ($env:ProgramFiles) {
-    $IsccCandidates += (Join-Path $env:ProgramFiles 'Inno Setup 6\ISCC.exe')
-}
-
-$IsccFromPath = $null
-try {
-    $cmd = Get-Command ISCC.exe -ErrorAction Stop
-    if ($cmd -and $cmd.Source) { $IsccFromPath = $cmd.Source }
-} catch {}
-
-$Iscc = @($IsccFromPath) + $IsccCandidates |
-    Where-Object { $_ -and (Test-Path $_) } |
-    Select-Object -First 1
-
-if ($Iscc) {
-    & $Iscc "/DMyAppVersion=$Version" "/DBuildDir=$Build" (Join-Path $Root 'installer\KronikiRPG.iss')
-    if ($LASTEXITCODE -ne 0) { throw 'Inno Setup failed' }
-    if (!(Test-Path (Join-Path $Build 'KronikiRPG-Setup.exe'))) {
-        throw 'Inno Setup finished but build/KronikiRPG-Setup.exe was not created.'
-    }
-} else {
-    throw 'Inno Setup compiler not found. Cannot produce build/KronikiRPG-Setup.exe.'
-}
-'@
-          if (-not $src.Contains($old)) { throw 'Expected Inno Setup block was not found in build script.' }
-          $src = $src.Replace($old, $new)
+          $src = $src.Replace('"$env:ProgramFiles(x86)\Inno Setup 6\ISCC.exe"', '"${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"')
           Set-Content -Path $path -Value $src -Encoding utf8
 
       - name: Patch launcher for eframe 0.36
