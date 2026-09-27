@@ -55,6 +55,26 @@ jobs:
             throw 'Source archive reconstruction failed.'
           }
 
+      - name: Patch launcher for eframe 0.36
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $path = 'kroniki-rpg-godot/launcher/src/main.rs'
+          $src = Get-Content $path -Raw
+          $src = $src.Replace(
+            'fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {',
+            'fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {'
+          )
+          $src = $src.Replace(
+            'ctx.request_repaint_after(Duration::from_millis(100));',
+            'ui.ctx().request_repaint_after(Duration::from_millis(100));'
+          )
+          $src = $src.Replace(
+            'egui::CentralPanel::default().show(ctx, |ui| {',
+            'egui::CentralPanel::default().show(ui, |ui| {'
+          )
+          Set-Content -Path $path -Value $src -Encoding utf8
+
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
