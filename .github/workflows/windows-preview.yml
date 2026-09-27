@@ -113,10 +113,10 @@ jobs:
           $ErrorActionPreference = 'Stop'
 
           $gd = 'kroniki-rpg-godot/godot/scripts/main.gd'
-          $src = Get-Content $gd -Raw
+          $src = (Get-Content $gd -Raw).Replace("`r`n","`n")
           $src = $src.Replace(
             'var save_id := -1',
-            "var save_id := -1`r`nvar save_feedback := \"\"`r`nvar save_pending_name := \"\""
+            ('var save_id := -1' + [Environment]::NewLine + 'var save_feedback := ""' + [Environment]::NewLine + 'var save_pending_name := ""')
           )
           $src = $src.Replace(
             'var save:=Button.new(); save.text="ZAPISZ"; save.pressed.connect(_save); h.add_child(save)',
@@ -168,6 +168,7 @@ jobs:
               if overwrite and save_id > 0: p["id"] = save_id
               core.request("/save", p)
           '@
+          $oldSave = $oldSave.Replace("`r`n","`n"); $newSave = $newSave.Replace("`r`n","`n")
           if (-not $src.Contains($oldSave)) { throw 'Expected save function block not found.' }
           $src = $src.Replace($oldSave,$newSave)
 
@@ -191,6 +192,7 @@ jobs:
             return
                   if route=="/action": pending_request_id=""; last_narration="Rdzeń gry nie odpowiedział. Twoja akcja nie została utracona; możesz spróbować ponownie."
           '@
+          $oldFail = $oldFail.Replace("`r`n","`n"); $newFail = $newFail.Replace("`r`n","`n")
           if (-not $src.Contains($oldFail)) { throw 'Expected core failure block not found.' }
           $src = $src.Replace($oldFail,$newFail)
 
@@ -224,12 +226,13 @@ jobs:
                 v.add_child(_label(save_feedback, 15, TEXT))
                 v.add_child(_button("ZAMKNIJ", func(): overlay.visible = false))
           '@
+          $oldResponse = $oldResponse.Replace("`r`n","`n"); $newResponse = $newResponse.Replace("`r`n","`n")
           if (-not $src.Contains($oldResponse)) { throw 'Expected save response block not found.' }
           $src = $src.Replace($oldResponse,$newResponse)
           Set-Content -Path $gd -Value $src -Encoding utf8
 
           $rust = 'kroniki-rpg-godot/rust-core/src/main.rs'
-          $rs = Get-Content $rust -Raw
+          $rs = (Get-Content $rust -Raw).Replace("`r`n","`n")
           $oldRust = @'
           async fn save(State(s):State<AppState>,Json(p):Json<Value>)->Json<Value>{
               let name=p.get("name").and_then(Value::as_str).unwrap_or("Zapis");let st=migrate_state(p.get("state").cloned().unwrap_or(json!({})));let txt=serde_json::to_string(&st).unwrap_or_else(|_|"{}".into());let c=s.db.lock().unwrap();
@@ -257,6 +260,7 @@ jobs:
               }
           }
           '@
+          $oldRust = $oldRust.Replace("`r`n","`n"); $newRust = $newRust.Replace("`r`n","`n")
           if (-not $rs.Contains($oldRust)) { throw 'Expected Rust save handler not found.' }
           $rs = $rs.Replace($oldRust,$newRust)
           Set-Content -Path $rust -Value $rs -Encoding utf8
