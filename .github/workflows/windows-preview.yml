@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-windows:
@@ -269,3 +269,24 @@ jobs:
             kroniki-rpg-godot/build/update-manifest.json
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish Preview GitHub Release
+        shell: pwsh
+        working-directory: kroniki-rpg-godot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tag = 'v0.9.0-preview.1'
+          $repo = '${{ github.repository }}'
+          $assets = @('build/KronikiRPG-Setup.exe','build/KronikiRPG-win-x64.zip','build/update-manifest.json')
+          gh release view $tag --repo $repo *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag @assets --repo $repo --clobber
+            if ($LASTEXITCODE -ne 0) { throw 'GitHub Release asset update failed.' }
+          } else {
+            gh release create $tag @assets --repo $repo --target '${{ github.sha }}' --title 'Kroniki RPG 0.9.0-preview.1' --notes 'Preview 0.9.0: Core Migration + AI-GM. Automatyczny build Windows z instalatorem, updaterem i testem trwałości zapisów.' --prerelease
+            if ($LASTEXITCODE -ne 0) { throw 'GitHub Release creation failed.' }
+          }
+          gh release view $tag --repo $repo --json tagName,isPrerelease,url,assets
+          if ($LASTEXITCODE -ne 0) { throw 'Could not verify published GitHub Release.' }
