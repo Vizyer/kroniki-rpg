@@ -66,6 +66,10 @@ impl Engine {
 
         let mut next = snapshot.clone();
         apply_patch(&mut next, &proposal.patch)?;
+        let director_events = crate::director::advance(&mut next);
+        if !director_events.is_empty() {
+            next.world.chronicle.extend(director_events);
+        }
         next.last_narration = proposal.narration.clone();
         next.last_suggestions = proposal.suggestions.clone();
 
@@ -98,7 +102,12 @@ impl Engine {
 
     pub async fn tick(&self, minutes: i64) -> Vec<String> {
         let mut s = self.state.write().await;
-        let events = simulate_background(&mut s, minutes);
+        let mut events = simulate_background(&mut s, minutes);
+        let director_events = crate::director::advance(&mut s);
+        if !director_events.is_empty() {
+            s.world.chronicle.extend(director_events.clone());
+            events.extend(director_events);
+        }
         self.store.event(&s, "tick", &format!("{minutes}"));
         events
     }
