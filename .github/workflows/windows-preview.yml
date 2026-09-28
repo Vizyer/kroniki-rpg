@@ -117,6 +117,13 @@ jobs:
           python $patchPath
           if ($LASTEXITCODE -ne 0) { throw 'Save patch script failed.' }
 
+      - name: Apply 0.10 narrator AI
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Copy-Item -Force 'rust-core/src/ai.rs' 'kroniki-rpg-godot/rust-core/src/ai.rs'
+          Write-Host 'Applied narrator-only AI from current source tree.'
+
       - name: Patch Godot export to wait for process completion
         shell: pwsh
         run: |
@@ -202,7 +209,7 @@ jobs:
         shell: pwsh
         working-directory: kroniki-rpg-godot
         run: |
-          ./scripts/build_windows_release.ps1 -Version '0.9.0-preview.2' -Channel 'preview' -Repository 'Vizyer/kroniki-rpg' -GodotVersion '4.7.2'
+          ./scripts/build_windows_release.ps1 -Version '0.10.0-preview.1' -Channel 'preview' -Repository 'Vizyer/kroniki-rpg' -GodotVersion '4.7.2'
 
       - name: Verify outputs
         shell: pwsh
@@ -331,7 +338,7 @@ jobs:
       - name: Upload Windows installer
         uses: actions/upload-artifact@v4
         with:
-          name: KronikiRPG-0.9.0-preview.2-Windows
+          name: KronikiRPG-0.10.0-preview.1-Windows
           path: |
             kroniki-rpg-godot/build/KronikiRPG-Setup.exe
             kroniki-rpg-godot/build/KronikiRPG-win-x64.zip
@@ -346,7 +353,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $ErrorActionPreference = 'Stop'
-          $tag = 'v0.9.0-preview.2'
+          $tag = 'v0.10.0-preview.1'
           $repo = '${{ github.repository }}'
           $assets = @('build/KronikiRPG-Setup.exe','build/KronikiRPG-win-x64.zip','build/update-manifest.json')
           gh release view $tag --repo $repo *> $null
@@ -354,7 +361,7 @@ jobs:
             gh release upload $tag @assets --repo $repo --clobber
             if ($LASTEXITCODE -ne 0) { throw 'GitHub Release asset update failed.' }
           } else {
-            gh release create $tag @assets --repo $repo --target '${{ github.sha }}' --title 'Kroniki RPG 0.9.0-preview.2' --notes 'Preview 0.9.0: Core Migration + AI-GM. Automatyczny build Windows z instalatorem, updaterem i testem trwałości zapisów.' --prerelease
+            gh release create $tag @assets --repo $repo --target '${{ github.sha }}' --title 'Kroniki RPG 0.10.0-preview.1' --notes 'Preview 0.10.0: narrator AI. Qwen3 narrator-only pipeline, safe context, strict mechanics ownership, JSON repair and local fallback.' --prerelease
             if ($LASTEXITCODE -ne 0) { throw 'GitHub Release creation failed.' }
           }
           gh release view $tag --repo $repo --json tagName,isPrerelease,url,assets
