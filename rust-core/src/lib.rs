@@ -4,5 +4,6 @@ pub mod director;
 pub mod domain;
 pub mod engine;
 pub mod lore;
+pub mod runtime;
 pub mod store;
 pub mod systems;
