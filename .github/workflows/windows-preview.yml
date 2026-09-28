@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build-windows:
@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Reconstruct source archive
         shell: pwsh
@@ -142,34 +144,6 @@ jobs:
           $src = $src.Replace($oldImport,$newImport).Replace($oldExport,$newExport)
           $src = $src.Replace("Pop-Location", "Pop-Location`r`nif (!(Test-Path (Join-Path `$App 'KronikiRPG.exe'))) { throw 'Godot export finished without KronikiRPG.exe' }")
           Set-Content -Path $path -Value $src -Encoding utf8
-      - name: Materialize current source branch
-        if: github.ref == 'refs/heads/main'
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $branch = 'feature/0.10-autonomous-mg'
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git fetch origin $branch 2>$null
-          if ($LASTEXITCODE -eq 0) {
-            git switch -C $branch "origin/$branch"
-          } else {
-            git switch -c $branch
-          }
-          if (Test-Path 'source010/current') { Remove-Item -Recurse -Force 'source010/current' }
-          New-Item -ItemType Directory -Force -Path 'source010/current' | Out-Null
-          Copy-Item -Recurse -Force 'kroniki-rpg-godot/*' 'source010/current/'
-          git add source010/current
-          if ((git status --porcelain source010/current).Length -gt 0) {
-            git commit -m 'build: materialize current 0.9 source for 0.10'
-            git push origin "HEAD:$branch" --force-with-lease
-          } else {
-            Write-Host 'Source branch already up to date.'
-          }
-          git switch main
-
       - name: Upload reconstructed source snapshot
         uses: actions/upload-artifact@v4
         with:
@@ -342,23 +316,3 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Publish Preview GitHub Release
-        shell: pwsh
-        working-directory: kroniki-rpg-godot
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $tag = 'v0.10.0-preview.1'
-          $repo = '${{ github.repository }}'
-          $assets = @('build/KronikiRPG-Setup.exe','build/KronikiRPG-win-x64.zip','build/update-manifest.json')
-          gh release view $tag --repo $repo *> $null
-          if ($LASTEXITCODE -eq 0) {
-            gh release upload $tag @assets --repo $repo --clobber
-            if ($LASTEXITCODE -ne 0) { throw 'GitHub Release asset update failed.' }
-          } else {
-            gh release create $tag @assets --repo $repo --target '${{ github.sha }}' --title 'Kroniki RPG 0.10.0-preview.1' --notes 'Preview 0.10.0: narrator AI. Qwen3 narrator-only pipeline, safe context, strict mechanics ownership, JSON repair and local fallback.' --prerelease
-            if ($LASTEXITCODE -ne 0) { throw 'GitHub Release creation failed.' }
-          }
-          gh release view $tag --repo $repo --json tagName,isPrerelease,url,assets
-          if ($LASTEXITCODE -ne 0) { throw 'Could not verify published GitHub Release.' }
