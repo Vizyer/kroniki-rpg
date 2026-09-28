@@ -1,420 +1,289 @@
-use serde_json::{json, Map, Value};
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
+use crate::domain::*;
+use serde_json::Value;
+use std::cmp::{max, min};
 
-pub fn clamp_i(v: i64, lo: i64, hi: i64) -> i64 { v.max(lo).min(hi) }
-pub fn clamp_f(v: f64, lo: f64, hi: f64) -> f64 { v.max(lo).min(hi) }
-
-fn ensure_object<'a>(root: &'a mut Value, key: &str) -> &'a mut Map<String, Value> {
-    if !root.get(key).map(Value::is_object).unwrap_or(false) {
-        root[key] = json!({});
-    }
-    root.get_mut(key).and_then(Value::as_object_mut).expect("object")
-}
-
-fn ensure_array<'a>(root: &'a mut Value, key: &str) -> &'a mut Vec<Value> {
-    if !root.get(key).map(Value::is_array).unwrap_or(false) {
-        root[key] = json!([]);
-    }
-    root.get_mut(key).and_then(Value::as_array_mut).expect("array")
-}
-
-fn world_stamp(state: &Value) -> String {
-    let w = state.get("world").unwrap_or(&Value::Null);
-    format!("{:02}.{:02}.{} {:02}:{:02}",
-        w.get("day").and_then(Value::as_i64).unwrap_or(1),
-        w.get("month").and_then(Value::as_i64).unwrap_or(1),
-        w.get("year").and_then(Value::as_i64).unwrap_or(1272),
-        w.get("hour").and_then(Value::as_i64).unwrap_or(12),
-        w.get("minute").and_then(Value::as_i64).unwrap_or(0))
-}
-
-pub fn absolute_minutes(state: &Value) -> i64 {
-    let w = state.get("world").unwrap_or(&Value::Null);
-    let year = w.get("year").and_then(Value::as_i64).unwrap_or(1272);
-    let month = w.get("month").and_then(Value::as_i64).unwrap_or(1);
-    let day = w.get("day").and_then(Value::as_i64).unwrap_or(1);
-    let hour = w.get("hour").and_then(Value::as_i64).unwrap_or(0);
-    let minute = w.get("minute").and_then(Value::as_i64).unwrap_or(0);
-    ((((year * 12 + (month - 1)) * 30 + (day - 1)) * 24 + hour) * 60) + minute
-}
-
-pub fn advance_time(state: &mut Value, minutes: i64) -> Vec<Value> {
-    let minutes = minutes.max(0);
-    let old_year = state.pointer("/world/year").and_then(Value::as_i64).unwrap_or(1272);
-    if !state.get("world").map(Value::is_object).unwrap_or(false) { state["world"] = json!({}); }
-    let w = state.get_mut("world").and_then(Value::as_object_mut).unwrap();
-    let mut minute = w.get("minute").and_then(Value::as_i64).unwrap_or(0) + minutes;
-    let mut hour = w.get("hour").and_then(Value::as_i64).unwrap_or(0) + minute / 60;
-    minute %= 60;
-    let mut day = w.get("day").and_then(Value::as_i64).unwrap_or(1) + hour / 24;
-    hour %= 24;
-    let mut month = w.get("month").and_then(Value::as_i64).unwrap_or(1);
-    let mut year = old_year;
-    while day > 30 { day -= 30; month += 1; if month > 12 { month = 1; year += 1; } }
-    w.insert("minute".into(), json!(minute)); w.insert("hour".into(), json!(hour));
-    w.insert("day".into(), json!(day)); w.insert("month".into(), json!(month)); w.insert("year".into(), json!(year));
-    milestone_events(old_year, year)
-}
-
-fn milestone_events(from_year: i64, to_year: i64) -> Vec<Value> {
-    let milestones = [
-        (1263, "Upadek Cintry"),
-        (1267, "Przewrót na Thanedd"),
-        (1268, "Brenna i Rivia"),
-        (1271, "Wydarzenia pierwszej gry"),
-        (1272, "Wojna i Dziki Gon"),
-        (1275, "Krew i Wino"),
-    ];
-    milestones.into_iter().filter(|(y, _)| *y > from_year && *y <= to_year)
-        .map(|(y,t)| json!({"year":y,"title":t,"kind":"historical_milestone","knowledge":"world_truth"})).collect()
-}
-
-pub fn process_world_tick(mut state: Value, minutes: i64, reason: &str) -> Value {
-    let before_abs = absolute_minutes(&state);
-    let mut world_events = advance_time(&mut state, minutes);
-    let now_abs = absolute_minutes(&state);
-
-    // Quest deadlines are authoritative and never delegated to the narrator.
-    if let Some(quests) = state.get_mut("quests").and_then(Value::as_array_mut) {
-        for q in quests.iter_mut() {
-            if q.get("status").and_then(Value::as_str).unwrap_or("active") != "active" { continue; }
-            let deadline = q.get("deadline_abs_minutes").and_then(Value::as_i64);
-            if let Some(d) = deadline {
-                if before_abs < d && now_abs >= d {
-                    q["status"] = json!("failed");
-                    q["failed_reason"] = json!("deadline");
-                    world_events.push(json!({"kind":"quest_deadline","quest_id":q.get("id").cloned().unwrap_or(json!("unknown")),"title":q.get("title").cloned().unwrap_or(json!("Zadanie"))}));
-                }
-            }
+pub fn advance_time(clock: &mut Clock, minutes: i64) {
+    let mut total = i64::from(clock.hour) * 60 + i64::from(clock.minute) + minutes.max(0);
+    let days = total / 1440;
+    total %= 1440;
+    clock.hour = (total / 60) as u8;
+    clock.minute = (total % 60) as u8;
+    if days > 0 {
+        let mut d = i64::from(clock.day) + days;
+        while d > 30 {
+            d -= 30;
+            clock.month = if clock.month >= 12 { 1 } else { clock.month + 1 };
+            if clock.month == 1 { clock.year += 1; }
         }
+        clock.day = d as u8;
     }
-
-    // Faction clocks: slow, resource-bound background autonomy.
-    if let Some(factions) = state.get_mut("factions").and_then(Value::as_object_mut) {
-        let ticks = (minutes / 60).max(0);
-        if ticks > 0 {
-            for (id, f) in factions.iter_mut() {
-                let active = f.get("active").and_then(Value::as_bool).unwrap_or(true);
-                if !active { continue; }
-                let resources = f.get("resources").and_then(Value::as_i64).unwrap_or(50);
-                let influence = f.get("influence").and_then(Value::as_i64).unwrap_or(50);
-                let old = f.get("clock").and_then(Value::as_i64).unwrap_or(0);
-                let speed = if resources > 70 && influence > 70 { 2 } else { 1 };
-                let new_clock = clamp_i(old + ticks * speed, 0, 100);
-                f["clock"] = json!(new_clock);
-                for threshold in [25,50,75,100] {
-                    if old < threshold && new_clock >= threshold {
-                        world_events.push(json!({"kind":"faction_move","faction_id":id,"clock":threshold,"public":threshold>=75,"goal":f.get("public_goal").cloned().unwrap_or(json!("nieznany"))}));
-                    }
-                }
-            }
-        }
-    }
-
-    // NPC plans progress only when enough in-world time passes.
-    if let Some(npcs) = state.get_mut("npcs").and_then(Value::as_object_mut) {
-        if minutes >= 10 {
-            for (id,npc) in npcs.iter_mut() {
-                let plan = npc.pointer("/autonomy/plan").and_then(Value::as_str).unwrap_or("").to_string();
-                if plan.is_empty() { continue; }
-                let risk = npc.pointer("/autonomy/risk_tolerance").and_then(Value::as_i64).unwrap_or(50);
-                let old = npc.pointer("/autonomy/progress").and_then(Value::as_i64).unwrap_or(0);
-                let delta = ((minutes / 10).max(1) * (40 + risk) / 90).max(1);
-                if !npc.get("autonomy").map(Value::is_object).unwrap_or(false) { npc["autonomy"] = json!({}); }
-                npc["autonomy"]["progress"] = json!(clamp_i(old+delta,0,100));
-                npc["autonomy"]["last_tick_reason"] = json!(reason);
-                if old < 100 && old+delta >= 100 {
-                    world_events.push(json!({"kind":"npc_plan_completed","npc_id":id,"plan":plan,"public":false}));
-                }
-            }
-        }
-    }
-
-    // Information propagation: world truth enters character knowledge only when its due time arrives.
-    let mut delivered = Vec::new();
-    if let Some(queue) = state.get_mut("news_queue").and_then(Value::as_array_mut) {
-        let mut keep = Vec::new();
-        for item in queue.drain(..) {
-            if item.get("deliver_at_abs_minutes").and_then(Value::as_i64).unwrap_or(i64::MAX) <= now_abs {
-                delivered.push(item);
-            } else { keep.push(item); }
-        }
-        *queue = keep;
-    }
-    if !delivered.is_empty() {
-        if !state.get("character").map(Value::is_object).unwrap_or(false) { state["character"] = json!({}); }
-        let c = state.get_mut("character").and_then(Value::as_object_mut).unwrap();
-        let knowledge = c.entry("known_events").or_insert_with(||json!([]));
-        if let Some(a)=knowledge.as_array_mut(){ for e in &delivered { a.push(e.clone()); } }
-        world_events.push(json!({"kind":"news_delivered","count":delivered.len()}));
-    }
-
-    json!({"ok":true,"state":state,"advanced_minutes":minutes,"world_events":world_events,"delivered_news":delivered,"rule":"world_truth_not_character_knowledge"})
 }
 
-pub fn npc_event(mut state: Value, p: &Value) -> Value {
-    let npc_id = p.get("npc_id").and_then(Value::as_str).unwrap_or("npc").trim();
-    let npc_id = if npc_id.is_empty(){"npc"}else{npc_id};
-    let name = p.get("name").and_then(Value::as_str).unwrap_or(npc_id);
-    let text = p.get("text").and_then(Value::as_str).unwrap_or("").trim();
-    let importance = clamp_i(p.get("importance").and_then(Value::as_i64).unwrap_or(2),0,5);
-    let stamp = world_stamp(&state);
-
-    let npcs = ensure_object(&mut state,"npcs");
-    if !npcs.contains_key(npc_id) {
-        npcs.insert(npc_id.to_string(), json!({
-            "id":npc_id,"name":name,"canon":false,"role":p.get("role").cloned().unwrap_or(json!("postać kampanii")),
-            "personality":p.get("personality").cloned().unwrap_or(json!([])),
-            "goal":p.get("goal").cloned().unwrap_or(json!("")),"hidden_goal":"","fear":"","secret":"",
-            "memories":[],"knowledge":[],"autonomy":{"plan":"","progress":0,"resources":50,"risk_tolerance":50}
-        }));
-    }
-    if let Some(npc)=npcs.get_mut(npc_id) {
-        npc["last_event"] = json!(text);
-        if importance >= 2 && !text.is_empty() {
-            if !npc.get("memories").map(Value::is_array).unwrap_or(false) { npc["memories"] = json!([]); }
-            let a=npc.get_mut("memories").and_then(Value::as_array_mut).unwrap();
-            a.push(json!({"at":stamp,"text":text,"importance":importance,"private":p.get("private").and_then(Value::as_bool).unwrap_or(false)}));
-            if a.len()>40 { let n=a.len()-40; a.drain(0..n); }
-        }
-        if let Some(plan)=p.get("plan").and_then(Value::as_str) {
-            if !npc.get("autonomy").map(Value::is_object).unwrap_or(false) { npc["autonomy"] = json!({}); }
-            npc["autonomy"]["plan"] = json!(plan); npc["autonomy"]["progress"] = json!(0);
-        }
-    }
-
-    let relations = ensure_object(&mut state,"relations");
-    let rel_key=format!("player::{npc_id}");
-    let rel=relations.entry(rel_key.clone()).or_insert_with(||json!({"trust":0,"respect":0,"fear":0,"liking":0,"debt":0,"hostility":0,"leverage":0,"public_status":"neutral","private_notes":[]}));
-    for k in ["trust","respect","fear","liking","debt","hostility","leverage"] {
-        let delta=p.pointer(&format!("/relation_delta/{k}")).and_then(Value::as_i64).unwrap_or(0);
-        if delta!=0 { rel[k]=json!(clamp_i(rel.get(k).and_then(Value::as_i64).unwrap_or(0)+delta,-100,100)); }
-    }
-    json!({"ok":true,"state":state,"npc_id":npc_id,"relation_key":rel_key})
-}
-
-pub fn quest_update(mut state: Value, p: &Value) -> Value {
-    let quest_id=p.get("quest_id").and_then(Value::as_str).unwrap_or("quest");
-    let title=p.get("title").and_then(Value::as_str).unwrap_or("Zadanie");
-    let quests=ensure_array(&mut state,"quests");
-    let idx=quests.iter().position(|q|q.get("id").and_then(Value::as_str)==Some(quest_id));
-    if idx.is_none(){ quests.push(json!({"id":quest_id,"title":title,"type":p.get("type").cloned().unwrap_or(json!("side")),"status":"active","stage":0,"summary":"","urgency":0,"objectives":[],"rewards":{},"consequences":[]})); }
-    let q=quests.iter_mut().find(|q|q.get("id").and_then(Value::as_str)==Some(quest_id)).unwrap();
-    for k in ["status","summary"] { if let Some(v)=p.get(k){ q[k]=v.clone(); } }
-    if let Some(v)=p.get("urgency").and_then(Value::as_i64){q["urgency"]=json!(clamp_i(v,0,100));}
-    if let Some(v)=p.get("stage").and_then(Value::as_i64){q["stage"]=json!(v.max(0));}
-    if let Some(deadline)=p.get("deadline_abs_minutes").and_then(Value::as_i64){q["deadline_abs_minutes"]=json!(deadline);}
-    if let Some(obj)=p.get("objective") {
-        if !q.get("objectives").map(Value::is_array).unwrap_or(false){q["objectives"]=json!([]);}
-        let a=q.get_mut("objectives").and_then(Value::as_array_mut).unwrap();
-        let oid=obj.get("id").and_then(Value::as_str).unwrap_or("objective");
-        if let Some(existing)=a.iter_mut().find(|x|x.get("id").and_then(Value::as_str)==Some(oid)){*existing=obj.clone();} else {a.push(obj.clone());}
-    }
-    let q_out=q.clone();
-    json!({"ok":true,"state":state,"quest":q_out})
-}
-
-fn ingredient_counts(state:&Value)->Map<String,Value>{
-    state.pointer("/inventory/ingredients").and_then(Value::as_object).cloned().unwrap_or_default()
-}
-fn set_ingredient_counts(state:&mut Value, counts:Map<String,Value>){
-    if !state.get("inventory").map(Value::is_object).unwrap_or(false){state["inventory"]=json!({});}
-    state["inventory"]["ingredients"]=Value::Object(counts);
-}
-
-pub fn alchemy_craft(mut state:Value,p:&Value)->Value{
-    let recipe=p.get("recipe").and_then(Value::as_str).unwrap_or("Jaskółka");
-    let catalog:Vec<(&str,i64,Vec<(&str,i64)>,i64)>=vec![
-        ("Jaskółka",3,vec![("alkohol",1),("glistnik",2),("mózg utopca",1)],25),
-        ("Kot",2,vec![("alkohol",1),("berberka",2)],20),
-        ("Grom",4,vec![("alkohol",1),("werbena",2),("eter",1)],35),
-        ("Samum",3,vec![("saletra",1),("fosfor",1)],30),
-        ("Kartacz",4,vec![("saletra",2),("wapno",1)],40),
-        ("Olej na nekrofagi",3,vec![("tłuszcz",1),("jaskółcze ziele",1),("pył kostny",1)],30),
-        ("Antidotum",2,vec![("alkohol",1),("węgiel",1),("zioła",1)],20),
-    ];
-    let Some((_,difficulty,needs,toxicity))=catalog.iter().find(|x|x.0.eq_ignore_ascii_case(recipe)).cloned() else{return json!({"ok":false,"error":"Nieznana receptura","state":state});};
-    let skill=p.get("skill").and_then(Value::as_i64).or_else(||state.pointer("/character/alchemy/skill").and_then(Value::as_i64)).unwrap_or(2);
-    let tools=p.get("tool_quality").and_then(Value::as_i64).unwrap_or(0);
-    let mut counts=ingredient_counts(&state);
-    let missing:Vec<String>=needs.iter().filter_map(|(n,q)|{let have=counts.get(*n).and_then(Value::as_i64).unwrap_or(0);if have<*q{Some(format!("{} ({}/{})",n,have,q))}else{None}}).collect();
-    if !missing.is_empty(){return json!({"ok":false,"error":"Brak składników","missing":missing,"state":state});}
-    let roll=p.get("roll").and_then(Value::as_i64).unwrap_or_else(||stable_d20(&format!("alchemy:{recipe}:{}",world_stamp(&state))));
-    let total=roll+skill+tools; let target=10+difficulty; let margin=total-target; let success=margin>=0;
-    for (n,q) in &needs {
-        let have=counts.get(*n).and_then(Value::as_i64).unwrap_or(0);
-        let loss=if success{*q}else{((*q+1)/2).max(1)};
-        counts.insert(n.to_string(),json!((have-loss).max(0)));
-    }
-    set_ingredient_counts(&mut state,counts);
-    if success {
-        if !state.pointer("/character/alchemy/prepared").map(Value::is_array).unwrap_or(false){
-            if !state.get("character").map(Value::is_object).unwrap_or(false){state["character"]=json!({});}
-            if !state["character"].get("alchemy").map(Value::is_object).unwrap_or(false){state["character"]["alchemy"]=json!({});}
-            state["character"]["alchemy"]["prepared"]=json!([]);
-        }
-        let quality=clamp_i(50+margin*5,20,100);
-        state["character"]["alchemy"]["prepared"].as_array_mut().unwrap().push(json!({"name":recipe,"quality":quality,"freshness":100,"toxicity":toxicity,"uses":if recipe.contains("Olej"){3}else{1}}));
-    }
-    json!({"ok":success,"state":state,"resolution":{"recipe":recipe,"roll":roll,"skill":skill,"difficulty":target,"margin":margin,"quality":clamp_i(50+margin*5,0,100),"toxicity":toxicity,"partial_loss":!success}})
-}
-
-pub fn crafting_craft(mut state:Value,p:&Value)->Value{
-    let item=p.get("item").and_then(Value::as_str).unwrap_or("Zestaw naprawczy");
-    let difficulty=p.get("difficulty").and_then(Value::as_i64).unwrap_or(3);
-    let skill=p.get("skill").and_then(Value::as_i64).or_else(||state.pointer("/character/crafting/skill").and_then(Value::as_i64)).unwrap_or(2);
-    let material_quality=clamp_i(p.get("material_quality").and_then(Value::as_i64).unwrap_or(50),0,100);
-    let tool_quality=clamp_i(p.get("tool_quality").and_then(Value::as_i64).unwrap_or(0),-3,5);
-    let minutes=p.get("minutes").and_then(Value::as_i64).unwrap_or(60).max(5);
-    let roll=p.get("roll").and_then(Value::as_i64).unwrap_or_else(||stable_d20(&format!("craft:{item}:{}",world_stamp(&state))));
-    let target=10+difficulty; let margin=roll+skill+tool_quality-target; let success=margin>=0;
-    let _=advance_time(&mut state,minutes);
-    if success {
-        if !state.pointer("/inventory/items").map(Value::is_array).unwrap_or(false){if !state.get("inventory").map(Value::is_object).unwrap_or(false){state["inventory"]=json!({});}state["inventory"]["items"]=json!([]);}
-        let q=clamp_i(material_quality+margin*4,10,100); state["inventory"]["items"].as_array_mut().unwrap().push(json!({"name":item,"quality":q,"condition":100,"crafted":true}));
-    }
-    json!({"ok":success,"state":state,"resolution":{"item":item,"roll":roll,"difficulty":target,"margin":margin,"time_minutes":minutes,"quality":clamp_i(material_quality+margin*4,0,100)}})
-}
-
-fn magic_semantics(intent:&str)->(String,String,i64,i64){
-    let s=intent.to_lowercase();
-    let source=if s.contains("ogie")||s.contains("płomie")||s.contains("igni"){"fire"}else if s.contains("wod")||s.contains("lód")||s.contains("mróz"){"water"}else if s.contains("wiatr")||s.contains("powiet")||s.contains("aard"){"air"}else if s.contains("ziem")||s.contains("kamień")||s.contains("yrden"){"earth"}else{"chaos"};
-    let op=if s.contains("tarc")||s.contains("barier")||s.contains("quen"){"shield"}else if s.contains("odep")||s.contains("rzuc")||s.contains("pchn")||s.contains("aard"){"force"}else if s.contains("spal")||s.contains("podpal")||s.contains("igni"){"damage"}else if s.contains("spowol")||s.contains("uwię")||s.contains("yrden"){"control"}else if s.contains("wpły")||s.contains("uspok")||s.contains("axii"){"mind"}else{"shape"};
-    let scale=if s.contains("cały")||s.contains("obszar")||s.contains("wielk")||s.contains("burz"){3}else if s.contains("kilka")||s.contains("grup")||s.contains("szerok"){2}else{1};
-    let range=if s.contains("daleko")||s.contains("odleg")||s.contains("horyzont"){3}else if s.contains("dystans")||s.contains("kilkanaście")||s.contains("10 m"){2}else{1};
-    (source.into(),op.into(),scale,range)
-}
-
-pub fn magic_cast(mut state:Value,p:&Value)->Value{
-    let intent=p.get("intent").and_then(Value::as_str).unwrap_or("zaklęcie"); let hasty=p.get("hasty").and_then(Value::as_bool).unwrap_or(false);
-    let (source,operation,scale,range)=magic_semantics(intent);
-    let control=state.pointer("/character/magic/control").and_then(Value::as_i64).unwrap_or(3);
-    let vigor=state.pointer("/character/magic/vigor").and_then(Value::as_i64).unwrap_or(6);
-    let stamina=state.pointer("/character/magic/stamina").and_then(Value::as_i64).unwrap_or(10);
-    let saturation=state.pointer("/character/magic/chaos_saturation").and_then(Value::as_i64).unwrap_or(0);
-    let concentration=state.pointer("/character/magic/concentration").and_then(Value::as_i64).unwrap_or(100);
-    let pressure=state.pointer("/combat/pressure").and_then(Value::as_i64).unwrap_or(0);
-    let pressure_penalty=if pressure>=9{3}else if pressure>=6{2}else if pressure>=3{1}else{0};
-    let learned=p.get("learned").and_then(Value::as_bool).unwrap_or(false);
-    let channel_seconds=p.get("channel_seconds").and_then(Value::as_i64).unwrap_or(0).max(0);
-    let channel_bonus=(channel_seconds/4).min(3);
-    let mut difficulty=5+scale*2+range+pressure_penalty+(if hasty{2}else{0})-(if learned{2}else{0})-channel_bonus;
-    difficulty=difficulty.max(2);
-    let mut cost=1+scale+range+(if operation=="shield"{1}else{0})-(if learned{1}else{0})-(channel_bonus/2); cost=cost.max(1);
-    let mut instability=(scale-1)+(range-1)+(if source=="chaos"{1}else{0})+(if hasty{1}else{0})-(channel_bonus/2); instability=instability.max(0);
-    if cost>vigor{instability+=cost-vigor;}
-    if saturation>=61{instability+=2}else if saturation>=41{instability+=1}
-    let roll=p.get("roll").and_then(Value::as_i64).unwrap_or_else(||stable_d20(&format!("magic:{intent}:{}",world_stamp(&state))));
-    let margin=roll+control-difficulty; let success=margin>=0;
-    let cast_seconds=(2+scale*2+range+channel_seconds-(if hasty{2}else{0})).max(1);
-    if !state.get("character").map(Value::is_object).unwrap_or(false){state["character"]=json!({});}
-    if !state["character"].get("magic").map(Value::is_object).unwrap_or(false){state["character"]["magic"]=json!({});}
-    state["character"]["magic"]["stamina"]=json!((stamina-cost).max(0));
-    state["character"]["magic"]["chaos_saturation"]=json!(clamp_i(saturation+cost*2+instability*3,0,100));
-    state["character"]["magic"]["concentration"]=json!(clamp_i(concentration-(if success{instability*2}else{8+instability*3}),0,100));
-    let effects=match operation.as_str(){
-        "shield"=>json!({"magic_shield":2+scale,"guard":0,"tempo":0}),
-        "force"=>json!({"enemy_guard":-scale,"pressure":1+scale/2,"distance":1.0+scale as f64*0.5}),
-        "damage"=>json!({"damage":scale,"pressure":scale,"panic":scale>=2}),
-        "control"=>json!({"zone_control":scale,"enemy_tempo":-1,"pressure":1}),
-        "mind"=>json!({"enemy_tempo":-1,"interrupt":success,"deescalation":scale}),
-        _=>json!({"fictional_effect":true,"scale":scale}),
+pub fn infer_intent(text: &str) -> Intent {
+    let l = text.to_lowercase();
+    let magical = l.contains("inkant") || l.contains("zakl") || l.contains("aard") || l.contains("igni") || l.contains("quen") || l.contains("yrden") || l.contains("axii") || l.contains("chaos") || l.contains("pash ");
+    let (kind, verb) = if magical {
+        ("magic_attempt", "cast")
+    } else if l.contains("atak") || l.contains("tnę") || l.contains("uderz") || l.contains("strzel") {
+        ("combat_action", "attack")
+    } else if l.contains("pytam") || l.contains("mówię") || l.contains("rozmaw") {
+        ("social", "speak")
+    } else if l.contains("szuk") || l.contains("badam") || l.contains("ogląd") || l.contains("sprawdz") {
+        ("investigation", "inspect")
+    } else if l.contains("idę") || l.contains("jadę") || l.contains("ruszam") {
+        ("travel", "move")
+    } else {
+        ("freeform", "act")
     };
-    let backlash=if !success && instability>=2 {Some(match source.as_str(){"fire"=>"oparzenie / niekontrolowany żar","air"=>"uderzenie zwrotne / utrata równowagi","water"=>"wychłodzenie / skurcz","earth"=>"uraz przeciążeniowy","chaos"=>"zaburzenie percepcji / rezonans",_=>"przeciążenie"})}else{None};
-    json!({"ok":success,"state":state,"resolution":{"intent":intent,"source":source,"operation":operation,"scale":scale,"range":range,"cost":cost,"difficulty":difficulty,"roll":roll,"control":control,"margin":margin,"instability":instability,"cast_seconds":cast_seconds,"effects":effects,"backlash":backlash,"contract":"mechanics_first_narration_second"}})
+    let method = if magical && (l.contains("wyczu") || l.contains("energia") || l.contains("rezon")) { "sensing" } else if magical { "improvised" } else { "natural_language" };
+    Intent { kind: kind.into(), verb: verb.into(), target: String::new(), method: method.into(), stakes: "normal".into(), magical, confidence: 0.72 }
 }
 
-pub fn hunt_action(mut state:Value,p:&Value)->Value{
-    if !state.get("hunting").map(Value::is_object).unwrap_or(false){state["hunting"]=json!({"evidence":[],"hypotheses":[],"confidence":0,"preparation":0});}
-    if !state["hunting"].get("evidence").map(Value::is_array).unwrap_or(false){state["hunting"]["evidence"]=json!([]);}
-    if !state["hunting"].get("hypotheses").map(Value::is_array).unwrap_or(false){state["hunting"]["hypotheses"]=json!([]);}
-    if state["hunting"].get("confidence").and_then(Value::as_i64).is_none(){state["hunting"]["confidence"]=json!(0);}
-    if state["hunting"].get("preparation").and_then(Value::as_i64).is_none(){state["hunting"]["preparation"]=json!(0);}
-    let kind=p.get("kind").and_then(Value::as_str).unwrap_or("clue");
-    match kind {
-        "clue"=>{
-            let reliability=clamp_f(p.get("reliability").and_then(Value::as_f64).unwrap_or(0.6),0.0,1.0);
-            let quality=clamp_i(p.get("quality").and_then(Value::as_i64).unwrap_or((reliability*100.0) as i64),0,100);
-            let text=p.get("text").and_then(Value::as_str).unwrap_or("Nowy trop");
-            state["hunting"]["evidence"].as_array_mut().unwrap().push(json!({"text":text,"type":p.get("evidence_type").cloned().unwrap_or(json!("observation")),"source":p.get("source").cloned().unwrap_or(json!("observation")),"reliability":reliability,"quality":quality,"confirmed":false}));
-            let old=state["hunting"]["confidence"].as_i64().unwrap_or(0); state["hunting"]["confidence"]=json!(clamp_i(old+(reliability*12.0).round() as i64,0,100));
-        },
-        "hypothesis"=>{
-            let label=p.get("label").and_then(Value::as_str).unwrap_or("Nieznany potwór"); let evidence_count=state["hunting"]["evidence"].as_array().map(|a|a.len()).unwrap_or(0) as i64;
-            let confidence=clamp_i(15+evidence_count*12,0,85); state["hunting"]["hypotheses"].as_array_mut().unwrap().push(json!({"label":label,"confidence":confidence,"player_theory":true,"truth_revealed":false}));
-        },
-        "prepare"=>{let delta=clamp_i(p.get("delta").and_then(Value::as_i64).unwrap_or(15),1,40);let old=state["hunting"]["preparation"].as_i64().unwrap_or(0);state["hunting"]["preparation"]=json!(clamp_i(old+delta,0,100));},
-        "contradiction"=>{let old=state["hunting"]["confidence"].as_i64().unwrap_or(0);state["hunting"]["confidence"]=json!(clamp_i(old-10,0,100));},
-        _=>{}
+fn deterministic_roll(seed: &str, revision: i64) -> i32 {
+    let mut h: u64 = 1469598103934665603;
+    for b in seed.bytes().chain(revision.to_string().bytes()) {
+        h ^= u64::from(b);
+        h = h.wrapping_mul(1099511628211);
     }
-    let hunting_out=state.get("hunting").cloned().unwrap_or(json!({}));
-    json!({"ok":true,"state":state,"hunting":hunting_out,"rule":"RAG_truth_must_not_leak_species"})
+    1 + (h % 20) as i32
 }
 
-pub fn combat_pulse(mut combat:Value, action:&str)->Value{
-    let g=combat.get("enemy_guard").and_then(Value::as_i64).unwrap_or(4);let guard=combat.get("guard").and_then(Value::as_i64).unwrap_or(6);let pressure=combat.get("pressure").and_then(Value::as_i64).unwrap_or(0);let tempo=combat.get("tempo").and_then(Value::as_i64).unwrap_or(0);let dist=combat.get("distance").and_then(Value::as_f64).unwrap_or(4.0);let morale=combat.get("morale").and_then(Value::as_i64).unwrap_or(70);
-    let mut time=3.0;
-    match action {
-        "Natarcie"=>{combat["enemy_guard"]=json!((g-1).max(0));combat["pressure"]=json!(pressure+1);combat["morale"]=json!((morale-3).max(0));time=2.8},
-        "Finta"=>{combat["enemy_guard"]=json!((g-2).max(0));combat["tempo"]=json!((tempo+1).min(3));combat["morale"]=json!((morale-2).max(0));time=2.4},
-        "Obrona"=>{combat["guard"]=json!((guard+2).min(10));combat["pressure"]=json!((pressure-1).max(0));time=2.0},
-        "Pozycja"=>{combat["tempo"]=json!((tempo+1).min(3));combat["distance"]=json!((dist-0.5).max(1.0));time=2.2},
-        "Aard"=>{combat["enemy_guard"]=json!((g-1).max(0));combat["pressure"]=json!(pressure+2);combat["distance"]=json!(dist+1.5);combat["morale"]=json!((morale-5).max(0));time=1.8},
-        "Odwrót"=>{combat["distance"]=json!(dist+2.0);combat["tempo"]=json!((tempo-1).max(-3));time=3.0},_=>{}
+pub fn resolve_action(state: &GameState, action: &PlayerAction, intent: &Intent) -> Resolution {
+    let roll = deterministic_roll(&action.text, state.revision);
+    let per = *state.character.attributes.get("PER").unwrap_or(&2);
+    let int_ = *state.character.attributes.get("INT").unwrap_or(&2);
+    let dex = *state.character.attributes.get("DEX").unwrap_or(&2);
+    let cha = *state.character.attributes.get("CHA").unwrap_or(&2);
+    let skill = if intent.magical { int_ + *state.character.skills.get("magic").unwrap_or(&0) }
+        else if intent.kind == "combat_action" { dex + *state.character.skills.get("combat").unwrap_or(&0) }
+        else if intent.kind == "social" { cha + *state.character.skills.get("social").unwrap_or(&0) }
+        else { per + *state.character.skills.get("investigation").unwrap_or(&0) };
+    let mut difficulty = 11 + state.world.tension / 25;
+    if intent.magical { difficulty += state.character.chaos / 25; }
+    let score = roll + skill;
+    let degree = if score >= difficulty + 7 { "critical_success" }
+        else if score >= difficulty { "success" }
+        else if score + 3 >= difficulty { "success_with_complication" }
+        else { "failure" };
+    let ok = degree != "failure";
+    let mut revealed = Vec::new();
+    let mut complications = Vec::new();
+    if intent.magical && intent.method == "sensing" && ok {
+        if let Some(v) = state.world.truth.get("local_magic_disturbance") {
+            if v.as_bool().unwrap_or(false) {
+                revealed.push("Pole magiczne rzeczywiście jest zaburzone.".into());
+                if degree == "critical_success" { revealed.push("Zakłócenie ma uporządkowany rytm i pochodzi z głębi miejsca.".into()); }
+            } else {
+                revealed.push("Nie wykrywasz wiarygodnego zaburzenia pola magicznego.".into());
+            }
+        } else {
+            revealed.push("Wyczuwasz ślady lokalnego rezonansu, ale ich źródło pozostaje niepewne.".into());
+        }
     }
-    json!({"combat":combat,"mechanics":{"action":action,"time_seconds":time,"contract":"pulse_resolution"}})
+    if degree == "success_with_complication" { complications.push("Sukces ma koszt lub zwraca uwagę otoczenia.".into()); }
+    if degree == "failure" { complications.push("Świat nie potwierdza deklarowanego rezultatu.".into()); }
+    Resolution {
+        ok,
+        degree: degree.into(),
+        difficulty,
+        roll,
+        cost_stamina: if intent.kind == "combat_action" { 2 } else { 0 },
+        cost_vigor: if intent.magical { 2 } else { 0 },
+        chaos_gain: if intent.magical { if ok { 2 } else { 4 } } else { 0 },
+        instability: if intent.magical { if degree == "failure" { 3 } else { 1 } } else { 0 },
+        duration_seconds: if intent.kind == "social" { 30 } else if intent.kind == "travel" { 600 } else { 4 },
+        revealed,
+        complications,
+    }
 }
 
-pub fn resolve_player_action(mut state:Value,action:&str,p:&Value)->Value{
-    let a=action.to_lowercase();
-    let mut seconds=30i64;
-    if a.contains("przeszuk")||a.contains("badam")||a.contains("zbada") {seconds=600;}
-    else if a.contains("rozmaw")||a.contains("pytam")||a.contains("mówię") {seconds=90;}
-    else if a.contains("biegn")||a.contains("idę")||a.contains("ruszam") {seconds=180;}
-    else if a.contains("czekam") {seconds=3600;}
-    let minutes=(seconds+59)/60; let events=advance_time(&mut state,minutes);
-    let mut check=Value::Null;
-    if a.contains("badam")||a.contains("szuk")||a.contains("trop") {
-        let stat=state.pointer("/character/stats/PER").and_then(Value::as_i64).unwrap_or(3);
-        let roll=p.get("roll").and_then(Value::as_i64).unwrap_or_else(||stable_d20(&format!("action:{action}:{}",world_stamp(&state))));
-        let difficulty=p.get("difficulty").and_then(Value::as_i64).unwrap_or(12); let total=roll+stat; check=json!({"skill":"Percepcja","roll":roll,"modifier":stat,"difficulty":difficulty,"margin":total-difficulty,"success":total>=difficulty});
+pub fn apply_patch(state: &mut GameState, patch: &StatePatch) -> Result<(), String> {
+    for op in &patch.ops {
+        match op {
+            PatchOp::AdvanceTime { minutes } => advance_time(&mut state.world.clock, *minutes),
+            PatchOp::SetLocation { location } => state.world.location = location.clone(),
+            PatchOp::AddChronicle { text } => if !text.trim().is_empty() { state.world.chronicle.push(text.clone()); },
+            PatchOp::LearnFact { fact } => {
+                if !state.character.knowledge.iter().any(|x| x.id == fact.id) { state.character.knowledge.push(fact.clone()); }
+            }
+            PatchOp::NpcRemember { npc_id, memory } => {
+                let npc = state.world.npcs.get_mut(npc_id).ok_or_else(|| format!("Unknown NPC: {npc_id}"))?;
+                npc.memories.push(memory.clone());
+                npc.memories.sort_by_key(|m| -m.importance);
+                npc.memories.truncate(24);
+            }
+            PatchOp::RelationDelta { npc_id, subject_id, trust, respect, fear, liking, debt, hostility, leverage } => {
+                let npc = state.world.npcs.get_mut(npc_id).ok_or_else(|| format!("Unknown NPC: {npc_id}"))?;
+                let r = npc.relations.entry(subject_id.clone()).or_default();
+                r.trust = clamp100(r.trust + trust);
+                r.respect = clamp100(r.respect + respect);
+                r.fear = clamp100(r.fear + fear);
+                r.liking = clamp100(r.liking + liking);
+                r.debt = clamp100(r.debt + debt);
+                r.hostility = clamp100(r.hostility + hostility);
+                r.leverage = clamp100(r.leverage + leverage);
+            }
+            PatchOp::FactionClock { faction_id, delta } => {
+                let f = state.world.factions.get_mut(faction_id).ok_or_else(|| format!("Unknown faction: {faction_id}"))?;
+                f.clock = min(f.clock_max.max(1), max(0, f.clock + delta));
+            }
+            PatchOp::QuestStage { quest_id, stage, status } => {
+                let q = state.world.quests.get_mut(quest_id).ok_or_else(|| format!("Unknown quest: {quest_id}"))?;
+                q.stage = max(q.stage, *stage);
+                if let Some(s) = status { q.status = s.clone(); }
+            }
+            PatchOp::CharacterResource { resource, delta } => match resource.as_str() {
+                "hp" => state.character.hp = max(0, state.character.hp + delta),
+                "stamina" => state.character.stamina = max(0, state.character.stamina + delta),
+                "vigor" => state.character.vigor = max(0, state.character.vigor + delta),
+                "chaos" => state.character.chaos = min(100, max(0, state.character.chaos + delta)),
+                "stress" => state.character.stress = min(100, max(0, state.character.stress + delta)),
+                "fatigue" => state.character.fatigue = min(100, max(0, state.character.fatigue + delta)),
+                _ => return Err(format!("Unknown resource: {resource}")),
+            },
+            PatchOp::CombatPulse { tempo, guard, pressure, morale, wound } => {
+                let c = &mut state.world.combat;
+                c.tempo = max(-3, min(3, c.tempo + tempo));
+                c.guard = max(0, c.guard + guard);
+                c.pressure = max(0, min(10, c.pressure + pressure));
+                c.morale = max(0, min(100, c.morale + morale));
+                if let Some(w) = wound { c.wounds.push(w.clone()); }
+            }
+            PatchOp::AddClue { clue } => if !state.world.hunt.clues.contains(clue) { state.world.hunt.clues.push(clue.clone()); },
+            PatchOp::AlchemyToxicity { delta } => state.world.alchemy.toxicity = max(0, min(100, state.world.alchemy.toxicity + delta)),
+            PatchOp::AddItem { item } => {
+                if let Some(existing) = state.character.inventory.iter_mut().find(|x| x.id == item.id && x.quality == item.quality) { existing.quantity += item.quantity; }
+                else { state.character.inventory.push(item.clone()); }
+            }
+            PatchOp::RemoveItem { item_id, quantity } => {
+                let it = state.character.inventory.iter_mut().find(|x| x.id == *item_id).ok_or_else(|| format!("Missing item: {item_id}"))?;
+                if it.quantity < *quantity { return Err(format!("Not enough item: {item_id}")); }
+                it.quantity -= quantity;
+                state.character.inventory.retain(|x| x.quantity > 0);
+            }
+        }
     }
-    json!({"state":state,"mechanics":{"action":action,"time_seconds":seconds,"check":check,"world_events":events,"authoritative":true}})
+    state.revision += 1;
+    Ok(())
 }
 
-pub fn apply_ai_patch(mut state:Value,patch:&Value)->Value{
-    // AI can only alter narrative/social structures. HP, gold, inventory quantities, combat and magic resources are excluded.
-    if let Some(memories)=patch.get("npc_memories").and_then(Value::as_array){
-        for m in memories.iter().take(8){ state=npc_event(state,&json!({"npc_id":m.get("npc_id").cloned().unwrap_or(json!("npc")),"name":m.get("name").cloned().unwrap_or(json!("NPC")),"text":m.get("text").cloned().unwrap_or(json!("")),"importance":m.get("importance").cloned().unwrap_or(json!(2)),"private":m.get("private").cloned().unwrap_or(json!(false))}))["state"].clone(); }
+fn clamp100(v: i32) -> i32 { max(-100, min(100, v)) }
+
+pub fn simulate_background(state: &mut GameState, elapsed_minutes: i64) -> Vec<String> {
+    let mut events = Vec::new();
+    if elapsed_minutes <= 0 { return events; }
+    advance_time(&mut state.world.clock, elapsed_minutes);
+    for f in state.world.factions.values_mut() {
+        if f.clock_max > 0 && elapsed_minutes >= 60 {
+            f.clock = min(f.clock_max, f.clock + (elapsed_minutes / 180) as i32);
+            if f.clock == f.clock_max { events.push(format!("Plan frakcji '{}' osiągnął punkt przełomowy.", f.name)); }
+        }
     }
-    if let Some(rels)=patch.get("relations").and_then(Value::as_array){
-        for r in rels.iter().take(8){let id=r.get("npc_id").and_then(Value::as_str).unwrap_or("npc");state=npc_event(state,&json!({"npc_id":id,"text":"","importance":0,"relation_delta":r.get("delta").cloned().unwrap_or(json!({}))}))["state"].clone();}
+    for npc in state.world.npcs.values_mut().filter(|n| n.active) {
+        if !npc.plan.is_empty() && elapsed_minutes >= 60 {
+            let step = npc.plan.remove(0);
+            events.push(format!("{} realizuje plan: {}", npc.name, step));
+        }
     }
-    if let Some(qs)=patch.get("quest_events").and_then(Value::as_array){
-        for q in qs.iter().take(6){state=quest_update(state,q)["state"].clone();}
+    for q in state.world.quests.values_mut() {
+        if let Some(d) = q.deadline_minutes.as_mut() {
+            *d -= elapsed_minutes;
+            if *d <= 0 && q.status == "active" {
+                q.status = "failed".into();
+                events.push(format!("Upłynął termin zadania '{}'.", q.title));
+            }
+        }
     }
-    if let Some(clues)=patch.get("clues").and_then(Value::as_array){
-        for c in clues.iter().take(6){let mut cp=c.clone();if let Some(o)=cp.as_object_mut(){o.insert("kind".into(),json!("clue"));}state=hunt_action(state,&cp)["state"].clone();}
-    }
-    if let Some(flags)=patch.get("world_flags").and_then(Value::as_array){
-        let map=ensure_object(&mut state,"campaign_flags");
-        for f in flags.iter().take(12){if let Some(k)=f.get("key").and_then(Value::as_str){if let Some(v)=f.get("value"){if v.is_boolean()||v.is_number()||v.is_string(){map.insert(k.chars().take(80).collect(),v.clone());}}}}
-    }
-    state
+    state.world.chronicle.extend(events.clone());
+    if !events.is_empty() { state.revision += 1; }
+    events
 }
 
-pub fn append_chronicle(state:&mut Value,title:&str,text:&str){
-    let stamp=world_stamp(state); let arr=ensure_array(state,"chronicle"); arr.push(json!({"date":stamp,"title":title,"text":text})); if arr.len()>250{let n=arr.len()-250;arr.drain(0..n);}
+pub fn validate_ai_patch(state: &GameState, proposal: &AiProposal) -> Result<(), String> {
+    for op in &proposal.patch.ops {
+        match op {
+            PatchOp::NpcRemember { npc_id, .. } | PatchOp::RelationDelta { npc_id, .. } if !state.world.npcs.contains_key(npc_id) => return Err(format!("AI referenced unknown NPC: {npc_id}")),
+            PatchOp::FactionClock { faction_id, .. } if !state.world.factions.contains_key(faction_id) => return Err(format!("AI referenced unknown faction: {faction_id}")),
+            PatchOp::QuestStage { quest_id, .. } if !state.world.quests.contains_key(quest_id) => return Err(format!("AI referenced unknown quest: {quest_id}")),
+            PatchOp::CharacterResource { resource, delta } if resource == "hp" && state.character.hp + delta < 0 => return Err("AI attempted invalid HP patch".into()),
+            _ => {}
+        }
+    }
+    if proposal.narration.len() > 18_000 { return Err("Narration too long".into()); }
+    Ok(())
 }
 
-pub fn stable_d20(seed:&str)->i64{let mut h=DefaultHasher::new();seed.hash(&mut h);(h.finish()%20) as i64+1}
+pub fn default_mechanical_patch(resolution: &Resolution) -> StatePatch {
+    let mut ops = vec![PatchOp::AdvanceTime { minutes: i64::from((resolution.duration_seconds.max(1) + 59) / 60) }];
+    if resolution.cost_stamina != 0 { ops.push(PatchOp::CharacterResource { resource: "stamina".into(), delta: -resolution.cost_stamina }); }
+    if resolution.cost_vigor != 0 { ops.push(PatchOp::CharacterResource { resource: "vigor".into(), delta: -resolution.cost_vigor }); }
+    if resolution.chaos_gain != 0 { ops.push(PatchOp::CharacterResource { resource: "chaos".into(), delta: resolution.chaos_gain }); }
+    StatePatch { ops }
+}
+
+pub fn craft(state: &mut GameState, recipe: &str) -> Result<ItemStack, String> {
+    if !state.world.crafting.recipes.iter().any(|r| r == recipe) { return Err("Nieznana receptura".into()); }
+    let item = ItemStack { id: format!("crafted:{}", recipe.to_lowercase().replace(' ', "_")), name: recipe.into(), quantity: 1, quality: 1 + *state.character.skills.get("crafting").unwrap_or(&0) / 2, freshness: None };
+    state.character.inventory.push(item.clone());
+    advance_time(&mut state.world.clock, 60);
+    state.revision += 1;
+    Ok(item)
+}
+
+pub fn brew(state: &mut GameState, recipe: &str) -> Result<ItemStack, String> {
+    if !state.world.alchemy.recipes.iter().any(|r| r == recipe) { return Err("Nieznana receptura alchemiczna".into()); }
+    let item = ItemStack { id: format!("alchemy:{}", recipe.to_lowercase().replace(' ', "_")), name: recipe.into(), quantity: 1, quality: 1 + *state.character.skills.get("alchemy").unwrap_or(&0) / 2, freshness: Some(72) };
+    state.world.alchemy.prepared.push(item.clone());
+    advance_time(&mut state.world.clock, 30);
+    state.revision += 1;
+    Ok(item)
+}
+
+pub fn add_hunt_evidence(state: &mut GameState, clue: &str, reliability: i32) {
+    if !state.world.hunt.clues.contains(&clue.to_string()) { state.world.hunt.clues.push(clue.into()); }
+    state.world.hunt.confidence = min(100, state.world.hunt.confidence + max(1, reliability / 10));
+    state.revision += 1;
+}
+
+pub fn magic_semantics(text: &str) -> Value {
+    let l = text.to_lowercase();
+    let operation = if l.contains("wyczu") || l.contains("słuch") || l.contains("energia") { "sense" }
+        else if l.contains("tłumi") || l.contains("zdusi") { "suppress" }
+        else if l.contains("wiąż") || l.contains("unieruch") { "bind" }
+        else if l.contains("pch") || l.contains("odrz") { "force" }
+        else { "shape" };
+    serde_json::json!({
+        "operation": operation,
+        "element": if l.contains("ogie") || l.contains("igni") { "fire" } else if l.contains("aard") || l.contains("powiet") { "air" } else { "chaos" },
+        "target": "contextual",
+        "scale": if l.contains("potęż") || l.contains("całe") { "large" } else { "small" },
+        "precision": if l.contains("ostroż") || l.contains("precy") { "high" } else { "medium" },
+        "channeling": l.contains("skup") || l.contains("powoli") || l.contains("zamykam oczy")
+    })
+}
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
-    #[test]fn time_advances(){let s=json!({"world":{"year":1272,"month":1,"day":30,"hour":23,"minute":30}});let r=process_world_tick(s,90,"test");assert_eq!(r.pointer("/state/world/month").unwrap(),&json!(2));assert_eq!(r.pointer("/state/world/day").unwrap(),&json!(1));}
-    #[test]fn npc_memory_is_bounded(){let mut s=json!({});for i in 0..50{s=npc_event(s,&json!({"npc_id":"marta","text":format!("e{i}"),"importance":3}))["state"].clone();}assert_eq!(s.pointer("/npcs/marta/memories").unwrap().as_array().unwrap().len(),40);}
-    #[test]fn ai_patch_cannot_touch_hp(){let s=json!({"character":{"hp":12}});let p=json!({"world_flags":[{"key":"x","value":true}],"hp":999});let out=apply_ai_patch(s,&p);assert_eq!(out.pointer("/character/hp"),Some(&json!(12)));}
-}
 
+    #[test]
+    fn time_advances_across_midnight() {
+        let mut c = Clock { year: 1272, month: 6, day: 17, hour: 23, minute: 50 };
+        advance_time(&mut c, 20);
+        assert_eq!((c.day, c.hour, c.minute), (18, 0, 10));
+    }
+
+    #[test]
+    fn free_magic_is_intent_not_world_truth() {
+        let i = infer_intent("Energia jest wzburzona. Pash iritor — próbuję ją wyczuć.");
+        assert!(i.magical);
+        assert_eq!(i.method, "sensing");
+    }
+
+    #[test]
+    fn npc_memory_requires_existing_npc() {
+        let s = GameState::default();
+        let p = AiProposal { patch: StatePatch { ops: vec![PatchOp::NpcRemember { npc_id: "ghost".into(), memory: NpcMemory::default() }] }, ..Default::default() };
+        assert!(validate_ai_patch(&s, &p).is_err());
+    }
+}
