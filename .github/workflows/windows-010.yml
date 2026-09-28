@@ -1,0 +1,126 @@
+name: Kroniki RPG 0.10 - Autonomous MGAI
+
+on:
+  push:
+    branches: ['feature/0.10-autonomous-mg']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-2025
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: source010/current
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            source010/current/rust-core
+            source010/current/launcher
+
+      - name: Test Rust Core
+        run: |
+          cargo test --manifest-path rust-core/Cargo.toml --all-targets
+          if ($LASTEXITCODE -ne 0) { throw 'Rust Core tests failed' }
+
+      - name: Build launcher tests
+        run: |
+          cargo check --manifest-path launcher/Cargo.toml
+          if ($LASTEXITCODE -ne 0) { throw 'Launcher check failed' }
+
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup --no-progress -y
+          $iscc = Get-ChildItem "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe","$env:ProgramFiles\Inno Setup 6\ISCC.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (!$iscc) { throw 'ISCC.exe not found after install' }
+          $iscc.Directory.FullName | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Build game launcher installer and local AI runtime
+        run: |
+          ./scripts/build_windows_release.ps1 -Version '0.10.0-preview.1' -Channel preview -Repository 'Vizyer/kroniki-rpg' -GodotVersion '4.7.2'
+
+      - name: Verify release outputs
+        run: |
+          $required = @(
+            'build/KronikiRPG-Setup.exe',
+            'build/KronikiRPG-win-x64.zip',
+            'build/update-manifest.json',
+            'build/KronikiLauncher.exe',
+            'build/app/KronikiRPG.exe',
+            'build/app/kroniki_core.exe',
+            'build/app/ai/llama-server.exe',
+            'build/app/ai/local-ai-profile.json'
+          )
+          foreach ($p in $required) {
+            if (!(Test-Path $p)) { throw "Missing build output: $p" }
+          }
+
+      - name: Smoke test autonomous Core
+        run: |
+          $ErrorActionPreference='Stop'
+          $core=(Resolve-Path 'build/app/kroniki_core.exe').Path
+          $proc=Start-Process -FilePath $core -WorkingDirectory (Split-Path $core) -PassThru
+          try {
+            for($i=0;$i -lt 80;$i++){
+              try { $h=Invoke-RestMethod 'http://127.0.0.1:17377/health' -TimeoutSec 1; if($h.ok){break} } catch {}
+              Start-Sleep -Milliseconds 250
+            }
+            if(!$h.ok){throw 'Core did not start'}
+            if($h.version -ne '0.10.0-preview.1'){throw "Wrong core version: $($h.version)"}
+
+            $new=Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/campaign/new' -ContentType 'application/json' -Body '{}'
+            if(!$new.ok -or !$new.state.director -or !$new.state.npcs){throw 'Campaign seed missing director/NPC state'}
+
+            $body=@{action='Hmm, energia tego miejsca wydaje się niezwykle wzburzona. Pash iritor — Zębie wypowiada inkantację.';state=$new.state;use_ai=$false;roll=18} | ConvertTo-Json -Depth 30
+            $turn=Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/action' -ContentType 'application/json' -Body $body
+            if(!$turn.ok){throw 'Action pipeline failed'}
+            if($turn.interpretation.action_type -ne 'magic_attempt'){throw 'Intent interpreter failed for free-form magic'}
+            if($turn.mechanics.magic.operation -ne 'sense'){throw "Magic semantic parser did not choose sense: $($turn.mechanics.magic.operation)"}
+            if(!$turn.director){throw 'Director result missing'}
+            if($turn.ai_backend -ne 'deterministic-fallback'){throw 'Offline smoke must use deterministic fallback'}
+
+            $saveBody=@{name='CI 0.10';state=$turn.state}|ConvertTo-Json -Depth 30
+            $saved=Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save' -ContentType 'application/json' -Body $saveBody
+            if(!$saved.ok){throw 'Save failed'}
+            $loaded=Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save/load' -ContentType 'application/json' -Body (@{id=$saved.id}|ConvertTo-Json)
+            if($loaded.state._meta.save_schema -ne 3){throw 'Save migration/schema failed'}
+
+            $tick=Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/world/tick' -ContentType 'application/json' -Body (@{minutes=480;reason='sen';state=$loaded.state}|ConvertTo-Json -Depth 30)
+            if(!$tick.ok){throw 'World tick failed'}
+
+            $status=Invoke-RestMethod -Uri 'http://127.0.0.1:17377/ai/status'
+            if($status.profile -ne 'Qwen3-8B Q5_K_M'){throw 'Local AI profile missing'}
+          } finally {
+            try { Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/shutdown' -ContentType 'application/json' -Body '{}' -TimeoutSec 2 | Out-Null } catch {}
+            Start-Sleep -Milliseconds 800
+            if(!$proc.HasExited){Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue}
+          }
+
+      - name: Godot exported game boot
+        run: |
+          $game=(Resolve-Path 'build/app/KronikiRPG.exe').Path
+          $p=Start-Process -FilePath $game -ArgumentList @('--headless','--quit-after','2') -Wait -PassThru
+          if($p.ExitCode -ne 0){throw "Godot boot failed: $($p.ExitCode)"}
+
+      - name: Upload 0.10 preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: KronikiRPG-0.10.0-preview.1-Windows
+          path: |
+            source010/current/build/KronikiRPG-Setup.exe
+            source010/current/build/KronikiRPG-win-x64.zip
+            source010/current/build/update-manifest.json
+          if-no-files-found: error
+          retention-days: 30
