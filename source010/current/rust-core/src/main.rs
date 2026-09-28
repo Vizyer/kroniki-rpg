@@ -119,7 +119,7 @@ async fn ai_config_set(State(s):State<AppState>,Json(p):Json<Value>)->Json<Value
     if let Some(v)=p.get("timeout_ms").and_then(Value::as_u64){let _=set_setting(&c,"ai_timeout_ms",&v.clamp(5000,300000).to_string());}
     if let Some(v)=p.get("retries").and_then(Value::as_u64){let _=set_setting(&c,"ai_retries",&v.min(3).to_string());}
 }ai_config_get(State(s)).await}
-async fn ai_status(State(s):State<AppState>)->Json<Value>{let c=s.db.lock().unwrap();let cfg=route_config(&c);drop(c);let mut v=local_status(&cfg);v["ready"]=json!(s.ai.is_local_ready(&cfg.local_endpoint).await);v["remote_configured"]=json!(cfg.remote_api_key.is_some());Json(v)}
+async fn ai_status(State(s):State<AppState>)->Json<Value>{let cfg={let c=s.db.lock().unwrap();route_config(&c)};let mut v=local_status(&cfg);v["ready"]=json!(s.ai.is_local_ready(&cfg.local_endpoint).await);v["remote_configured"]=json!(cfg.remote_api_key.is_some());v["remote_model"]=json!(cfg.remote_model);Json(v)}
 async fn ai_start_local(State(s):State<AppState>)->Json<Value>{let cfg={let c=s.db.lock().unwrap();route_config(&c)};match s.ai.ensure_local_server(&cfg).await{Ok(_)=>Json(json!({"ok":true,"backend":"local","status":local_status(&cfg)})),Err(e)=>Json(json!({"ok":false,"error":e,"status":local_status(&cfg)}))}}
 async fn ai_cancel(State(s):State<AppState>,Json(p):Json<Value>)->Json<Value>{let id=p.get("request_id").and_then(Value::as_str).unwrap_or("");Json(json!({"ok":s.ai.cancel(id),"request_id":id}))}
 
