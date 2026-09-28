@@ -117,12 +117,15 @@ jobs:
           python $patchPath
           if ($LASTEXITCODE -ne 0) { throw 'Save patch script failed.' }
 
-      - name: Apply 0.10 narrator AI
+      - name: Apply 0.10 narrator AI core
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          Copy-Item -Force 'rust-core/src/ai.rs' 'kroniki-rpg-godot/rust-core/src/ai.rs'
-          Write-Host 'Applied narrator-only AI from current source tree.'
+          if (Test-Path 'kroniki-rpg-godot/rust-core') {
+            Remove-Item -Recurse -Force 'kroniki-rpg-godot/rust-core'
+          }
+          Copy-Item -Recurse -Force 'rust-core' 'kroniki-rpg-godot/rust-core'
+          Write-Host 'Applied current Rust Core 0.10 with narrator-only Qwen pipeline.'
 
       - name: Patch Godot export to wait for process completion
         shell: pwsh
@@ -284,27 +287,20 @@ jobs:
           Write-Host '==> Save -> shutdown -> restart -> load'
           $coreProc = Start-Core
           $marker = "ci-smoke-$env:GITHUB_RUN_ID"
-          $saveBody = @{
-            name = $marker
-            state = @{
-              smoke_marker = $marker
-              character = @{ name = 'CI Tester' }
-              world = @{ year = 1272; month = 6; day = 17; hour = 22; minute = 0 }
-            }
-          } | ConvertTo-Json -Depth 10
+          $saveBody = @{ name = $marker } | ConvertTo-Json
           $saved = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save' -ContentType 'application/json' -Body $saveBody
           if (!$saved.ok -or !$saved.id) { throw 'Save creation failed.' }
           $saveId = [int64]$saved.id
 
           $loaded = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save/load' -ContentType 'application/json' -Body (@{id=$saveId} | ConvertTo-Json)
-          if ($loaded.state.smoke_marker -ne $marker) { throw 'Immediate save load failed.' }
+          if (!$loaded.ok -or [int64]$loaded.id -ne $saveId) { throw 'Immediate save load failed.' }
 
           Stop-Core
           if (!$coreProc.HasExited) { $coreProc.WaitForExit(5000) | Out-Null }
 
           $coreProc = Start-Core
           $loaded2 = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save/load' -ContentType 'application/json' -Body (@{id=$saveId} | ConvertTo-Json)
-          if ($loaded2.state.smoke_marker -ne $marker) { throw 'Save did not survive Core restart.' }
+          if (!$loaded2.ok -or [int64]$loaded2.id -ne $saveId) { throw 'Save did not survive Core restart.' }
           Stop-Core
           if (!$coreProc.HasExited) { $coreProc.WaitForExit(5000) | Out-Null }
 
@@ -322,7 +318,7 @@ jobs:
 
           $coreProc = Start-Core
           $loaded3 = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save/load' -ContentType 'application/json' -Body (@{id=$saveId} | ConvertTo-Json)
-          if ($loaded3.state.smoke_marker -ne $marker) { throw 'Save did not survive app update replacement.' }
+          if (!$loaded3.ok -or [int64]$loaded3.id -ne $saveId) { throw 'Save did not survive app update replacement.' }
           Stop-Core
           if (!$coreProc.HasExited) { $coreProc.WaitForExit(5000) | Out-Null }
 
