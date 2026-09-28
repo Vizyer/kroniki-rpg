@@ -3,7 +3,7 @@ param(
     [string]$Channel = 'preview',
     [string]$Repository = 'Vizyer/kroniki-rpg',
     [string]$GodotVersion = '4.5.1',
-    [string]$LlamaVersion = 'v0.4.1'
+    [string]$LlamaVersion = 'b11228'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -46,7 +46,7 @@ Expand-Archive -Path $GodotZip -DestinationPath (Join-Path $Temp 'godot-bin') -F
 $Godot = Get-ChildItem (Join-Path $Temp 'godot-bin') -Filter 'Godot*.exe' | Select-Object -First 1 -ExpandProperty FullName
 if (!$Godot) { throw 'Godot executable not found' }
 
-$TemplatesZip = Join-Path $Temp 'templates.tpz'
+$TemplatesZip = Join-Path $Temp 'templates.zip'
 $TemplatesUrl = "https://github.com/godotengine/godot/releases/download/$GodotTag/Godot_v$($GodotTag)_export_templates.tpz"
 Download $TemplatesUrl $TemplatesZip
 $TemplateDir = Join-Path $env:APPDATA "Godot\export_templates\$GodotVersion.stable"
@@ -107,6 +107,8 @@ $PackageUrl = "https://github.com/$Repository/releases/download/v$Version/Kronik
     version = $Version
     channel = $Channel
     package_url = $PackageUrl
+    url = $PackageUrl
+    download_url = $PackageUrl
     sha256 = $Sha
     save_schema = 10
 } | ConvertTo-Json | Set-Content (Join-Path $Build 'update-manifest.json') -Encoding utf8
