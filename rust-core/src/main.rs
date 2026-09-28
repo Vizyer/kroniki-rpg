@@ -5,6 +5,7 @@ use kroniki_core::{
     domain::{state_summary, GameState, PlayerAction},
     engine::Engine,
     lore::{self, LoreQuery},
+    runtime::LocalAiRuntime,
     store::Store,
     systems,
 };
@@ -22,7 +23,11 @@ struct AppState {
 async fn main() {
     let store = Store::open_default().expect("Cannot open KronikiRPG SQLite database");
     let engine = Arc::new(Engine::new(store));
-    let app_state = AppState { engine };
+    let app_state = AppState { engine: engine.clone() };
+    let local_ai = engine.local_ai.clone();
+    tokio::spawn(async move {
+        let _ = local_ai.ensure_started().await;
+    });
 
     let cors = CorsLayer::new()
         .allow_origin(Any)
@@ -38,6 +43,8 @@ async fn main() {
         .route("/saves", get(list_saves))
         .route("/save/load", post(load_save))
         .route("/ai/config", get(ai_config_get).post(ai_config_set))
+        .route("/ai/local/status", get(ai_local_status))
+        .route("/ai/local/start", post(ai_local_start))
         .route("/character/create", post(character_create))
         .route("/lore/search", post(lore_search))
         .route("/magic/parse", post(magic_parse))
@@ -64,7 +71,8 @@ async fn health(State(s): State<AppState>) -> Json<Value> {
         "core": "0.10.0",
         "schema": st.schema,
         "revision": st.revision,
-        "ai": s.engine.ai_config.read().await.clone()
+        "ai": s.engine.ai_config.read().await.clone(),
+        "local_ai": LocalAiRuntime::status_json()
     }))
 }
 
@@ -177,6 +185,17 @@ async fn ai_config_get(State(s): State<AppState>) -> Json<Value> {
     }))
 }
 
+async fn ai_local_status() -> Json<Value> {
+    Json(json!({"ok":true,"local_ai":LocalAiRuntime::status_json()}))
+}
+
+async fn ai_local_start(State(s): State<AppState>) -> Json<Value> {
+    match s.engine.local_ai.ensure_started().await {
+        Ok(started) => Json(json!({"ok":true,"started":started,"local_ai":LocalAiRuntime::status_json()})),
+        Err(e) => Json(json!({"ok":false,"error":e,"local_ai":LocalAiRuntime::status_json()})),
+    }
+}
+
 async fn ai_config_set(
     State(s): State<AppState>,
     Json(cfg): Json<AiConfig>,
@@ -265,8 +284,10 @@ async fn hunt_evidence(
     Json(json!({"ok":true,"hunt":st.world.hunt}))
 }
 
-async fn shutdown() -> Json<Value> {
-    tokio::spawn(async {
+async fn shutdown(State(s): State<AppState>) -> Json<Value> {
+    let rt = s.engine.local_ai.clone();
+    tokio::spawn(async move {
+        rt.stop().await;
         tokio::time::sleep(std::time::Duration::from_millis(100)).await;
         std::process::exit(0);
     });
