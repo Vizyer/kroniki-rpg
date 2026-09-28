@@ -16,7 +16,9 @@ use std::{
 };
 use zip::ZipArchive;
 
-const LAUNCHER_VERSION: &str = "0.1.0";
+const LAUNCHER_VERSION: &str = "0.2.0";
+const LOCAL_MODEL_FILE: &str = "Qwen3-8B-Q5_K_M.gguf";
+const LOCAL_MODEL_URL: &str = "https://huggingface.co/Qwen/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q5_K_M.gguf?download=true";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct LauncherConfig {
@@ -146,6 +148,32 @@ impl LauncherApp {
         });
     }
 
+    fn install_local_model(&mut self) {
+        if self.busy { return; }
+        self.busy = true;
+        self.progress = 0.0;
+        self.status = "Pobieram lokalnego MGAI Qwen3-8B Q5_K_M (~5.9 GB)...".into();
+        let tx = self.tx.clone();
+        thread::spawn(move || {
+            let dir = data_dir().join("models");
+            if let Err(e)=fs::create_dir_all(&dir) { let _=tx.send(Msg::Error(format!("Nie mogę utworzyć folderu modeli: {e}"))); return; }
+            let final_path=dir.join(LOCAL_MODEL_FILE);
+            let temp=dir.join(format!("{LOCAL_MODEL_FILE}.part"));
+            let _=fs::remove_file(&temp);
+            let result=download_file(LOCAL_MODEL_URL,&temp,&tx).and_then(|_|{
+                let size=fs::metadata(&temp)?.len();
+                if size < 5_000_000_000 { return Err(anyhow!("Pobrany model jest zbyt mały ({size} B). Pobieranie zostało przerwane.")); }
+                if final_path.exists(){fs::remove_file(&final_path)?;}
+                fs::rename(&temp,&final_path)?;
+                Ok(())
+            });
+            match result {
+                Ok(())=>{let _=tx.send(Msg::Done("Lokalny MGAI Qwen3-8B jest gotowy. Gra uruchomi go automatycznie.".into()));},
+                Err(e)=>{let _=fs::remove_file(&temp);let _=tx.send(Msg::Error(format!("Pobieranie modelu nie powiodło się: {e:#}")));},
+            }
+        });
+    }
+
     fn rollback(&mut self) {
         if self.busy { return; }
         self.busy = true;
@@ -245,6 +273,18 @@ impl eframe::App for LauncherApp {
                     if let Some(n)=c.manifest.package_size { ui.label(format!("Paczka: {:.1} MB", n as f64 / 1024.0 / 1024.0)); }
                 });
             }
+
+            ui.add_space(12.0);
+            ui.group(|ui| {
+                ui.strong("Lokalny Mistrz Gry AI");
+                if local_model_path().exists() {
+                    ui.label("Qwen3-8B Q5_K_M — zainstalowany. Profil dla 16 GB RAM / 8 GB VRAM.");
+                } else {
+                    ui.label("Qwen3-8B Q5_K_M — opcjonalny pakiet ~5.9 GB. Po pobraniu MGAI działa lokalnie i offline.");
+                    if ui.add_enabled(!self.busy, egui::Button::new("POBIERZ MGAI (~5.9 GB)")).clicked() { self.install_local_model(); }
+                }
+                if ui.button("Folder modeli AI").clicked() { open_folder(&data_dir().join("models")); }
+            });
 
             ui.add_space(12.0);
             ui.horizontal(|ui| {
@@ -380,6 +420,7 @@ fn sanitize(s:&str)->String{s.chars().map(|c|if c.is_ascii_alphanumeric()||".-_"
 
 fn install_root()->PathBuf { std::env::current_exe().ok().and_then(|p|p.parent().map(Path::to_path_buf)).unwrap_or_else(||PathBuf::from(".")) }
 fn data_dir()->PathBuf { std::env::var_os("LOCALAPPDATA").map(PathBuf::from).unwrap_or_else(||PathBuf::from(".")).join("KronikiRPG") }
+fn local_model_path()->PathBuf { data_dir().join("models").join(LOCAL_MODEL_FILE) }
 fn config_path()->PathBuf { install_root().join("launcher-config.json") }
 fn settings_path()->PathBuf { data_dir().join("launcher-settings.json") }
 fn read_config()->Result<LauncherConfig>{Ok(serde_json::from_slice(&fs::read(config_path())?)?)}
