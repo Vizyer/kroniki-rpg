@@ -46,7 +46,6 @@ Marta: Jeśli Sten naprawdę poszedł w stronę bagien, nie mamy wiele czasu."
 var suggested_actions:Array = ["Pytam Martę, czego jeszcze mi nie powiedziała.","Badam list i ślady błota na papierze.","Proszę, by pokazała mi miejsce ostatniego widzenia Stena."]
 var pending_request_id := ""
 var ai_configured := false
-var ai_info := {"mode":"local","profile":"Qwen3-8B Q5_K_M","model_exists":false,"server_exists":false,"ready":false,"last_backend":""}
 var save_id := -1
 var save_feedback := ""
 var save_pending_name := ""
@@ -58,7 +57,7 @@ func _ready() -> void:
     add_child(core)
     core.request_completed.connect(_on_core_response)
     _build_ui()
-    core.request("/ai/status", {}, "GET")
+    core.request("/ai/config", {}, "GET")
     _render_scene()
 
 func _apply_theme() -> void:
@@ -104,7 +103,6 @@ func _build_topbar() -> Control:
     status_line=Label.new(); status_line.add_theme_color_override("font_color",MUTED); h.add_child(status_line)
     var know:=Button.new(); know.text="TRYB WIEDZY"; know.pressed.connect(func(): knowledge_on=!knowledge_on; _render_right_context()); h.add_child(know)
     var ai:=Button.new(); ai.text="AI-MG"; ai.pressed.connect(_open_ai_settings); h.add_child(ai)
-    var campaign:=Button.new(); campaign.text="NOWA KAMPANIA"; campaign.pressed.connect(_new_campaign); h.add_child(campaign)
     var load:=Button.new(); load.text="WCZYTAJ"; load.pressed.connect(_open_save_list); h.add_child(load)
     var save:=Button.new(); save.text="ZAPISZ"; save.pressed.connect(_open_save_dialog); h.add_child(save)
     return p
@@ -139,7 +137,7 @@ func _render_left() -> void:
     left_panel.add_child(_label(c.name,25,GOLD)); left_panel.add_child(_label(c.profession+" • poziom "+str(c.level),14,MUTED))
     left_panel.add_child(_label("ZYCIE  "+str(c.hp)+" / "+str(c.max_hp),18,TEXT))
     left_panel.add_child(_label("Korony: "+str(c.gold),15,MUTED))
-    left_panel.add_child(_label(_ai_label(),13,GREEN if ai_configured else MUTED))
+    left_panel.add_child(_label("AI-MG: "+("aktywny" if ai_configured else "fallback lokalny"),13,GREEN if ai_configured else MUTED))
     left_panel.add_child(HSeparator.new()); left_panel.add_child(_label("AKTUALNY CEL",12,GOLD)); left_panel.add_child(_label(state.world.quest,18,TEXT))
     left_panel.add_child(_label("Znajdz zaginionego zanim trop zostanie zmyty przez deszcz.",14,MUTED))
     left_panel.add_child(HSeparator.new()); left_panel.add_child(_label("STAN",12,GOLD)); left_panel.add_child(_label("Zmeczenie 22\nStres 2 / 10\nToksycznosc 0%\nRany 0",14,MUTED))
@@ -162,20 +160,6 @@ func _render_combat_right() -> void:
 func _update_status() -> void:
     status_line.text="%s • %02d.%02d.%d • %02d:%02d • %s" % [state.world.location,state.world.day,state.world.month,state.world.year,state.world.hour,state.world.minute,state.world.weather]
 
-
-func _ai_label() -> String:
-    var mode := str(ai_info.get("mode","local"))
-    var backend := str(ai_info.get("last_backend",""))
-    if backend != "":
-        return "MGAI: " + backend
-    if mode == "local":
-        return "MGAI: lokalny Qwen3-8B" if bool(ai_info.get("model_exists",false)) else "MGAI: model lokalny niepobrany"
-    if mode == "hybrid":
-        return "MGAI: hybrydowy"
-    return "MGAI: online"
-
-func _new_campaign() -> void:
-    core.request("/campaign/new",{"character":state.get("character",{})})
 
 func _submit_action(t:String) -> void:
     if t.strip_edges() != "":
@@ -351,14 +335,8 @@ func _on_core_response(route:String, ok:bool, data) -> void:
         _render_scene()
         return
     match route:
-        "/ai/config", "/ai/status", "/ai/start-local":
-            if data.get("status") is Dictionary:
-                ai_info = data.get("status")
-            else:
-                ai_info = data
-            if data.has("mode"): ai_info["mode"] = data.get("mode")
-            ai_configured = bool(ai_info.get("model_exists",false)) or bool(ai_info.get("remote_configured",false))
-            _render_left()
+        "/ai/config":
+            ai_configured=bool(data.get("configured",false)); _render_left()
         "/lore/search":
             if lore_results:
                 _clear(lore_results)
@@ -370,18 +348,7 @@ func _on_core_response(route:String, ok:bool, data) -> void:
             if data.get("state") is Dictionary: state=data.get("state")
             last_narration=str(data.get("narration","Świat reaguje na twoje działanie."))
             suggested_actions=data.get("suggestions",suggested_actions)
-            ai_info["last_backend"] = str(data.get("ai_backend",""))
             _render_scene()
-        "/campaign/new":
-            if data.get("state") is Dictionary:
-                state=data.get("state")
-                save_id=-1
-                overlay.visible=false
-                var ch=state.get("chronicle",[])
-                if ch is Array and not ch.is_empty():
-                    last_narration=str(ch[ch.size()-1].get("text","Nowa kampania rozpoczyna się."))
-                suggested_actions=state.get("suggested_actions",suggested_actions)
-                _render_scene()
         "/world/tick":
             if data.get("state") is Dictionary: state=data.get("state")
             _open_tab(current_tab)
@@ -426,25 +393,11 @@ func _make_overlay() -> void:
 func _open_ai_settings() -> void:
     overlay.visible=true; _clear(overlay)
     var v:=VBoxContainer.new(); v.add_theme_constant_override("separation",10); overlay.add_child(v)
-    v.add_child(_label("MISTRZ GRY AI",28,GOLD))
-    v.add_child(_label("Standard dla tego komputera: Qwen3-8B Q5_K_M • okno kontekstu 12k • maksymalny offload GPU. Rust nadal rozstrzyga mechanikę i waliduje stan.",14,MUTED))
-    var mode:=OptionButton.new()
-    mode.add_item("Lokalny",0); mode.add_item("Hybrydowy",1); mode.add_item("Online",2)
-    var current_mode:=str(ai_info.get("mode","local"))
-    mode.select(1 if current_mode=="hybrid" else (2 if current_mode=="online" else 0))
-    v.add_child(mode)
-    var installed:=bool(ai_info.get("model_exists",false))
-    var server_ok:=bool(ai_info.get("server_exists",false))
-    v.add_child(_label("Model: "+("znaleziony" if installed else "brak pliku")+" • llama.cpp: "+("gotowy" if server_ok else "brak")+"\n"+str(ai_info.get("model_path","%LOCALAPPDATA%/KronikiRPG/models/Qwen3-8B-Q5_K_M.gguf")),14,GREEN if installed and server_ok else MUTED))
-    var key:=LineEdit.new(); key.placeholder_text="Opcjonalny klucz API dla trybu Hybrydowego/Online"; key.secret=true; v.add_child(key)
-    var model:=LineEdit.new(); model.text=str(ai_info.get("remote_model","gpt-5.6-luna")); model.placeholder_text="Model online"; v.add_child(model)
+    v.add_child(_label("AI-MG",28,GOLD)); v.add_child(_label("Klucz API jest zapisywany lokalnie w bazie ustawień. Pozostaw pole puste, aby zachować obecny klucz.",14,MUTED))
+    var key:=LineEdit.new(); key.placeholder_text="OpenAI API key"; key.secret=true; v.add_child(key)
+    var model:=LineEdit.new(); model.text="gpt-5.6-luna"; model.placeholder_text="Model"; v.add_child(model)
     var h:=HBoxContainer.new(); v.add_child(h)
-    h.add_child(_button("ZAPISZ",func():
-        var selected_mode="local" if mode.selected==0 else ("hybrid" if mode.selected==1 else "online")
-        core.request("/ai/config",{"mode":selected_mode,"api_key":key.text,"model":model.text,"local_context":12288,"local_gpu_layers":99,"timeout_ms":120000,"retries":1})
-        overlay.visible=false
-    ))
-    h.add_child(_button("URUCHOM LOKALNY MGAI",func(): core.request("/ai/start-local",{})))
+    h.add_child(_button("ZAPISZ",func(): core.request("/ai/config",{"api_key":key.text,"model":model.text,"timeout_ms":45000,"retries":1}); overlay.visible=false))
     h.add_child(_button("ANULUJ",func(): overlay.visible=false))
 
 func _open_save_list() -> void:
@@ -476,12 +429,6 @@ func _open_creator() -> void:
     v.add_child(_label("STATYSTYKI — 8 punktow ponad baze",15,GOLD)); var info:=_label("STR 3 • DEX 5 • CON 4 • INT 3 • PER 5 • CHA 2",16,TEXT); v.add_child(info)
     var concept:=TextEdit.new(); concept.custom_minimum_size.y=120; concept.placeholder_text="Opis postaci / motywacja / tajemnica..."; v.add_child(concept)
     var h:=HBoxContainer.new(); v.add_child(h); h.add_child(_button("GENERUJ PROPOZYCJE AI",func(): core.request("/character/generate",{"concept":concept.text,"profession":profession.get_item_text(profession.selected),"year":state.world.year})))
-    h.add_child(_button("ROZPOCZNIJ KAMPANIE",func():
-        state.character.name=name.text if name.text.strip_edges()!="" else "Bez imienia"
-        state.character.profession=profession.get_item_text(profession.selected)
-        state.character["origin_story"]=origin.get_item_text(origin.selected)
-        state.character["concept"]=concept.text
-        core.request("/campaign/new",{"character":state.character})
-    ))
+    h.add_child(_button("ZAPISZ POSTAC",func(): state.character.name=name.text if name.text.strip_edges()!="" else "Bez imienia"; state.character.profession=profession.get_item_text(profession.selected); state.character["origin_story"]=origin.get_item_text(origin.selected); overlay.visible=false; _render_scene()))
     h.add_child(_button("ANULUJ",func(): overlay.visible=false))
 

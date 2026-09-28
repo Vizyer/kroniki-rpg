@@ -54,31 +54,6 @@ Write-Step "Build Rust Core"
 if ($LASTEXITCODE -ne 0) { throw 'cargo build Rust Core failed' }
 Copy-Item (Join-Path $Root 'rust-core\target\release\kroniki_core.exe') (Join-Path $App 'kroniki_core.exe') -Force
 
-Write-Step "Pakowanie lokalnego runtime MGAI (llama.cpp Vulkan)"
-$AiDir = Join-Path $App 'ai'
-New-Item -ItemType Directory -Force -Path $AiDir | Out-Null
-$LlamaRelease = Invoke-RestMethod -UseBasicParsing -Headers @{ 'User-Agent'='KronikiRPG-Build' } 'https://api.github.com/repos/ggml-org/llama.cpp/releases/latest'
-$LlamaAsset = $LlamaRelease.assets | Where-Object { $_.name -like '*bin-win-vulkan-x64.zip' } | Select-Object -First 1
-if (!$LlamaAsset) { throw 'Nie znaleziono Windows Vulkan llama.cpp w najnowszym release.' }
-$LlamaZip = Join-Path $Tools $LlamaAsset.name
-if (!(Test-Path $LlamaZip)) { Invoke-WebRequest -UseBasicParsing -Headers @{ 'User-Agent'='KronikiRPG-Build' } $LlamaAsset.browser_download_url -OutFile $LlamaZip }
-$LlamaTemp = Join-Path $Tools 'llama-win-vulkan'
-if (Test-Path $LlamaTemp) { Remove-Item -Recurse -Force $LlamaTemp }
-Expand-Archive -Force $LlamaZip $LlamaTemp
-$LlamaServer = Get-ChildItem -Path $LlamaTemp -Filter 'llama-server.exe' -Recurse | Select-Object -First 1
-if (!$LlamaServer) { throw 'Paczka llama.cpp nie zawiera llama-server.exe.' }
-Copy-Item -Force -Recurse (Join-Path $LlamaServer.Directory.FullName '*') $AiDir
-if (!(Test-Path (Join-Path $AiDir 'llama-server.exe'))) { throw 'Nie udało się spakować llama-server.exe.' }
-@{
-    profile='Qwen3-8B Q5_K_M'
-    model_file='Qwen3-8B-Q5_K_M.gguf'
-    model_url='https://huggingface.co/Qwen/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q5_K_M.gguf?download=true'
-    recommended_ram_gb=16
-    recommended_vram_gb=8
-    context=12288
-    backend='llama.cpp Vulkan'
-} | ConvertTo-Json | Set-Content -Encoding UTF8 (Join-Path $AiDir 'local-ai-profile.json')
-
 Write-Step "Build Launchera"
 & cargo build --manifest-path (Join-Path $Root 'launcher\Cargo.toml') --release
 if ($LASTEXITCODE -ne 0) { throw 'cargo build launcher failed' }
@@ -114,7 +89,7 @@ $Manifest = [ordered]@{
     sha256 = $Hash
     package_size = $Size
     notes = "Kroniki RPG $Version ($Channel)"
-    min_launcher_version = '0.2.0'
+    min_launcher_version = '0.1.0'
 }
 $Manifest | ConvertTo-Json | Set-Content -Encoding UTF8 (Join-Path $Build 'update-manifest.json')
 
