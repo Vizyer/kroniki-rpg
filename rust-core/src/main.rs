@@ -1,8 +1,10 @@
 use axum::{extract::State, http::Method, routing::{get, post}, Json, Router};
 use kroniki_core::{
     ai::AiConfig,
+    creator::{self, CreateCharacterRequest},
     domain::{state_summary, GameState, PlayerAction},
     engine::Engine,
+    lore::{self, LoreQuery},
     store::Store,
     systems,
 };
@@ -36,6 +38,8 @@ async fn main() {
         .route("/saves", get(list_saves))
         .route("/save/load", post(load_save))
         .route("/ai/config", get(ai_config_get).post(ai_config_set))
+        .route("/character/create", post(character_create))
+        .route("/lore/search", post(lore_search))
         .route("/magic/parse", post(magic_parse))
         .route("/craft", post(craft))
         .route("/alchemy/brew", post(brew))
@@ -182,6 +186,25 @@ async fn ai_config_set(
     }
     *s.engine.ai_config.write().await = cfg.clone();
     Json(json!({"ok":true,"config":cfg}))
+}
+
+
+async fn character_create(
+    State(s): State<AppState>,
+    Json(req): Json<CreateCharacterRequest>,
+) -> Json<Value> {
+    let character = creator::create(&req);
+    let mut st = s.engine.state.write().await;
+    st.character = character.clone();
+    st.revision += 1;
+    Json(json!({"ok":true,"character":character,"state":state_summary(&st)}))
+}
+
+async fn lore_search(Json(mut q): Json<LoreQuery>) -> Json<Value> {
+    if q.limit == 0 { q.limit = 6; }
+    let facts = lore::starter_facts();
+    let found = lore::search(&facts, &q);
+    Json(json!({"ok":true,"facts":found}))
 }
 
 #[derive(Deserialize)]
