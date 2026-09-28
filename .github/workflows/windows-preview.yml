@@ -1,8 +1,6 @@
 name: Kroniki RPG - Windows Preview Build
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
