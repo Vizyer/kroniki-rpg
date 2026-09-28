@@ -1,6 +1,8 @@
 name: Kroniki RPG - Windows Preview Build
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -130,6 +132,34 @@ jobs:
           $src = $src.Replace($oldImport,$newImport).Replace($oldExport,$newExport)
           $src = $src.Replace("Pop-Location", "Pop-Location`r`nif (!(Test-Path (Join-Path `$App 'KronikiRPG.exe'))) { throw 'Godot export finished without KronikiRPG.exe' }")
           Set-Content -Path $path -Value $src -Encoding utf8
+      - name: Materialize current source branch
+        if: github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $branch = 'feature/0.10-autonomous-mg'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin $branch 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            git switch -C $branch "origin/$branch"
+          } else {
+            git switch -c $branch
+          }
+          if (Test-Path 'source010/current') { Remove-Item -Recurse -Force 'source010/current' }
+          New-Item -ItemType Directory -Force -Path 'source010/current' | Out-Null
+          Copy-Item -Recurse -Force 'kroniki-rpg-godot/*' 'source010/current/'
+          git add source010/current
+          if ((git status --porcelain source010/current).Length -gt 0) {
+            git commit -m 'build: materialize current 0.9 source for 0.10'
+            git push origin "HEAD:$branch" --force-with-lease
+          } else {
+            Write-Host 'Source branch already up to date.'
+          }
+          git switch main
+
       - name: Upload reconstructed source snapshot
         uses: actions/upload-artifact@v4
         with:
