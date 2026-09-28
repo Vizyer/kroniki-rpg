@@ -1,0 +1,51 @@
+name: Kroniki RPG 0.10 Core Tests
+
+on:
+  push:
+    branches: [main, "feat/**"]
+    paths:
+      - "rust-core/**"
+      - "godot/**"
+      - "AI_MODEL_PROFILE.json"
+      - ".github/workflows/rust-core-010.yml"
+  pull_request:
+    paths:
+      - "rust-core/**"
+      - "godot/**"
+      - "AI_MODEL_PROFILE.json"
+
+permissions:
+  contents: read
+
+jobs:
+  rust-core:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust-core
+      - name: Cargo check
+        working-directory: rust-core
+        run: cargo check
+      - name: Cargo test
+        working-directory: rust-core
+        run: cargo test
+
+  godot-parse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L -o godot.zip https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip
+          unzip -q godot.zip
+          mv Godot_v4.5.1-stable_linux.x86_64 godot-bin
+          chmod +x godot-bin
+      - name: Import and parse project
+        run: ./godot-bin --headless --path godot --editor --quit

@@ -1,0 +1,23 @@
+{
+  "default": {
+    "family": "Qwen3",
+    "size": "8B",
+    "quantization": "Q5_K_M",
+    "runtime": "llama.cpp",
+    "context_tokens": 14000,
+    "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+    "target_hardware": "16 GB RAM / 8 GB VRAM"
+  },
+  "high": {
+    "family": "Qwen3",
+    "size": "14B",
+    "quantization": "Q4_K_M",
+    "experimental": true
+  },
+  "policy": {
+    "model_is_not_world_authority": true,
+    "rust_validates_all_state_changes": true,
+    "fallback_must_keep_game_playable": true,
+    "future_model_download_is_optional_package": true
+  }
+}
