@@ -46,7 +46,7 @@ jobs:
 
       - name: Build direct 0.10 release
         shell: pwsh
-        run: ./scripts/build_windows_release.ps1 -Version '0.10.0-preview.1' -Channel 'preview' -Repository '${{ github.repository }}' -GodotVersion '4.5.1' -LlamaVersion 'v0.4.1'
+        run: ./scripts/build_windows_release.ps1 -Version '0.10.0-preview.1' -Channel 'preview' -Repository '${{ github.repository }}' -GodotVersion '4.5.1' -LlamaVersion 'b11228'
 
       - name: Verify outputs
         shell: pwsh
