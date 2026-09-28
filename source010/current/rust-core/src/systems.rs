@@ -280,7 +280,7 @@ pub fn crafting_craft(mut state:Value,p:&Value)->Value{
 fn magic_semantics(intent:&str)->(String,String,i64,i64){
     let s=intent.to_lowercase();
     let source=if s.contains("ogie")||s.contains("płomie")||s.contains("igni"){"fire"}else if s.contains("wod")||s.contains("lód")||s.contains("mróz"){"water"}else if s.contains("wiatr")||s.contains("powiet")||s.contains("aard"){"air"}else if s.contains("ziem")||s.contains("kamień")||s.contains("yrden"){"earth"}else{"chaos"};
-    let op=if s.contains("tarc")||s.contains("barier")||s.contains("quen"){"shield"}else if s.contains("odep")||s.contains("rzuc")||s.contains("pchn")||s.contains("aard"){"force"}else if s.contains("spal")||s.contains("podpal")||s.contains("igni"){"damage"}else if s.contains("spowol")||s.contains("uwię")||s.contains("yrden"){"control"}else if s.contains("wpły")||s.contains("uspok")||s.contains("axii"){"mind"}else{"shape"};
+    let op=if s.contains("wycz")||s.contains("bada")||s.contains("analiz")||s.contains("rezon")||s.contains("energia")||s.contains("pash iritor"){"sense"}else if s.contains("tarc")||s.contains("barier")||s.contains("quen"){"shield"}else if s.contains("odep")||s.contains("rzuc")||s.contains("pchn")||s.contains("aard"){"force"}else if s.contains("spal")||s.contains("podpal")||s.contains("igni"){"damage"}else if s.contains("spowol")||s.contains("uwię")||s.contains("yrden"){"control"}else if s.contains("wpły")||s.contains("uspok")||s.contains("axii"){"mind"}else{"shape"};
     let scale=if s.contains("cały")||s.contains("obszar")||s.contains("wielk")||s.contains("burz"){3}else if s.contains("kilka")||s.contains("grup")||s.contains("szerok"){2}else{1};
     let range=if s.contains("daleko")||s.contains("odleg")||s.contains("horyzont"){3}else if s.contains("dystans")||s.contains("kilkanaście")||s.contains("10 m"){2}else{1};
     (source.into(),op.into(),scale,range)
@@ -299,7 +299,8 @@ pub fn magic_cast(mut state:Value,p:&Value)->Value{
     let learned=p.get("learned").and_then(Value::as_bool).unwrap_or(false);
     let channel_seconds=p.get("channel_seconds").and_then(Value::as_i64).unwrap_or(0).max(0);
     let channel_bonus=(channel_seconds/4).min(3);
-    let mut difficulty=5+scale*2+range+pressure_penalty+(if hasty{2}else{0})-(if learned{2}else{0})-channel_bonus;
+    let sensing_bonus=if operation=="sense"{2}else{0};
+    let mut difficulty=5+scale*2+range+pressure_penalty+(if hasty{2}else{0})-(if learned{2}else{0})-channel_bonus-sensing_bonus;
     difficulty=difficulty.max(2);
     let mut cost=1+scale+range+(if operation=="shield"{1}else{0})-(if learned{1}else{0})-(channel_bonus/2); cost=cost.max(1);
     let mut instability=(scale-1)+(range-1)+(if source=="chaos"{1}else{0})+(if hasty{1}else{0})-(channel_bonus/2); instability=instability.max(0);
@@ -319,10 +320,11 @@ pub fn magic_cast(mut state:Value,p:&Value)->Value{
         "damage"=>json!({"damage":scale,"pressure":scale,"panic":scale>=2}),
         "control"=>json!({"zone_control":scale,"enemy_tempo":-1,"pressure":1}),
         "mind"=>json!({"enemy_tempo":-1,"interrupt":success,"deescalation":scale}),
+        "sense"=>json!({"knowledge_probe":success,"depth":clamp_i(1+(margin.max(0)/5),1,4),"interference":instability,"rule":"reveals_only_validated_information"}),
         _=>json!({"fictional_effect":true,"scale":scale}),
     };
     let backlash=if !success && instability>=2 {Some(match source.as_str(){"fire"=>"oparzenie / niekontrolowany żar","air"=>"uderzenie zwrotne / utrata równowagi","water"=>"wychłodzenie / skurcz","earth"=>"uraz przeciążeniowy","chaos"=>"zaburzenie percepcji / rezonans",_=>"przeciążenie"})}else{None};
-    json!({"ok":success,"state":state,"resolution":{"intent":intent,"source":source,"operation":operation,"scale":scale,"range":range,"cost":cost,"difficulty":difficulty,"roll":roll,"control":control,"margin":margin,"instability":instability,"cast_seconds":cast_seconds,"effects":effects,"backlash":backlash,"contract":"mechanics_first_narration_second"}})
+    json!({"ok":success,"state":state,"resolution":{"intent":intent,"source":source,"operation":operation,"scale":scale,"range":range,"cost":cost,"difficulty":difficulty,"roll":roll,"control":control,"margin":margin,"success":success,"instability":instability,"cast_seconds":cast_seconds,"effects":effects,"backlash":backlash,"contract":"mechanics_first_narration_second"}})
 }
 
 pub fn hunt_action(mut state:Value,p:&Value)->Value{
