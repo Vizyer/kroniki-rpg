@@ -53,6 +53,7 @@ try {
     }
     $cfg = Get-Content (Join-Path $install 'launcher-config.json') -Raw | ConvertFrom-Json
     if ($cfg.repository -ne $env:GITHUB_REPOSITORY -or $cfg.channel -ne 'preview') { throw 'Wrong updater repository/channel' }
+    Write-Host 'Installer completed. Checking Core and save persistence.'
     $h = Start-Core
     if ($h.core -ne '0.10.0' -or !$h.local_ai.runtime_present) { throw 'Wrong Core or missing local runtime' }
     $marker = "update-smoke-$env:GITHUB_RUN_ID"
@@ -83,9 +84,18 @@ try {
     $null = Start-Core
     Assert-Save $saved.id $marker
     Stop-Core
-    $game = Start-Process (Join-Path $install 'app/KronikiRPG.exe') -ArgumentList @('--headless','--quit-after','2') -Wait -PassThru
+    Write-Host 'Save survived restart, update and rollback. Starting Godot boot test.'
+    # Start-Process -Wait waits for the entire descendant tree on Windows.
+    # Core is a separate server; wait for the game itself, then shut Core down.
+    $game = Start-Process (Join-Path $install 'app/KronikiRPG.exe') -ArgumentList @('--headless','--quit-after','2') -PassThru
+    if (!$game.WaitForExit(30000)) {
+        Stop-Process -Id $game.Id -Force
+        throw 'Godot boot timed out'
+    }
+    $game.Refresh()
     if ($game.ExitCode -ne 0) { throw 'Godot boot failed' }
 } finally {
+    try { Invoke-RestMethod -Method Post 'http://127.0.0.1:17377/shutdown' -ContentType 'application/json' -Body '{}' -TimeoutSec 3 | Out-Null } catch {}
     if ($null -ne $script:coreProcess -and !$script:coreProcess.HasExited) { Stop-Process -Id $script:coreProcess.Id -Force }
     $env:LOCALAPPDATA = $previousLocalAppData
 }

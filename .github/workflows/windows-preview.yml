@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: windows-preview-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build-windows:
@@ -55,6 +55,7 @@ jobs:
         run: |
           ./scripts/build_windows_release.ps1 -Version $env:RELEASE_VERSION -Channel preview -Repository $env:GITHUB_REPOSITORY -SourceSha $env:GITHUB_SHA
       - name: Verify installer and update persistence
+        timeout-minutes: 5
         env:
           RELEASE_VERSION: ${{ steps.version.outputs.version }}
         run: ./scripts/test_windows_update.ps1 -Version $env:RELEASE_VERSION -SourceSha $env:GITHUB_SHA
