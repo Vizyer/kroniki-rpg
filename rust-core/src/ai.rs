@@ -93,13 +93,22 @@ Zwróć WYŁĄCZNIE JSON zgodny ze schematem: {interpretation,narration,suggesti
 pub async fn propose_with_model(config: &AiConfig, state: &GameState, action: &PlayerAction, resolution: &Resolution) -> Result<AiProposal, String> {
     if config.mode == "off" { return Err("AI disabled".into()); }
     let ctx = build_context(state, action, resolution);
+    let intent = crate::systems::infer_intent(&action.text);
+    let use_thinking = config.thinking && (
+        intent.magical ||
+        intent.kind == "combat_action" ||
+        !resolution.complications.is_empty() ||
+        state.director.tension >= 60
+    );
+    let mode_prefix = if use_thinking { "/think\n" } else { "/no_think\n" };
+    let user_content = format!("{}{}", mode_prefix, serde_json::to_string(&ctx).map_err(|e|e.to_string())?);
     let body = json!({
         "model": config.model,
         "temperature": 0.72,
         "response_format": {"type":"json_object"},
         "messages": [
             {"role":"system","content":system_prompt()},
-            {"role":"user","content":serde_json::to_string(&ctx).map_err(|e|e.to_string())?}
+            {"role":"user","content":user_content}
         ]
     });
     let client = Client::builder()
