@@ -3,6 +3,8 @@ name: Kroniki RPG - Windows Preview Build
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -106,6 +108,7 @@ jobs:
           retention-days: 30
 
       - name: Publish Preview GitHub Release
+        if: github.event_name != 'pull_request'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
