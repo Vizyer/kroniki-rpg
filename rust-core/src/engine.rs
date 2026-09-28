@@ -54,15 +54,26 @@ impl Engine {
             let _ = self.local_ai.ensure_started().await;
         }
 
-        let (mut proposal, source, ai_error) =
-            match propose_with_model(&cfg, &snapshot, &action, &resolution).await {
-                Ok(p) => (p, "model".to_string(), None),
-                Err(e) => (
-                    local_fallback(&snapshot, &action, &resolution),
-                    "local_fallback".to_string(),
-                    Some(e),
-                ),
-            };
+        let first = propose_with_model(&cfg, &snapshot, &action, &resolution).await;
+        let attempt = match first {
+            Ok(p) => Ok(p),
+            Err(first_error) => {
+                tokio::time::sleep(std::time::Duration::from_millis(250)).await;
+                match propose_with_model(&cfg, &snapshot, &action, &resolution).await {
+                    Ok(p) => Ok(p),
+                    Err(second_error) => Err(format!("{first_error}; retry: {second_error}")),
+                }
+            }
+        };
+
+        let (mut proposal, source, ai_error) = match attempt {
+            Ok(p) => (p, "model".to_string(), None),
+            Err(e) => (
+                local_fallback(&snapshot, &action, &resolution),
+                "local_fallback".to_string(),
+                Some(e),
+            ),
+        };
 
         proposal.interpretation = intent.clone();
         if proposal.patch.ops.is_empty() {
