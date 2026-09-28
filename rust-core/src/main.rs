@@ -65,7 +65,8 @@ async fn health(State(s): State<AppState>) -> Json<Value> {
 }
 
 async fn get_state(State(s): State<AppState>) -> Json<Value> {
-    Json(state_summary(&s.engine.state.read().await))
+    let guard = s.engine.state.read().await;
+    Json(state_summary(&guard))
 }
 
 async fn set_state(
@@ -96,10 +97,11 @@ async fn tick(
     Json(p): Json<TickReq>,
 ) -> Json<Value> {
     let events = s.engine.tick(p.minutes.max(0)).await;
+    let guard = s.engine.state.read().await;
     Json(json!({
         "ok":true,
         "events":events,
-        "state":state_summary(&s.engine.state.read().await)
+        "state":state_summary(&guard)
     }))
 }
 
