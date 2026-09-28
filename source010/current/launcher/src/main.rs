@@ -383,7 +383,7 @@ fn stop_orphan_core(){
 }
 
 fn download_file(url:&str,path:&Path,tx:&Sender<Msg>)->Result<()> {
-    let client=Client::builder().user_agent(format!("KronikiRPGLauncher/{LAUNCHER_VERSION}")).build()?;
+    let client=Client::builder().user_agent(format!("KronikiRPGLauncher/{LAUNCHER_VERSION}")).timeout(Duration::from_secs(12*60*60)).build()?;
     let mut response=client.get(url).send()?.error_for_status()?;
     let total=response.content_length().unwrap_or(0);
     let mut out=fs::File::create(path)?; let mut buf=[0u8;64*1024]; let mut got=0u64;
