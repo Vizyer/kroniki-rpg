@@ -33,6 +33,10 @@ impl Default for LauncherConfig {
 #[derive(Debug, Clone, Deserialize, Default)]
 struct AppVersion {
     version: String,
+    #[serde(default)]
+    channel: String,
+    #[serde(default)]
+    source_sha: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -55,6 +59,12 @@ struct UpdateManifest {
     channel: String,
     package_url: String,
     sha256: String,
+    #[serde(default)]
+    package_size: Option<u64>,
+    #[serde(default)]
+    source_sha: Option<String>,
+    #[serde(default)]
+    min_launcher_version: Option<String>,
 }
 
 #[derive(Default, Debug, Clone)]
@@ -85,7 +95,7 @@ impl LauncherApp {
         let config = read_json::<LauncherConfig>(&root.join("launcher-config.json")).unwrap_or_default();
         let installed_version = read_json::<AppVersion>(&root.join("app/version.json"))
             .map(|v| v.version)
-            .unwrap_or_else(|| "0.0.0".into());
+            .unwrap_or_else(|_| "0.0.0".into());
 
         Self {
             root,
@@ -167,11 +177,13 @@ impl LauncherApp {
 }
 
 impl eframe::App for LauncherApp {
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        ctx.request_repaint_after(Duration::from_millis(250));
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        ui.ctx().request_repaint_after(Duration::from_millis(250));
 
-        if let Ok(job) = self.update_job.lock() {
+        if let Ok(mut job) = self.update_job.lock() {
             if job.done {
+                job.done = false;
+                self.available = None;
                 if let Some(e) = &job.error {
                     self.status = format!("Aktualizacja nie powiodła się: {e}");
                 } else if !job.message.is_empty() {
@@ -182,8 +194,9 @@ impl eframe::App for LauncherApp {
                 }
             }
         }
-        if let Ok(job) = self.model_job.lock() {
+        if let Ok(mut job) = self.model_job.lock() {
             if job.done {
+                job.done = false;
                 if let Some(e) = &job.error {
                     self.status = format!("Instalacja MGAI nie powiodła się: {e}");
                 } else if !job.message.is_empty() {
@@ -192,7 +205,7 @@ impl eframe::App for LauncherApp {
             }
         }
 
-        egui::CentralPanel::default().show(ctx, |ui| {
+        egui::CentralPanel::default().show(ui, |ui| {
             ui.add_space(18.0);
             ui.heading("Kroniki RPG");
             ui.label("Autonomiczny Mistrz Gry • Godot + Rust Core");
@@ -296,28 +309,85 @@ fn client() -> Result<Client> {
         .build()?)
 }
 
-fn find_update(config: &LauncherConfig, installed: &str) -> Result<Option<UpdateManifest>> {
-    let url = format!("https://api.github.com/repos/{}/releases?per_page=20", config.repository);
-    let releases: Vec<GithubRelease> = client()?.get(url).send()?.error_for_status()?.json()?;
-    let installed = normalize_version(installed).unwrap_or_else(|| Version::new(0,0,0));
-    let mut candidates = Vec::new();
-
-    for release in releases {
-        if release.draft { continue; }
-        let is_preview = config.channel.eq_ignore_ascii_case("preview");
-        if !is_preview && release.prerelease { continue; }
-        if is_preview && !release.prerelease { continue; }
-
-        let Some(asset) = release.assets.iter().find(|a| a.name == "update-manifest.json") else { continue; };
-        let manifest: UpdateManifest = client()?.get(&asset.browser_download_url).send()?.error_for_status()?.json()?;
-        if !manifest.channel.eq_ignore_ascii_case(&config.channel) { continue; }
-        if let Some(v) = normalize_version(&manifest.version) {
-            if v > installed { candidates.push((v, manifest)); }
+fn validate_manifest(config: &LauncherConfig, release: &GithubRelease, manifest: &UpdateManifest) -> Result<()> {
+    let parsed = normalize_version(&manifest.version).ok_or_else(|| anyhow!("Nieprawidłowa wersja aktualizacji"))?;
+    if release.tag_name != format!("v{}", manifest.version)
+        || manifest.channel != config.channel
+        || release.prerelease != !parsed.pre.is_empty()
+        || (manifest.channel == "stable" && release.prerelease)
+    {
+        return Err(anyhow!("Manifest nie odpowiada wersji lub kanałowi wydania"));
+    }
+    let expected = format!("https://github.com/{}/releases/download/{}/KronikiRPG-win-x64.zip", config.repository, release.tag_name);
+    if manifest.package_url != expected || !release.assets.iter().any(|a| a.name == "KronikiRPG-win-x64.zip" && a.browser_download_url == expected) {
+        return Err(anyhow!("Paczka nie pochodzi z wybranego wydania GitHub"));
+    }
+    if manifest.sha256.len() != 64 || !manifest.sha256.bytes().all(|c| c.is_ascii_hexdigit()) {
+        return Err(anyhow!("Nieprawidłowa suma SHA-256"));
+    }
+    if let Some(min) = &manifest.min_launcher_version {
+        let min = normalize_version(min).ok_or_else(|| anyhow!("Nieprawidłowa wersja launchera"))?;
+        if min > Version::parse(env!("CARGO_PKG_VERSION"))? {
+            return Err(anyhow!("Pobierz nowy instalator: aktualizacja wymaga nowszego launchera"));
         }
     }
+    Ok(())
+}
 
-    candidates.sort_by(|a,b| b.0.cmp(&a.0));
-    Ok(candidates.into_iter().next().map(|(_,m)|m))
+fn find_update(config: &LauncherConfig, installed: &str) -> Result<Option<UpdateManifest>> {
+    if !matches!(config.channel.as_str(), "stable" | "preview") {
+        return Err(anyhow!("Nieznany kanał aktualizacji"));
+    }
+    let installed = normalize_version(installed).ok_or_else(|| anyhow!("Nieprawidłowa wersja zainstalowanej gry"))?;
+    let http = client()?;
+    let mut candidates = Vec::new();
+    let mut page = 1;
+    loop {
+        let url = format!("https://api.github.com/repos/{}/releases?per_page=100&page={page}", config.repository);
+        let releases: Vec<GithubRelease> = http.get(url).send()?.error_for_status()?.json()?;
+        let more = releases.len() == 100;
+        for release in releases {
+            if release.draft || release.prerelease != (config.channel == "preview") { continue; }
+            if let Some(v) = normalize_version(&release.tag_name) {
+                if v > installed { candidates.push((v, release)); }
+            }
+        }
+        if !more { break; }
+        page += 1;
+    }
+    candidates.sort_by(|a, b| b.0.cmp(&a.0));
+    for (_, release) in candidates {
+        let Some(asset) = release.assets.iter().find(|a| a.name == "update-manifest.json") else { continue; };
+        let expected = format!("https://github.com/{}/releases/download/{}/update-manifest.json", config.repository, release.tag_name);
+        if asset.browser_download_url != expected { return Err(anyhow!("Nieprawidłowy adres manifestu")); }
+        let manifest: UpdateManifest = http.get(&expected).send()?.error_for_status()?.json()?;
+        validate_manifest(config, &release, &manifest)?;
+        return Ok(Some(manifest));
+    }
+    Ok(None)
+}
+
+fn validate_staged_app(staging: &Path, manifest: &UpdateManifest) -> Result<()> {
+    for name in ["KronikiRPG.exe", "kroniki_core.exe", "version.json"] {
+        if !staging.join(name).is_file() { return Err(anyhow!("Niekompletna paczka: {name}")); }
+    }
+    let version: AppVersion = read_json(&staging.join("version.json"))?;
+    if version.version != manifest.version || version.channel != manifest.channel
+        || (manifest.source_sha.is_some() && version.source_sha != manifest.source_sha)
+    { return Err(anyhow!("Wersja paczki nie odpowiada manifestowi")); }
+    Ok(())
+}
+
+fn stop_core_for_update() -> Result<()> {
+    let http = Client::builder().timeout(Duration::from_secs(2)).build()?;
+    let health = "http://127.0.0.1:17377/health";
+    if http.get(health).send().is_err() { return Ok(()); }
+    http.post("http://127.0.0.1:17377/shutdown").json(&serde_json::json!({})).send()?.error_for_status()?;
+    for _ in 0..30 {
+        thread::sleep(Duration::from_millis(200));
+        if http.get(health).send().is_err() { return Ok(()); }
+    }
+    Err(anyhow!("Zamknij grę przed aktualizacją"))
 }
 
 fn normalize_version(s: &str) -> Option<Version> {
@@ -328,6 +398,9 @@ fn install_update(root: &Path, manifest: &UpdateManifest, job: &Arc<Mutex<JobSta
     let staging_zip = root.join(".update.zip");
     download_large_file(&manifest.package_url, &staging_zip, job)?;
 
+    if let Some(size) = manifest.package_size {
+        if fs::metadata(&staging_zip)?.len() != size { return Err(anyhow!("Niepełna paczka aktualizacji")); }
+    }
     set_job_message(job, "Weryfikacja SHA-256…", 0.92);
     let actual = sha256_file(&staging_zip)?;
     if !actual.eq_ignore_ascii_case(&manifest.sha256) {
@@ -343,6 +416,8 @@ fn install_update(root: &Path, manifest: &UpdateManifest, job: &Arc<Mutex<JobSta
 
     set_job_message(job, "Rozpakowywanie aktualizacji…", 0.95);
     extract_zip(&staging_zip, &staging)?;
+    validate_staged_app(&staging, manifest)?;
+    stop_core_for_update()?;
 
     let _ = fs::remove_dir_all(&rollback);
     if app.exists() {
@@ -364,7 +439,9 @@ fn install_update(root: &Path, manifest: &UpdateManifest, job: &Arc<Mutex<JobSta
 fn download_large_file(url: &str, target: &Path, job: &Arc<Mutex<JobState>>) -> Result<()> {
     if let Some(parent) = target.parent() { fs::create_dir_all(parent)?; }
     let part = target.with_extension("part");
-    let mut response = client()?.get(url).send()?.error_for_status()?;
+    let http = Client::builder().user_agent("KronikiRPG-Launcher/0.10")
+        .connect_timeout(Duration::from_secs(30)).timeout(Duration::from_secs(7200)).build()?;
+    let mut response = http.get(url).send()?.error_for_status()?;
     let total = response.content_length().unwrap_or(0);
     let mut out = File::create(&part)?;
     let mut buf = vec![0u8; 1024 * 1024];
@@ -386,7 +463,9 @@ fn download_large_file(url: &str, target: &Path, job: &Arc<Mutex<JobState>>) -> 
             }
         }
     }
-    out.flush()?;
+    if total > 0 && downloaded != total { return Err(anyhow!("Niepełne pobieranie")); }
+    out.sync_all()?;
+    drop(out);
     fs::rename(&part, target)?;
     Ok(())
 }
@@ -408,7 +487,7 @@ fn extract_zip(zip_path: &Path, dest: &Path) -> Result<()> {
     let mut zip = ZipArchive::new(file)?;
     for i in 0..zip.len() {
         let mut entry = zip.by_index(i)?;
-        let Some(name) = entry.enclosed_name().map(Path::to_path_buf) else { continue; };
+        let name = entry.enclosed_name().ok_or_else(|| anyhow!("Nieprawidłowa ścieżka w archiwum"))?;
         let out = dest.join(name);
         if entry.is_dir() {
             fs::create_dir_all(&out)?;
@@ -437,5 +516,54 @@ fn finish_job(job: &Arc<Mutex<JobState>>, result: Result<String>) {
             Ok(msg) => { j.message = msg; j.error = None; }
             Err(e) => j.error = Some(e.to_string()),
         }
+    }
+}
+
+
+#[cfg(test)]
+mod update_tests {
+    use super::*;
+    fn fixture() -> (LauncherConfig, GithubRelease, UpdateManifest) {
+        let cfg = LauncherConfig::default();
+        let version = "0.10.0-preview.20.1";
+        let url = format!("https://github.com/{}/releases/download/v{version}/KronikiRPG-win-x64.zip", cfg.repository);
+        let release = GithubRelease { tag_name: format!("v{version}"), prerelease: true, draft: false,
+            assets: vec![GithubAsset { name: "KronikiRPG-win-x64.zip".into(), browser_download_url: url.clone() }] };
+        let manifest = UpdateManifest { version: version.into(), channel: "preview".into(), package_url: url,
+            sha256: "a".repeat(64), package_size: Some(123), source_sha: Some("b".repeat(40)), min_launcher_version: Some("0.1.0".into()) };
+        (cfg, release, manifest)
+    }
+    #[test]
+    fn release_manifest_must_match_tag_channel_and_asset() {
+        let (cfg, mut release, mut m) = fixture();
+        assert!(validate_manifest(&cfg, &release, &m).is_ok());
+        m.package_url = "https://example.com/game.zip".into();
+        assert!(validate_manifest(&cfg, &release, &m).is_err());
+        m.package_url = release.assets[0].browser_download_url.clone();
+        release.tag_name = "v0.10.0-preview.19.1".into();
+        assert!(validate_manifest(&cfg, &release, &m).is_err());
+        release.tag_name = format!("v{}", m.version);
+        m.channel = "stable".into();
+        assert!(validate_manifest(&cfg, &release, &m).is_err());
+    }
+    #[test]
+    fn newer_build_has_higher_semver_precedence() {
+        assert!(normalize_version("0.10.0-preview.21.1") > normalize_version("0.10.0-preview.20.2"));
+    }
+    #[test]
+    fn staging_requires_binaries_and_matching_provenance() {
+        let (_, _, m) = fixture();
+        let dir = std::env::temp_dir().join(format!("kroniki-update-test-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).unwrap();
+        assert!(validate_staged_app(&dir, &m).is_err());
+        for name in ["KronikiRPG.exe", "kroniki_core.exe"] { fs::write(dir.join(name), b"test").unwrap(); }
+        let mut v = serde_json::json!({"version":m.version,"channel":m.channel,"source_sha":"wrong"});
+        fs::write(dir.join("version.json"), v.to_string()).unwrap();
+        assert!(validate_staged_app(&dir, &m).is_err());
+        v["source_sha"] = serde_json::json!(m.source_sha);
+        fs::write(dir.join("version.json"), v.to_string()).unwrap();
+        assert!(validate_staged_app(&dir, &m).is_ok());
+        fs::remove_dir_all(dir).unwrap();
     }
 }

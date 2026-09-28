@@ -1,2 +1,2 @@
-Kroniki RPG 0.8.1
-Godot + Rust Core + Release Pipeline
+Kroniki RPG 0.10.0-preview.1
+Narrator AI — Qwen3 local pipeline

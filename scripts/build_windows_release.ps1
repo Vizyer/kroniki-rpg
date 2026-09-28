@@ -1,12 +1,16 @@
 param(
-    [string]$Version = '0.10.0-preview.1',
-    [string]$Channel = 'preview',
+    [Parameter(Mandatory=$true)][string]$Version,
+    [ValidateSet('stable','preview')][string]$Channel = 'preview',
     [string]$Repository = 'Vizyer/kroniki-rpg',
     [string]$GodotVersion = '4.5.1',
-    [string]$LlamaVersion = 'b11228'
+    [string]$LlamaVersion = 'b11228',
+    [Parameter(Mandatory=$true)][ValidatePattern('^[0-9a-f]{40}$')][string]$SourceSha
 )
 
 $ErrorActionPreference = 'Stop'
+Set-StrictMode -Version Latest
+if ($Version -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$') { throw 'Invalid release version' }
+if (($Channel -eq 'preview') -ne $Version.Contains('-')) { throw 'Version and channel disagree' }
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $Build = Join-Path $Root 'build'
 $App = Join-Path $Build 'app'
@@ -63,7 +67,7 @@ $p = Start-Process -FilePath $Godot -WorkingDirectory $Project -ArgumentList @('
 if ($p.ExitCode -ne 0) { throw "Godot import failed: $($p.ExitCode)" }
 
 $GameExe = Join-Path $App 'KronikiRPG.exe'
-$p = Start-Process -FilePath $Godot -WorkingDirectory $Project -ArgumentList @('--headless','--export-release','Windows Desktop',$GameExe) -Wait -PassThru
+$p = Start-Process -FilePath $Godot -WorkingDirectory $Project -ArgumentList @('--headless','--export-release','"Windows Desktop"',('"' + $GameExe + '"')) -Wait -PassThru
 if ($p.ExitCode -ne 0) { throw "Godot export failed: $($p.ExitCode)" }
 if (!(Test-Path $GameExe)) { throw 'Godot export did not create KronikiRPG.exe' }
 
@@ -86,6 +90,7 @@ Step 'Write runtime manifests'
 @{
     version = $Version
     channel = $Channel
+    source_sha = $SourceSha
     core = '0.10.0'
     save_schema = 10
     ai_profile = 'Qwen3-8B-Q5_K_M'
@@ -110,6 +115,9 @@ $PackageUrl = "https://github.com/$Repository/releases/download/v$Version/Kronik
     url = $PackageUrl
     download_url = $PackageUrl
     sha256 = $Sha
+    package_size = (Get-Item $Zip).Length
+    source_sha = $SourceSha
+    min_launcher_version = '0.1.0'
     save_schema = 10
 } | ConvertTo-Json | Set-Content (Join-Path $Build 'update-manifest.json') -Encoding utf8
 
@@ -131,3 +139,4 @@ if (!(Test-Path (Join-Path $Build 'KronikiRPG-Setup.exe'))) { throw 'Installer o
 
 Step 'Done'
 Get-ChildItem $Build -Recurse | Select-Object FullName,Length
+

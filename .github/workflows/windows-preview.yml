@@ -8,98 +8,59 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: windows-preview-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build-windows:
-    runs-on: windows-latest
-    timeout-minutes: 45
+    runs-on: windows-2025
+    timeout-minutes: 50
+    defaults:
+      run:
+        shell: pwsh
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Rust cache
-        uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Select unique preview version
+        id: version
+        run: |
+          $base = (Select-String -Path rust-core/Cargo.toml -Pattern '^version = "([0-9.]+)"$').Matches[0].Groups[1].Value
+          $version = "$base-preview.$env:GITHUB_RUN_NUMBER.$env:GITHUB_RUN_ATTEMPT"
+          "version=$version" >> $env:GITHUB_OUTPUT
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
             rust-core
             launcher
-
-      - name: Test Core and launcher
-        shell: pwsh
+      - name: Test Core and updater
         run: |
-          cargo test --manifest-path rust-core/Cargo.toml
-          if ($LASTEXITCODE -ne 0) { throw 'Rust Core tests failed.' }
-          cargo check --manifest-path launcher/Cargo.toml
-          if ($LASTEXITCODE -ne 0) { throw 'Launcher check failed.' }
-
+          cargo test --manifest-path rust-core/Cargo.toml --all-targets
+          if ($LASTEXITCODE -ne 0) { throw 'Rust Core tests failed' }
+          cargo test --manifest-path launcher/Cargo.toml --all-targets
+          if ($LASTEXITCODE -ne 0) { throw 'Launcher tests failed' }
       - name: Install Inno Setup
-        shell: pwsh
         run: |
           choco install innosetup --yes --no-progress
-          $inno = @('C:\Program Files (x86)\Inno Setup 6','C:\Program Files\Inno Setup 6') | Where-Object { Test-Path (Join-Path $_ 'ISCC.exe') } | Select-Object -First 1
-          if (!$inno) { throw 'ISCC.exe not found.' }
-          $inno | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
-      - name: Build direct 0.10 release
-        shell: pwsh
-        run: ./scripts/build_windows_release.ps1 -Version '0.10.0-preview.1' -Channel 'preview' -Repository '${{ github.repository }}' -GodotVersion '4.5.1' -LlamaVersion 'b11228'
-
-      - name: Verify outputs
-        shell: pwsh
+          if ($LASTEXITCODE -ne 0) { throw 'Inno Setup installation failed' }
+      - name: Build committed source
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
         run: |
-          $required = @('build/KronikiRPG-Setup.exe','build/KronikiRPG-win-x64.zip','build/update-manifest.json','build/KronikiLauncher.exe','build/app/KronikiRPG.exe','build/app/kroniki_core.exe','build/app/ai-runtime/llama-server.exe','build/app/version.json')
-          foreach ($p in $required) { if (!(Test-Path $p)) { throw "Missing build output: $p" } }
-
-      - name: Smoke test installed Core and persistent save
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $installDir = Join-Path $env:RUNNER_TEMP 'KronikiRPG-Smoke'
-          $dataDir = Join-Path $env:LOCALAPPDATA 'KronikiRPG'
-          if (Test-Path $installDir) { Remove-Item -Recurse -Force $installDir }
-          if (Test-Path $dataDir) { Remove-Item -Recurse -Force $dataDir }
-          $p = Start-Process -FilePath (Resolve-Path 'build/KronikiRPG-Setup.exe') -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-',"/DIR=$installDir") -Wait -PassThru
-          if ($p.ExitCode -ne 0) { throw "Installer failed: $($p.ExitCode)" }
-          $core = Join-Path $installDir 'app/kroniki_core.exe'
-          $game = Join-Path $installDir 'app/KronikiRPG.exe'
-          $llama = Join-Path $installDir 'app/ai-runtime/llama-server.exe'
-          foreach ($p in @($core,$game,$llama)) { if (!(Test-Path $p)) { throw "Installed file missing: $p" } }
-          function Wait-Core { for ($i=0; $i -lt 80; $i++) { try { $h=Invoke-RestMethod -Uri 'http://127.0.0.1:17377/health' -TimeoutSec 1; if ($h.ok) { return $h } } catch {}; Start-Sleep -Milliseconds 250 }; throw 'Core timeout' }
-          $cp = Start-Process -FilePath $core -WorkingDirectory (Split-Path $core) -PassThru
-          $health = Wait-Core
-          if ($health.core -ne '0.10.0') { throw "Wrong core: $($health.core)" }
-          if (!$health.local_ai.runtime_present) { throw 'llama runtime not visible to Core' }
-          $saved=Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save' -ContentType 'application/json' -Body '{"name":"CI 0.10 smoke"}'
-          if (!$saved.ok -or !$saved.id) { throw 'Save failed' }
-          $saveId=[int64]$saved.id
-          $loaded=Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save/load' -ContentType 'application/json' -Body (@{id=$saveId}|ConvertTo-Json)
-          if (!$loaded.ok -or $loaded.state.schema -ne 10) { throw 'Load failed' }
-          Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/shutdown' -ContentType 'application/json' -Body '{}' | Out-Null
-          Start-Sleep -Seconds 1
-          $staging=Join-Path $env:RUNNER_TEMP 'KronikiRPG-Update-Staging'
-          if (Test-Path $staging) { Remove-Item -Recurse -Force $staging }
-          Expand-Archive 'build/KronikiRPG-win-x64.zip' $staging -Force
-          Remove-Item -Recurse -Force (Join-Path $installDir 'app')
-          Move-Item $staging (Join-Path $installDir 'app')
-          $core=Join-Path $installDir 'app/kroniki_core.exe'
-          $cp=Start-Process -FilePath $core -WorkingDirectory (Split-Path $core) -PassThru
-          $null=Wait-Core
-          $loaded2=Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save/load' -ContentType 'application/json' -Body (@{id=$saveId}|ConvertTo-Json)
-          if (!$loaded2.ok) { throw 'Save did not survive update' }
-          Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/shutdown' -ContentType 'application/json' -Body '{}' | Out-Null
-          Start-Sleep -Seconds 1
-          $gp=Start-Process -FilePath (Join-Path $installDir 'app/KronikiRPG.exe') -ArgumentList @('--headless','--quit-after','2') -Wait -PassThru
-          if ($gp.ExitCode -ne 0) { throw 'Godot boot failed' }
-          if (!(Test-Path (Join-Path $dataDir 'kroniki.sqlite3'))) { throw 'SQLite save DB missing' }
-
-      - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
+          ./scripts/build_windows_release.ps1 -Version $env:RELEASE_VERSION -Channel preview -Repository $env:GITHUB_REPOSITORY -SourceSha $env:GITHUB_SHA
+      - name: Verify installer and update persistence
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: ./scripts/test_windows_update.ps1 -Version $env:RELEASE_VERSION -SourceSha $env:GITHUB_SHA
+      - uses: actions/upload-artifact@v4
         with:
-          name: KronikiRPG-0.10.0-preview.1-Windows
+          name: windows-release-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             build/KronikiRPG-Setup.exe
             build/KronikiRPG-win-x64.zip
@@ -107,15 +68,41 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Publish Preview GitHub Release
-        if: github.event_name != 'pull_request'
-        shell: pwsh
+  publish:
+    needs: build-windows
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-release-${{ github.run_id }}-${{ github.run_attempt }}
+          path: release
+      - name: Publish complete GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_VERSION: ${{ needs.build-windows.outputs.version }}
+          SOURCE_SHA: ${{ github.sha }}
+        shell: bash
         run: |
-          $tag='v0.10.0-preview.1'
-          $repo='${{ github.repository }}'
-          $assets=@('build/KronikiRPG-Setup.exe','build/KronikiRPG-win-x64.zip','build/update-manifest.json')
-          gh release view $tag --repo $repo *> $null
-          if ($LASTEXITCODE -eq 0) { gh release upload $tag @assets --repo $repo --clobber } else { gh release create $tag @assets --repo $repo --target '${{ github.sha }}' --title 'Kroniki RPG 0.10.0-preview.1' --notes 'Autonomous AI-GM foundation, direct Rust/Godot build, bundled llama.cpp runtime, optional Qwen3-8B model.' --prerelease }
-          if ($LASTEXITCODE -ne 0) { throw 'Release publication failed' }
+          set -euo pipefail
+          cd release
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          m = json.loads(pathlib.Path('update-manifest.json').read_text(encoding='utf-8-sig'))
+          package = pathlib.Path('KronikiRPG-win-x64.zip')
+          assert m['version'] == os.environ['RELEASE_VERSION']
+          assert m['source_sha'] == os.environ['SOURCE_SHA']
+          assert m['channel'] == 'preview'
+          assert m['package_size'] == package.stat().st_size
+          assert m['sha256'] == hashlib.sha256(package.read_bytes()).hexdigest()
+          assert m['package_url'] == f"https://github.com/{os.environ['GH_REPO']}/releases/download/v{m['version']}/{package.name}"
+          PY
+          tag="v$RELEASE_VERSION"
+          # Draft hides incomplete uploads from launchers. Existing tags/assets are never overwritten.
+          gh release create "$tag" KronikiRPG-Setup.exe KronikiRPG-win-x64.zip update-manifest.json \
+            --target "$SOURCE_SHA" --title "Kroniki RPG $RELEASE_VERSION" \
+            --notes "Preview built and tested from commit $SOURCE_SHA." --prerelease --draft
+          gh release edit "$tag" --draft=false --prerelease --latest=false
