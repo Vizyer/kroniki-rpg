@@ -1,4 +1,5 @@
 use crate::domain::*;
+use crate::lore::{self, LoreQuery};
 use crate::systems::{default_mechanical_patch, infer_intent, magic_semantics};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -42,6 +43,17 @@ pub fn build_context(state: &GameState, action: &PlayerAction, resolution: &Reso
             "known_facts":n.knowledge.iter().take(8).collect::<Vec<_>>()
         })).collect();
     let quests: Vec<_> = state.world.quests.values().filter(|q| q.status == "active").take(8).collect();
+    let lore_facts = lore::starter_facts();
+    let lore_query = LoreQuery {
+        text: action.text.clone(),
+        year: state.world.clock.year,
+        month: state.world.clock.month,
+        day: state.world.clock.day,
+        character_only: false,
+        known_fact_ids: state.character.knowledge.iter().map(|k| k.id.clone()).collect(),
+        limit: 6,
+    };
+    let relevant_lore = lore::search(&lore_facts, &lore_query);
     json!({
         "rules": {
             "player_controls": ["intentions","speech","thoughts","attempts"],
@@ -60,6 +72,7 @@ pub fn build_context(state: &GameState, action: &PlayerAction, resolution: &Reso
         "director": &state.director,
         "active_npcs": active_npcs,
         "active_quests": quests,
+        "relevant_lore": relevant_lore,
         "player_known_facts": visible_facts,
         "action": action,
         "mechanical_resolution": resolution,
@@ -102,7 +115,7 @@ pub async fn propose_with_model(config: &AiConfig, state: &GameState, action: &P
     serde_json::from_str::<AiProposal>(content).map_err(|e|format!("Invalid AI proposal JSON: {e}"))
 }
 
-pub fn local_fallback(state: &GameState, action: &PlayerAction, resolution: &Resolution) -> AiProposal {
+pub fn local_fallback(_state: &GameState, action: &PlayerAction, resolution: &Resolution) -> AiProposal {
     let intent = infer_intent(&action.text);
     let mut patch = default_mechanical_patch(resolution);
     let outcome = match resolution.degree.as_str() {
