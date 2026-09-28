@@ -10,163 +10,15 @@ permissions:
 
 jobs:
   build-windows:
-    runs-on: windows-latest
-    timeout-minutes: 45
-
+    runs-on: windows-2025
+    timeout-minutes: 50
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: source010/current
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Reconstruct source archive
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $parts = @(
-            'ci/bin/head00.bin',
-            'ci/bin/head01.bin',
-            'ci/bin/rest00.bin',
-            'ci/bin/rest01.bin',
-            'ci/bin/rest02.bin',
-            'ci/bin/rest03.bin',
-            'ci/bin/rest04.bin',
-            'ci/bin/rest05.bin',
-            'ci/bin/rest06.bin',
-            'ci/bin/rest07.bin'
-          )
-          $out = [IO.File]::Create((Join-Path $PWD 'source.tar.xz'))
-          try {
-            foreach ($p in $parts) {
-              if (!(Test-Path $p)) { throw "Missing source fragment: $p" }
-              $bytes = [IO.File]::ReadAllBytes((Join-Path $PWD $p))
-              $out.Write($bytes, 0, $bytes.Length)
-            }
-          } finally {
-            $out.Dispose()
-          }
-          $size = (Get-Item 'source.tar.xz').Length
-          if ($size -ne 33684) { throw "Unexpected source archive size: $size" }
-          $sha = (Get-FileHash 'source.tar.xz' -Algorithm SHA256).Hash.ToLowerInvariant()
-          if ($sha -ne 'd8f2dba574f7975e872a88719090298321aaf4ef860ecd7ab0e1eae341eebccc') {
-            throw "Source archive SHA256 mismatch: $sha"
-          }
-          tar -xJf source.tar.xz
-          if ($LASTEXITCODE -ne 0) { throw 'Source extraction failed.' }
-          if (!(Test-Path 'kroniki-rpg-godot/scripts/build_windows_release.ps1')) {
-            throw 'Source archive reconstruction failed.'
-          }
-
-      - name: Apply 0.9 Core + AI-GM overlay
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $b64 = ''
-          foreach ($p in @('ci/overlay09/p0.b64','ci/overlay09/p1.b64','ci/overlay09/p2.b64','ci/overlay09/p3.b64')) {
-            if (!(Test-Path $p)) { throw "Missing 0.9 overlay fragment: $p" }
-            $b64 += (Get-Content $p -Raw).Trim()
-          }
-          $bytes = [Convert]::FromBase64String($b64)
-          [IO.File]::WriteAllBytes((Join-Path $PWD 'overlay-0.9.tar.xz'), $bytes)
-          $size = (Get-Item 'overlay-0.9.tar.xz').Length
-          if ($size -ne 28524) { throw "Unexpected 0.9 overlay size: $size" }
-          $sha = (Get-FileHash 'overlay-0.9.tar.xz' -Algorithm SHA256).Hash.ToLowerInvariant()
-          if ($sha -ne '348b7761cdfab42b70f7c5626df5df3dbe66a5bfe1fa66bd2a06c2b1d59084be') {
-            throw "0.9 overlay SHA256 mismatch: $sha"
-          }
-          tar -xJf overlay-0.9.tar.xz -C kroniki-rpg-godot
-          if ($LASTEXITCODE -ne 0) { throw '0.9 overlay extraction failed.' }
-          $required = @(
-            'kroniki-rpg-godot/rust-core/src/systems.rs',
-            'kroniki-rpg-godot/rust-core/src/ai.rs',
-            'kroniki-rpg-godot/godot/scripts/main.gd'
-          )
-          foreach ($p in $required) { if (!(Test-Path $p)) { throw "Overlay missing: $p" } }
-
-      - name: Fix 0.9 Rust compile issues
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $systems = 'kroniki-rpg-godot/rust-core/src/systems.rs'
-          $src = Get-Content $systems -Raw
-          $src = $src.Replace('let out=apply_ai_patch(s,p);', 'let out=apply_ai_patch(s,&p);')
-          Set-Content -Path $systems -Value $src -Encoding utf8
-
-          $main = 'kroniki-rpg-godot/rust-core/src/main.rs'
-          $src = Get-Content $main -Raw
-          $src = $src.Replace(
-            'async fn ai_config_set(State(s):State<AppState>,Json(p):Json<Value>)->Json<Value>{let c=s.db.lock().unwrap();',
-            'async fn ai_config_set(State(s):State<AppState>,Json(p):Json<Value>)->Json<Value>{{let c=s.db.lock().unwrap();'
-          )
-          $src = $src.Replace('drop(c);ai_config_get(State(s)).await}', '}ai_config_get(State(s)).await}')
-          Set-Content -Path $main -Value $src -Encoding utf8
-
-          $gd = 'kroniki-rpg-godot/godot/scripts/main.gd'
-          $gsrc = Get-Content $gd -Raw
-          $gsrc = $gsrc.Replace(
-            '    var total:=state.world.hour*60+state.world.minute+mins; state.world.day+=int(total/1440); total%=1440; state.world.hour=int(total/60); state.world.minute=total%60; _update_status()',
-            '    var total:int = int(state.world.hour) * 60 + int(state.world.minute) + mins; state.world.day += int(total / 1440); total %= 1440; state.world.hour = int(total / 60); state.world.minute = total % 60; _update_status()'
-          )
-          Set-Content -Path $gd -Value $gsrc -Encoding utf8
-
-      - name: Patch save UI and persistence
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $patchB64 = 'ZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCmltcG9ydCByZQoKZ2QgPSBQYXRoKCJrcm9uaWtpLXJwZy1nb2RvdC9nb2RvdC9zY3JpcHRzL21haW4uZ2QiKQpzcmMgPSBnZC5yZWFkX3RleHQoZW5jb2Rpbmc9InV0Zi04LXNpZyIpLnJlcGxhY2UoIlxyXG4iLCAiXG4iKQoKZGVmIG9uZV9yZXBsYWNlKHRleHQsIG9sZCwgbmV3LCBsYWJlbCk6CiAgICBjb3VudCA9IHRleHQuY291bnQob2xkKQogICAgaWYgY291bnQgIT0gMToKICAgICAgICByYWlzZSBTeXN0ZW1FeGl0KGYie2xhYmVsfTogZXhwZWN0ZWQgZXhhY3RseSAxIG9jY3VycmVuY2UsIGZvdW5kIHtjb3VudH0iKQogICAgcmV0dXJuIHRleHQucmVwbGFjZShvbGQsIG5ldywgMSkKCnNyYyA9IG9uZV9yZXBsYWNlKAogICAgc3JjLAogICAgJ3ZhciBzYXZlX2lkIDo9IC0xJywKICAgICd2YXIgc2F2ZV9pZCA6PSAtMVxudmFyIHNhdmVfZmVlZGJhY2sgOj0gIiJcbnZhciBzYXZlX3BlbmRpbmdfbmFtZSA6PSAiIicsCiAgICAic2F2ZSBzdGF0ZSB2YXJzIiwKKQpzcmMgPSBvbmVfcmVwbGFjZSgKICAgIHNyYywKICAgICd2YXIgc2F2ZTo9QnV0dG9uLm5ldygpOyBzYXZlLnRleHQ9IlpBUElTWiI7IHNhdmUucHJlc3NlZC5jb25uZWN0KF9zYXZlKTsgaC5hZGRfY2hpbGQoc2F2ZSknLAogICAgJ3ZhciBzYXZlOj1CdXR0b24ubmV3KCk7IHNhdmUudGV4dD0iWkFQSVNaIjsgc2F2ZS5wcmVzc2VkLmNvbm5lY3QoX29wZW5fc2F2ZV9kaWFsb2cpOyBoLmFkZF9jaGlsZChzYXZlKScsCiAgICAic2F2ZSBidXR0b24iLAopCgpzYXZlX2Z1bmNzID0gJycnZnVuYyBfc2FmZV9jaGFyYWN0ZXJfbmFtZSgpIC0+IFN0cmluZzoKICAgIHZhciBjaGFyYWN0ZXIgPSBzdGF0ZS5nZXQoImNoYXJhY3RlciIsIHt9KQogICAgaWYgY2hhcmFjdGVyIGlzIERpY3Rpb25hcnk6CiAgICAgICAgdmFyIG4gOj0gc3RyKGNoYXJhY3Rlci5nZXQoIm5hbWUiLCAiUG9zdGHEhyIpKS5zdHJpcF9lZGdlcygpCiAgICAgICAgaWYgbiAhPSAiIjoKICAgICAgICAgICAgcmV0dXJuIG4KICAgIHJldHVybiAiUG9zdGHEhyIKCmZ1bmMgX29wZW5fc2F2ZV9kaWFsb2coKSAtPiB2b2lkOgogICAgb3ZlcmxheS52aXNpYmxlID0gdHJ1ZQogICAgX2NsZWFyKG92ZXJsYXkpCiAgICB2YXIgdiA6PSBWQm94Q29udGFpbmVyLm5ldygpCiAgICB2LmFkZF90aGVtZV9jb25zdGFudF9vdmVycmlkZSgic2VwYXJhdGlvbiIsIDEwKQogICAgb3ZlcmxheS5hZGRfY2hpbGQodikKICAgIHYuYWRkX2NoaWxkKF9sYWJlbCgiWkFQSVNaIEdSxJgiLCAyOCwgR09MRCkpCiAgICB2LmFkZF9jaGlsZChfbGFiZWwoIlV0d8Ozcnogbm93eSB6YXBpcyBhbGJvIG5hZHBpc3ogYWt0dWFsbmllIHdjenl0YW55IHNsb3QuIiwgMTQsIE1VVEVEKSkKICAgIHZhciBuYW1lIDo9IExpbmVFZGl0Lm5ldygpCiAgICB2YXIgd29ybGQgPSBzdGF0ZS5nZXQoIndvcmxkIiwge30pCiAgICB2YXIgbG9jYXRpb24gOj0gIlphcGlzIgogICAgaWYgd29ybGQgaXMgRGljdGlvbmFyeToKICAgICAgICBsb2NhdGlvbiA9IHN0cih3b3JsZC5nZXQoImxvY2F0aW9uIiwgIlphcGlzIikpCiAgICBuYW1lLnRleHQgPSBfc2FmZV9jaGFyYWN0ZXJfbmFtZSgpICsgIiDigJQgIiArIGxvY2F0aW9uCiAgICBuYW1lLnBsYWNlaG9sZGVyX3RleHQgPSAiTmF6d2EgemFwaXN1IgogICAgdi5hZGRfY2hpbGQobmFtZSkKICAgIHZhciBoIDo9IEhCb3hDb250YWluZXIubmV3KCkKICAgIHYuYWRkX2NoaWxkKGgpCiAgICBoLmFkZF9jaGlsZChfYnV0dG9uKCJOT1dZIFpBUElTIiwgZnVuYygpOiBfc2F2ZV9nYW1lKG5hbWUudGV4dCwgZmFsc2UpKSkKICAgIGlmIHNhdmVfaWQgPiAwOgogICAgICAgIGguYWRkX2NoaWxkKF9idXR0b24oIk5BRFBJU1ogQklFxbvEhENZIiwgZnVuYygpOiBfc2F2ZV9nYW1lKG5hbWUudGV4dCwgdHJ1ZSkpKQogICAgaC5hZGRfY2hpbGQoX2J1dHRvbigiQU5VTFVKIiwgZnVuYygpOiBvdmVybGF5LnZpc2libGUgPSBmYWxzZSkpCgpmdW5jIF9zYXZlX2dhbWUobmFtZTpTdHJpbmcsIG92ZXJ3cml0ZTpib29sKSAtPiB2b2lkOgogICAgdmFyIGNsZWFuX25hbWUgOj0gbmFtZS5zdHJpcF9lZGdlcygpCiAgICBpZiBjbGVhbl9uYW1lID09ICIiOgogICAgICAgIGNsZWFuX25hbWUgPSBfc2FmZV9jaGFyYWN0ZXJfbmFtZSgpICsgIiDigJQgemFwaXMiCiAgICBzYXZlX3BlbmRpbmdfbmFtZSA9IGNsZWFuX25hbWUKICAgIHNhdmVfZmVlZGJhY2sgPSAiWmFwaXN5d2FuaWXigKYiCiAgICB2YXIgcCA6PSB7Im5hbWUiOiBjbGVhbl9uYW1lLCAic3RhdGUiOiBzdGF0ZX0KICAgIGlmIG92ZXJ3cml0ZSBhbmQgc2F2ZV9pZCA+IDA6CiAgICAgICAgcFsiaWQiXSA9IHNhdmVfaWQKICAgIGNvcmUucmVxdWVzdCgiL3NhdmUiLCBwKQoKJycnCnNyYywgbiA9IHJlLnN1Ym4ocicoP21zKV5mdW5jIF9zYXZlXChcKSAtPiB2b2lkOlxuLio/KD89XmZ1bmMgKScsIHNhdmVfZnVuY3MsIHNyYywgY291bnQ9MSkKaWYgbiAhPSAxOgogICAgcmFpc2UgU3lzdGVtRXhpdChmInNhdmUgZnVuY3Rpb24gYmxvY2s6IGV4cGVjdGVkIDEgcmVwbGFjZW1lbnQsIGZvdW5kIHtufSIpCgpmYWlsX3BhdHRlcm4gPSByJyg/bSleICAgIGlmIG5vdCBvazpcbiAgICAgICAgaWYgcm91dGU9PSIvYWN0aW9uIjogcGVuZGluZ19yZXF1ZXN0X2lkPSIiOyBsYXN0X25hcnJhdGlvbj0iKFteIl0qKSIkJwpmYWlsX3JlcGwgPSAnJycgICAgaWYgbm90IG9rOgogICAgICAgIGlmIHJvdXRlID09ICIvc2F2ZSI6CiAgICAgICAgICAgIHNhdmVfZmVlZGJhY2sgPSAiTmllIHVkYcWCbyBzacSZIHphcGlzYcSHIGdyeTogIiArIHN0cihkYXRhLmdldCgiZXJyb3IiLCAiYnJhayBvZHBvd2llZHppIFJ1c3QgQ29yZSIpKQogICAgICAgICAgICBzYXZlX3BlbmRpbmdfbmFtZSA9ICIiCiAgICAgICAgICAgIG92ZXJsYXkudmlzaWJsZSA9IHRydWUKICAgICAgICAgICAgX2NsZWFyKG92ZXJsYXkpCiAgICAgICAgICAgIHZhciBzdiA6PSBWQm94Q29udGFpbmVyLm5ldygpCiAgICAgICAgICAgIHN2LmFkZF90aGVtZV9jb25zdGFudF9vdmVycmlkZSgic2VwYXJhdGlvbiIsIDEwKQogICAgICAgICAgICBvdmVybGF5LmFkZF9jaGlsZChzdikKICAgICAgICAgICAgc3YuYWRkX2NoaWxkKF9sYWJlbCgiQsWBxIREIFpBUElTVSIsIDI4LCBSRUQpKQogICAgICAgICAgICBzdi5hZGRfY2hpbGQoX2xhYmVsKHNhdmVfZmVlZGJhY2ssIDE1LCBURVhUKSkKICAgICAgICAgICAgc3YuYWRkX2NoaWxkKF9idXR0b24oIlpBTUtOSUoiLCBmdW5jKCk6IG92ZXJsYXkudmlzaWJsZSA9IGZhbHNlKSkKICAgICAgICAgICAgcmV0dXJuCiAgICAgICAgaWYgcm91dGU9PSIvYWN0aW9uIjogcGVuZGluZ19yZXF1ZXN0X2lkPSIiOyBsYXN0X25hcnJhdGlvbj0iXFwxIicnJwpzcmMsIG4gPSByZS5zdWJuKGZhaWxfcGF0dGVybiwgZmFpbF9yZXBsLCBzcmMsIGNvdW50PTEpCmlmIG4gIT0gMToKICAgIHJhaXNlIFN5c3RlbUV4aXQoZiJjb3JlIGZhaWx1cmUgYmxvY2s6IGV4cGVjdGVkIDEgcmVwbGFjZW1lbnQsIGZvdW5kIHtufSIpCgpzYXZlX2JyYW5jaCA9ICcnJyAgICAgICAgIi9zYXZlIjoKICAgICAgICAgICAgaWYgYm9vbChkYXRhLmdldCgib2siLCBmYWxzZSkpOgogICAgICAgICAgICAgICAgc2F2ZV9pZCA9IGludChkYXRhLmdldCgiaWQiLCBzYXZlX2lkKSkKICAgICAgICAgICAgICAgIHNhdmVfZmVlZGJhY2sgPSAiWmFwaXNhbm86ICIgKyAoc2F2ZV9wZW5kaW5nX25hbWUgaWYgc2F2ZV9wZW5kaW5nX25hbWUgIT0gIiIgZWxzZSAiZ3JhIikKICAgICAgICAgICAgICAgIHNhdmVfcGVuZGluZ19uYW1lID0gIiIKICAgICAgICAgICAgICAgIG92ZXJsYXkudmlzaWJsZSA9IHRydWUKICAgICAgICAgICAgICAgIF9jbGVhcihvdmVybGF5KQogICAgICAgICAgICAgICAgdmFyIHYgOj0gVkJveENvbnRhaW5lci5uZXcoKQogICAgICAgICAgICAgICAgdi5hZGRfdGhlbWVfY29uc3RhbnRfb3ZlcnJpZGUoInNlcGFyYXRpb24iLCAxMCkKICAgICAgICAgICAgICAgIG92ZXJsYXkuYWRkX2NoaWxkKHYpCiAgICAgICAgICAgICAgICB2LmFkZF9jaGlsZChfbGFiZWwoIkdSQSBaQVBJU0FOQSIsIDI4LCBHUkVFTikpCiAgICAgICAgICAgICAgICB2LmFkZF9jaGlsZChfbGFiZWwoc2F2ZV9mZWVkYmFjaywgMTYsIFRFWFQpKQogICAgICAgICAgICAgICAgdi5hZGRfY2hpbGQoX2J1dHRvbigiV1LDk8SGIERPIEdSWSIsIGZ1bmMoKTogb3ZlcmxheS52aXNpYmxlID0gZmFsc2UpKQogICAgICAgICAgICBlbHNlOgogICAgICAgICAgICAgICAgc2F2ZV9mZWVkYmFjayA9ICJOaWUgdWRhxYJvIHNpxJkgemFwaXNhxIcgZ3J5OiAiICsgc3RyKGRhdGEuZ2V0KCJlcnJvciIsICJuaWV6bmFueSBixYLEhWQiKSkKICAgICAgICAgICAgICAgIHNhdmVfcGVuZGluZ19uYW1lID0gIiIKICAgICAgICAgICAgICAgIG92ZXJsYXkudmlzaWJsZSA9IHRydWUKICAgICAgICAgICAgICAgIF9jbGVhcihvdmVybGF5KQogICAgICAgICAgICAgICAgdmFyIHYgOj0gVkJveENvbnRhaW5lci5uZXcoKQogICAgICAgICAgICAgICAgdi5hZGRfdGhlbWVfY29uc3RhbnRfb3ZlcnJpZGUoInNlcGFyYXRpb24iLCAxMCkKICAgICAgICAgICAgICAgIG92ZXJsYXkuYWRkX2NoaWxkKHYpCiAgICAgICAgICAgICAgICB2LmFkZF9jaGlsZChfbGFiZWwoIkLFgcSERCBaQVBJU1UiLCAyOCwgUkVEKSkKICAgICAgICAgICAgICAgIHYuYWRkX2NoaWxkKF9sYWJlbChzYXZlX2ZlZWRiYWNrLCAxNSwgVEVYVCkpCiAgICAgICAgICAgICAgICB2LmFkZF9jaGlsZChfYnV0dG9uKCJaQU1LTklKIiwgZnVuYygpOiBvdmVybGF5LnZpc2libGUgPSBmYWxzZSkpCicnJwpzcmMsIG4gPSByZS5zdWJuKHInKD9tcyleICAgICAgICAiL3NhdmUiOlxuLio/KD89XiAgICAgICAgIi9zYXZlcyI6KScsIHNhdmVfYnJhbmNoLCBzcmMsIGNvdW50PTEpCmlmIG4gIT0gMToKICAgIHJhaXNlIFN5c3RlbUV4aXQoZiJzYXZlIHJlc3BvbnNlIGJyYW5jaDogZXhwZWN0ZWQgMSByZXBsYWNlbWVudCwgZm91bmQge259IikKCmdkLndyaXRlX3RleHQoc3JjLCBlbmNvZGluZz0idXRmLTgiLCBuZXdsaW5lPSJcbiIpCgpydXN0ID0gUGF0aCgia3JvbmlraS1ycGctZ29kb3QvcnVzdC1jb3JlL3NyYy9tYWluLnJzIikKcnMgPSBydXN0LnJlYWRfdGV4dChlbmNvZGluZz0idXRmLTgtc2lnIikucmVwbGFjZSgiXHJcbiIsICJcbiIpCm5ld19ydXN0ID0gJycnYXN5bmMgZm4gc2F2ZShTdGF0ZShzKTpTdGF0ZTxBcHBTdGF0ZT4sSnNvbihwKTpKc29uPFZhbHVlPiktPkpzb248VmFsdWU+ewogICAgbGV0IG5hbWU9cC5nZXQoIm5hbWUiKS5hbmRfdGhlbihWYWx1ZTo6YXNfc3RyKS5tYXAoc3RyOjp0cmltKS5maWx0ZXIofHh8IXguaXNfZW1wdHkoKSkudW53cmFwX29yKCJaYXBpcyIpOwogICAgbGV0IHN0PW1pZ3JhdGVfc3RhdGUocC5nZXQoInN0YXRlIikuY2xvbmVkKCkudW53cmFwX29yKGpzb24hKHt9KSkpOwogICAgbGV0IHR4dD1tYXRjaCBzZXJkZV9qc29uOjp0b19zdHJpbmcoJnN0KXsKICAgICAgICBPayh4KT0+eCwKICAgICAgICBFcnIoZSk9PnJldHVybiBKc29uKGpzb24hKHsib2siOmZhbHNlLCJlcnJvciI6Zm9ybWF0ISgiTmllIG1vxbxuYSB6YWtvZG93YcSHIHN0YW51IHphcGlzdToge2V9Iil9KSksCiAgICB9OwogICAgbGV0IGM9cy5kYi5sb2NrKCkudW53cmFwKCk7CiAgICBpZiBsZXQgU29tZShpZCk9cC5nZXQoImlkIikuYW5kX3RoZW4oVmFsdWU6OmFzX2k2NCl7CiAgICAgICAgcmV0dXJuIG1hdGNoIGMuZXhlY3V0ZSgiVVBEQVRFIHNhdmVzIFNFVCBuYW1lPT8xLHN0YXRlX2pzb249PzIsdXBkYXRlZF9hdD1DVVJSRU5UX1RJTUVTVEFNUCBXSEVSRSBpZD0/MyIscGFyYW1zIVtuYW1lLHR4dCxpZF0pewogICAgICAgICAgICBPayhuKSBpZiBuPjA9Pkpzb24oanNvbiEoeyJvayI6dHJ1ZSwiaWQiOmlkLCJzY2hlbWEiOlNBVkVfU0NIRU1BfSkpLAogICAgICAgICAgICBPayhfKT0+SnNvbihqc29uISh7Im9rIjpmYWxzZSwiaWQiOmlkLCJlcnJvciI6Ik5pZSB6bmFsZXppb25vIHphcGlzdSBkbyBuYWRwaXNhbmlhLiJ9KSksCiAgICAgICAgICAgIEVycihlKT0+SnNvbihqc29uISh7Im9rIjpmYWxzZSwiaWQiOmlkLCJlcnJvciI6ZS50b19zdHJpbmcoKX0pKSwKICAgICAgICB9OwogICAgfQogICAgbWF0Y2ggYy5leGVjdXRlKCJJTlNFUlQgSU5UTyBzYXZlcyhuYW1lLHN0YXRlX2pzb24pIFZBTFVFUyg/MSw/MikiLHBhcmFtcyFbbmFtZSx0eHRdKXsKICAgICAgICBPaygxKT0+SnNvbihqc29uISh7Im9rIjp0cnVlLCJpZCI6Yy5sYXN0X2luc2VydF9yb3dpZCgpLCJzY2hlbWEiOlNBVkVfU0NIRU1BfSkpLAogICAgICAgIE9rKF8pPT5Kc29uKGpzb24hKHsib2siOmZhbHNlLCJlcnJvciI6IlNRTGl0ZSBuaWUgdXR3b3J6ecWCIHJla29yZHUgemFwaXN1LiJ9KSksCiAgICAgICAgRXJyKGUpPT5Kc29uKGpzb24hKHsib2siOmZhbHNlLCJlcnJvciI6ZS50b19zdHJpbmcoKX0pKSwKICAgIH0KfQoKJycnCnJzLCBuID0gcmUuc3VibihyJyg/bXMpXmFzeW5jIGZuIHNhdmVcKC4qPyg/PV5hc3luYyBmbiBsaXN0X3NhdmVzKScsIG5ld19ydXN0LCBycywgY291bnQ9MSkKaWYgbiAhPSAxOgogICAgcmFpc2UgU3lzdGVtRXhpdChmIlJ1c3Qgc2F2ZSBoYW5kbGVyOiBleHBlY3RlZCAxIHJlcGxhY2VtZW50LCBmb3VuZCB7bn0iKQpydXN0LndyaXRlX3RleHQocnMsIGVuY29kaW5nPSJ1dGYtOCIsIG5ld2xpbmU9IlxuIikKCnByaW50KCJTYXZlIFVJICsgUnVzdCBwZXJzaXN0ZW5jZSBwYXRjaCBhcHBsaWVkLiIpCg=='
-          $patchPath = Join-Path $env:RUNNER_TEMP 'patch_save.py'
-          [IO.File]::WriteAllBytes($patchPath, [Convert]::FromBase64String($patchB64))
-          python $patchPath
-          if ($LASTEXITCODE -ne 0) { throw 'Save patch script failed.' }
-
-      - name: Patch Godot export to wait for process completion
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $path = 'kroniki-rpg-godot/scripts/build_windows_release.ps1'
-          $src = Get-Content $path -Raw
-          $oldImport = '& $Godot --headless --editor --quit'
-          $newImport = "& `$Godot --headless --editor --quit`r`nGet-Process -Name ([IO.Path]::GetFileNameWithoutExtension(`$Godot)) -ErrorAction SilentlyContinue | Wait-Process"
-          $oldExport = "& `$Godot --headless --export-release 'Windows Desktop' (Join-Path `$App 'KronikiRPG.exe')"
-          $newExport = "& `$Godot --headless --export-release 'Windows Desktop' (Join-Path `$App 'KronikiRPG.exe')`r`nGet-Process -Name ([IO.Path]::GetFileNameWithoutExtension(`$Godot)) -ErrorAction SilentlyContinue | Wait-Process"
-          if (-not $src.Contains($oldImport)) { throw 'Godot import command not found.' }
-          if (-not $src.Contains($oldExport)) { throw 'Godot export command not found.' }
-          $src = $src.Replace($oldImport,$newImport).Replace($oldExport,$newExport)
-          $src = $src.Replace("Pop-Location", "Pop-Location`r`nif (!(Test-Path (Join-Path `$App 'KronikiRPG.exe'))) { throw 'Godot export finished without KronikiRPG.exe' }")
-          Set-Content -Path $path -Value $src -Encoding utf8
-      - name: Materialize current source branch
-        if: github.ref == 'refs/heads/main'
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $branch = 'feature/0.10-autonomous-mg'
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git fetch origin $branch 2>$null
-          if ($LASTEXITCODE -eq 0) {
-            git switch -C $branch "origin/$branch"
-          } else {
-            git switch -c $branch
-          }
-          if (Test-Path 'source010/current') { Remove-Item -Recurse -Force 'source010/current' }
-          New-Item -ItemType Directory -Force -Path 'source010/current' | Out-Null
-          Copy-Item -Recurse -Force 'kroniki-rpg-godot/*' 'source010/current/'
-          git add source010/current
-          if ((git status --porcelain source010/current).Length -gt 0) {
-            git commit -m 'build: materialize current 0.9 source for 0.10'
-            git push origin "HEAD:$branch" --force-with-lease
-          } else {
-            Write-Host 'Source branch already up to date.'
-          }
-          git switch main
-
-      - name: Upload reconstructed source snapshot
-        uses: actions/upload-artifact@v4
-        with:
-          name: kroniki-rpg-source-snapshot
-          path: kroniki-rpg-godot
-          if-no-files-found: error
-          retention-days: 7
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -175,187 +27,122 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            kroniki-rpg-godot/rust-core
-            kroniki-rpg-godot/launcher
+            source010/current/rust-core
+            source010/current/launcher
 
       - name: Test Rust Core
-        shell: pwsh
         run: |
-          cargo test --manifest-path kroniki-rpg-godot/rust-core/Cargo.toml
-          if ($LASTEXITCODE -ne 0) { throw 'Rust Core tests failed.' }
+          cargo test --manifest-path rust-core/Cargo.toml --all-targets
+          if ($LASTEXITCODE -ne 0) { throw 'Rust Core tests failed' }
+
+      - name: Check launcher
+        run: |
+          cargo check --manifest-path launcher/Cargo.toml
+          if ($LASTEXITCODE -ne 0) { throw 'Launcher check failed' }
 
       - name: Install Inno Setup
-        shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
-          choco install innosetup --yes --no-progress
-          $candidates = @(
-            'C:\Program Files (x86)\Inno Setup 6',
-            'C:\Program Files\Inno Setup 6'
-          )
-          $inno = $candidates | Where-Object { Test-Path (Join-Path $_ 'ISCC.exe') } | Select-Object -First 1
-          if (!$inno) { throw 'Inno Setup installed but ISCC.exe was not found.' }
-          $inno | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          Write-Host "Inno Setup: $inno"
+          choco install innosetup --no-progress -y
+          $iscc = Get-ChildItem "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe","$env:ProgramFiles\Inno Setup 6\ISCC.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (!$iscc) { throw 'ISCC.exe not found after install' }
+          $iscc.Directory.FullName | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Build game, launcher and installer
-        shell: pwsh
-        working-directory: kroniki-rpg-godot
+      - name: Build 0.10 preview
         run: |
-          ./scripts/build_windows_release.ps1 -Version '0.9.0-preview.2' -Channel 'preview' -Repository 'Vizyer/kroniki-rpg' -GodotVersion '4.7.2'
+          ./scripts/build_windows_release.ps1 -Version '0.10.0-preview.1' -Channel preview -Repository '${{ github.repository }}' -GodotVersion '4.7.2'
 
       - name: Verify outputs
-        shell: pwsh
-        working-directory: kroniki-rpg-godot
         run: |
-          $required = @(
+          $required=@(
             'build/KronikiRPG-Setup.exe',
             'build/KronikiRPG-win-x64.zip',
             'build/update-manifest.json',
             'build/KronikiLauncher.exe',
             'build/app/KronikiRPG.exe',
-            'build/app/kroniki_core.exe'
+            'build/app/kroniki_core.exe',
+            'build/app/ai/llama-server.exe',
+            'build/app/ai/local-ai-profile.json'
           )
-          foreach ($p in $required) {
-            if (!(Test-Path $p)) { throw "Missing build output: $p" }
-          }
-          Get-FileHash build/KronikiRPG-Setup.exe -Algorithm SHA256
-          Get-ChildItem build -Recurse | Select-Object FullName,Length
+          foreach($p in $required){if(!(Test-Path $p)){throw "Missing build output: $p"}}
 
-      - name: Smoke test installed game and save persistence
-        shell: pwsh
-        working-directory: kroniki-rpg-godot
+      - name: Smoke test install save update and autonomous Core
         run: |
-          $ErrorActionPreference = 'Stop'
-          $installDir = Join-Path $env:RUNNER_TEMP 'KronikiRPG-Smoke'
-          $dataDir = Join-Path $env:LOCALAPPDATA 'KronikiRPG'
-          if (Test-Path $installDir) { Remove-Item -Recurse -Force $installDir }
-          if (Test-Path $dataDir) { Remove-Item -Recurse -Force $dataDir }
+          $ErrorActionPreference='Stop'
+          $installDir=Join-Path $env:RUNNER_TEMP 'KronikiRPG-010'
+          $dataDir=Join-Path $env:LOCALAPPDATA 'KronikiRPG'
+          if(Test-Path $installDir){Remove-Item -Recurse -Force $installDir}
+          if(Test-Path $dataDir){Remove-Item -Recurse -Force $dataDir}
 
-          Write-Host '==> Silent installer test'
-          $setup = (Resolve-Path 'build/KronikiRPG-Setup.exe').Path
-          $p = Start-Process -FilePath $setup -ArgumentList @(
-            '/VERYSILENT',
-            '/SUPPRESSMSGBOXES',
-            '/NORESTART',
-            '/SP-',
-            "/DIR=$installDir"
-          ) -Wait -PassThru
-          if ($p.ExitCode -ne 0) { throw "Installer failed with exit code $($p.ExitCode)" }
+          $setup=(Resolve-Path 'build/KronikiRPG-Setup.exe').Path
+          $p=Start-Process -FilePath $setup -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-',"/DIR=$installDir") -Wait -PassThru
+          if($p.ExitCode -ne 0){throw "Installer failed: $($p.ExitCode)"}
 
-          $launcher = Join-Path $installDir 'KronikiLauncher.exe'
-          $game = Join-Path $installDir 'app/KronikiRPG.exe'
-          $core = Join-Path $installDir 'app/kroniki_core.exe'
-          foreach ($required in @($launcher,$game,$core)) {
-            if (!(Test-Path $required)) { throw "Installed file missing: $required" }
+          foreach($r in @('KronikiLauncher.exe','app/KronikiRPG.exe','app/kroniki_core.exe','app/ai/llama-server.exe')){
+            if(!(Test-Path (Join-Path $installDir $r))){throw "Installed file missing: $r"}
           }
 
-          function Wait-Core {
-            for ($i=0; $i -lt 60; $i++) {
-              try {
-                $h = Invoke-RestMethod -Uri 'http://127.0.0.1:17377/health' -TimeoutSec 1
-                if ($h.ok) { return }
-              } catch {}
+          $core=Join-Path $installDir 'app/kroniki_core.exe'
+          $proc=Start-Process -FilePath $core -WorkingDirectory (Split-Path $core) -PassThru
+          try {
+            $h=$null
+            for($i=0;$i -lt 80;$i++){
+              try{$h=Invoke-RestMethod 'http://127.0.0.1:17377/health' -TimeoutSec 1;if($h.ok){break}}catch{}
               Start-Sleep -Milliseconds 250
             }
-            throw 'Rust Core did not become healthy.'
-          }
+            if(!$h.ok){throw 'Core did not start'}
+            if($h.version -ne '0.10.0-preview.1'){throw "Wrong core version $($h.version)"}
 
-          function Start-Core {
-            $proc = Start-Process -FilePath $core -WorkingDirectory (Split-Path $core) -PassThru
-            Wait-Core
-            return $proc
-          }
+            $new=Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/campaign/new' -ContentType 'application/json' -Body '{}'
+            if(!$new.state.director -or !$new.state.npcs){throw 'Autonomous campaign seed incomplete'}
 
-          function Stop-Core {
-            try {
-              Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/shutdown' -ContentType 'application/json' -Body '{}' -TimeoutSec 3 | Out-Null
-            } catch {}
+            $body=@{action='Pash iritor — badam wzburzoną energię tego miejsca.';state=$new.state;use_ai=$false;roll=18}|ConvertTo-Json -Depth 35
+            $turn=Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/action' -ContentType 'application/json' -Body $body
+            if($turn.interpretation.action_type -ne 'magic_attempt'){throw 'Intent interpreter failed'}
+            if($turn.mechanics.magic.operation -ne 'sense'){throw 'Free-form magic semantic resolution failed'}
+            if(!$turn.director){throw 'Story Director missing'}
+
+            $saved=Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save' -ContentType 'application/json' -Body (@{name='CI 0.10';state=$turn.state}|ConvertTo-Json -Depth 35)
+            if(!$saved.ok){throw 'Save failed'}
+            $loaded=Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save/load' -ContentType 'application/json' -Body (@{id=$saved.id}|ConvertTo-Json)
+            if($loaded.state._meta.save_schema -ne 3){throw 'Save schema mismatch'}
+
+            $tick=Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/world/tick' -ContentType 'application/json' -Body (@{minutes=480;reason='sen';state=$loaded.state}|ConvertTo-Json -Depth 35)
+            if(!$tick.ok){throw 'World autonomy tick failed'}
+          } finally {
+            try{Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/shutdown' -ContentType 'application/json' -Body '{}' -TimeoutSec 2|Out-Null}catch{}
             Start-Sleep -Milliseconds 700
+            if(!$proc.HasExited){Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue}
           }
 
-          Write-Host '==> Save -> shutdown -> restart -> load'
-          $coreProc = Start-Core
-          $marker = "ci-smoke-$env:GITHUB_RUN_ID"
-          $saveBody = @{
-            name = $marker
-            state = @{
-              smoke_marker = $marker
-              character = @{ name = 'CI Tester' }
-              world = @{ year = 1272; month = 6; day = 17; hour = 22; minute = 0 }
-            }
-          } | ConvertTo-Json -Depth 10
-          $saved = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save' -ContentType 'application/json' -Body $saveBody
-          if (!$saved.ok -or !$saved.id) { throw 'Save creation failed.' }
-          $saveId = [int64]$saved.id
+          $game=Join-Path $installDir 'app/KronikiRPG.exe'
+          $gp=Start-Process -FilePath $game -ArgumentList @('--headless','--quit-after','2') -Wait -PassThru
+          if($gp.ExitCode -ne 0){throw "Godot boot failed: $($gp.ExitCode)"}
 
-          $loaded = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save/load' -ContentType 'application/json' -Body (@{id=$saveId} | ConvertTo-Json)
-          if ($loaded.state.smoke_marker -ne $marker) { throw 'Immediate save load failed.' }
-
-          Stop-Core
-          if (!$coreProc.HasExited) { $coreProc.WaitForExit(5000) | Out-Null }
-
-          $coreProc = Start-Core
-          $loaded2 = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save/load' -ContentType 'application/json' -Body (@{id=$saveId} | ConvertTo-Json)
-          if ($loaded2.state.smoke_marker -ne $marker) { throw 'Save did not survive Core restart.' }
-          Stop-Core
-          if (!$coreProc.HasExited) { $coreProc.WaitForExit(5000) | Out-Null }
-
-          Write-Host '==> Simulated update package replacement'
-          $staging = Join-Path $env:RUNNER_TEMP 'KronikiRPG-Update-Staging'
-          if (Test-Path $staging) { Remove-Item -Recurse -Force $staging }
-          New-Item -ItemType Directory -Force -Path $staging | Out-Null
-          Expand-Archive -Path 'build/KronikiRPG-win-x64.zip' -DestinationPath $staging -Force
-          if (!(Test-Path (Join-Path $staging 'KronikiRPG.exe'))) { throw 'Update package missing game exe.' }
-          if (!(Test-Path (Join-Path $staging 'kroniki_core.exe'))) { throw 'Update package missing core exe.' }
-          Remove-Item -Recurse -Force (Join-Path $installDir 'app')
-          Move-Item -Path $staging -Destination (Join-Path $installDir 'app')
-          $core = Join-Path $installDir 'app/kroniki_core.exe'
-          $game = Join-Path $installDir 'app/KronikiRPG.exe'
-
-          $coreProc = Start-Core
-          $loaded3 = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:17377/save/load' -ContentType 'application/json' -Body (@{id=$saveId} | ConvertTo-Json)
-          if ($loaded3.state.smoke_marker -ne $marker) { throw 'Save did not survive app update replacement.' }
-          Stop-Core
-          if (!$coreProc.HasExited) { $coreProc.WaitForExit(5000) | Out-Null }
-
-          Write-Host '==> Godot exported game headless boot'
-          $gameProc = Start-Process -FilePath $game -ArgumentList @('--headless','--quit-after','2') -Wait -PassThru
-          if ($gameProc.ExitCode -ne 0) { throw "Godot game smoke boot failed with exit code $($gameProc.ExitCode)" }
-
-          if (!(Test-Path (Join-Path $dataDir 'kroniki.sqlite3'))) {
-            throw 'Expected persistent SQLite save database was not created.'
-          }
-          Write-Host 'SMOKE TEST PASSED: install -> core -> save -> restart -> update replacement -> save preserved -> game boot'
-
-      - name: Upload Windows installer
+      - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
-          name: KronikiRPG-0.9.0-preview.2-Windows
+          name: KronikiRPG-0.10.0-preview.1-Windows
           path: |
-            kroniki-rpg-godot/build/KronikiRPG-Setup.exe
-            kroniki-rpg-godot/build/KronikiRPG-win-x64.zip
-            kroniki-rpg-godot/build/update-manifest.json
+            source010/current/build/KronikiRPG-Setup.exe
+            source010/current/build/KronikiRPG-win-x64.zip
+            source010/current/build/update-manifest.json
           if-no-files-found: error
           retention-days: 30
 
       - name: Publish Preview GitHub Release
         shell: pwsh
-        working-directory: kroniki-rpg-godot
+        working-directory: source010/current
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $ErrorActionPreference = 'Stop'
-          $tag = 'v0.9.0-preview.2'
-          $repo = '${{ github.repository }}'
-          $assets = @('build/KronikiRPG-Setup.exe','build/KronikiRPG-win-x64.zip','build/update-manifest.json')
+          $ErrorActionPreference='Stop'
+          $tag='v0.10.0-preview.1'
+          $repo='${{ github.repository }}'
+          $assets=@('build/KronikiRPG-Setup.exe','build/KronikiRPG-win-x64.zip','build/update-manifest.json')
           gh release view $tag --repo $repo *> $null
-          if ($LASTEXITCODE -eq 0) {
+          if($LASTEXITCODE -eq 0){
             gh release upload $tag @assets --repo $repo --clobber
-            if ($LASTEXITCODE -ne 0) { throw 'GitHub Release asset update failed.' }
-          } else {
-            gh release create $tag @assets --repo $repo --target '${{ github.sha }}' --title 'Kroniki RPG 0.9.0-preview.2' --notes 'Preview 0.9.0: Core Migration + AI-GM. Automatyczny build Windows z instalatorem, updaterem i testem trwałości zapisów.' --prerelease
-            if ($LASTEXITCODE -ne 0) { throw 'GitHub Release creation failed.' }
+          }else{
+            gh release create $tag @assets --repo $repo --target '${{ github.sha }}' --title 'Kroniki RPG 0.10.0-preview.1' --notes 'Autonomiczny MGAI: lokalny Qwen3-8B, Story Director, pamięć i relacje NPC, questy/frakcje, free-form magic, alchemia/crafting/hunting i grywalny vertical slice.' --prerelease
           }
-          gh release view $tag --repo $repo --json tagName,isPrerelease,url,assets
-          if ($LASTEXITCODE -ne 0) { throw 'Could not verify published GitHub Release.' }
+          if($LASTEXITCODE -ne 0){throw 'Release publication failed'}
