@@ -1,0 +1,5 @@
+{
+  "repository": "OWNER/REPOSITORY",
+  "manifest_asset": "update-manifest.json",
+  "package_asset": "KronikiRPG-win-x64.zip"
+}

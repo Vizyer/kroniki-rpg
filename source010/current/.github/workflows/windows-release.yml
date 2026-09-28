@@ -1,0 +1,84 @@
+name: Windows build and release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Wersja bez prefiksu v, np. 0.8.1-preview.1'
+        required: true
+        default: '0.8.1-preview.1'
+      channel:
+        description: 'Kanał'
+        required: true
+        type: choice
+        options: [preview, stable]
+        default: preview
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            rust-core
+            launcher
+
+      - name: Install Inno Setup
+        shell: powershell
+        run: choco install innosetup -y --no-progress
+
+      - name: Resolve release version
+        id: vars
+        shell: powershell
+        run: |
+          if ('${{ github.event_name }}' -eq 'push') {
+            $v = '${{ github.ref_name }}'.TrimStart('v')
+            $c = if ($v -match '(?i)(preview|beta|rc)') { 'preview' } else { 'stable' }
+          } else {
+            $v = '${{ inputs.version }}'
+            $c = '${{ inputs.channel }}'
+          }
+          "version=$v" >> $env:GITHUB_OUTPUT
+          "channel=$c" >> $env:GITHUB_OUTPUT
+
+      - name: Build game, core, launcher, update package and installer
+        shell: powershell
+        run: |
+          .\scripts\build_windows_release.ps1 `
+            -Version '${{ steps.vars.outputs.version }}' `
+            -Channel '${{ steps.vars.outputs.channel }}' `
+            -Repository '${{ github.repository }}'
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: KronikiRPG-${{ steps.vars.outputs.version }}-windows
+          path: |
+            build/KronikiRPG-Setup.exe
+            build/KronikiRPG-win-x64.zip
+            build/update-manifest.json
+          if-no-files-found: error
+
+      - name: Publish GitHub Release for tags
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: ${{ steps.vars.outputs.channel == 'preview' }}
+          generate_release_notes: true
+          files: |
+            build/KronikiRPG-Setup.exe
+            build/KronikiRPG-win-x64.zip
+            build/update-manifest.json

@@ -1,0 +1,8048 @@
+{
+  "version": "1.3.0",
+  "continuity": "Saga + gry CDPR",
+  "cutoff": {
+    "year": 1275,
+    "note": "Koniec Krwi i Wina"
+  },
+  "policy": {
+    "bookPriority": "Dla konfliktów dat wydarzeń książkowych pierwszeństwo ma saga.",
+    "branching": "Warianty zależne od gracza pozostają branch-dependent do chwili ustalenia ich w stanie kampanii.",
+    "datePrecision": "Nigdy nie wymyślaj miesiąca/dnia, gdy materiał daje tylko rok lub okres.",
+    "knowledge": "RAG dostarcza prawdę MG, nie automatyczną wiedzę bohatera."
+  },
+  "sourceCatalog": [
+    {
+      "id": "books",
+      "label": "Saga i opowiadania Andrzeja Sapkowskiego",
+      "class": "primary-books"
+    },
+    {
+      "id": "cdpr",
+      "label": "Wiedźmin 1–3 i dodatki CD PROJEKT RED",
+      "class": "primary-games"
+    },
+    {
+      "id": "rtg",
+      "label": "Licencjonowany The Witcher TRPG — tylko jako pomocnicze rozszerzenie",
+      "class": "licensed-secondary"
+    },
+    {
+      "id": "indexes",
+      "label": "Indeksy i opracowania do weryfikacji chronologii, walut i klasyfikacji",
+      "class": "secondary"
+    }
+  ],
+  "entries": [
+    {
+      "id": "nilfgaard",
+      "type": "state",
+      "title": "Cesarstwo Nilfgaardzkie",
+      "aliases": [
+        "Nilfgaard"
+      ],
+      "summary": "Południowe imperium ekspandujące na północ; w drugiej połowie XIII wieku jego centralnym władcą jest Emhyr var Emreis.",
+      "facts": [],
+      "tags": [
+        "imperium",
+        "Emhyr"
+      ],
+      "regions": [
+        "Nilfgaard"
+      ],
+      "valid": {
+        "fromYear": 1257,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "temeria",
+      "type": "state",
+      "title": "Temeria",
+      "aliases": [],
+      "summary": "Główne Królestwo Północy ze stolicą w Wyzimie. Po śmierci Foltesta jego pozycja gwałtownie słabnie.",
+      "facts": [],
+      "tags": [
+        "Foltest",
+        "Wyzima"
+      ],
+      "regions": [
+        "Temeria"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "redania",
+      "type": "state",
+      "title": "Redania",
+      "aliases": [],
+      "summary": "Bogate północne królestwo z Tretogorem i Oxenfurtem, posiadające rozbudowany aparat wywiadowczy; w epoce Wiedźmina 3 dominuje politycznie na Północy.",
+      "facts": [],
+      "tags": [
+        "Vizimir",
+        "Radovid",
+        "Dijkstra"
+      ],
+      "regions": [
+        "Redania"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "kaedwen",
+      "type": "state",
+      "title": "Kaedwen",
+      "aliases": [],
+      "summary": "Rozległe królestwo Północy związane z Kaer Morhen. W grach jego niezależność zostaje poważnie osłabiona przez ekspansję Redanii.",
+      "facts": [],
+      "tags": [
+        "Henselt",
+        "Kaer Morhen"
+      ],
+      "regions": [
+        "Kaedwen"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "aedirn",
+      "type": "state",
+      "title": "Aedirn",
+      "aliases": [],
+      "summary": "Królestwo Północy związane z Vengerbergiem i Dol Blathanna; ważny teatr konfliktów politycznych sagi i Wiedźmina 2.",
+      "facts": [],
+      "tags": [
+        "Demawend",
+        "Vengerberg"
+      ],
+      "regions": [
+        "Aedirn"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "cintra",
+      "type": "state",
+      "title": "Cintra",
+      "aliases": [],
+      "summary": "Królestwo Ciri. W 1263 zostaje podbite przez Nilfgaard, a prawa dynastyczne do tronu pozostają politycznie istotne.",
+      "facts": [],
+      "tags": [
+        "Calanthe",
+        "Ciri"
+      ],
+      "regions": [
+        "Cintra"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "lyria_rivia",
+      "type": "state",
+      "title": "Lyria i Rivia",
+      "aliases": [
+        "Lyria",
+        "Rivia"
+      ],
+      "summary": "Związane królestwa rządzone przez Meve, ważne w wojnie z Nilfgaardem i końcowej fazie sagi.",
+      "facts": [],
+      "tags": [
+        "Meve"
+      ],
+      "regions": [
+        "Lyria",
+        "Rivia"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "kovir_poviss",
+      "type": "state",
+      "title": "Kovir i Poviss",
+      "aliases": [
+        "Kovir",
+        "Poviss"
+      ],
+      "summary": "Bogate północne królestwo o znaczeniu handlowym, bankowym i górniczym, położone z dala od głównych teatrów wojny.",
+      "facts": [],
+      "tags": [
+        "handel",
+        "bankowość"
+      ],
+      "regions": [
+        "Kovir",
+        "Poviss"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "skellige",
+      "type": "state",
+      "title": "Wyspy Skellige",
+      "aliases": [],
+      "summary": "Archipelag klanów żeglarskich. W Wiedźminie 3 wybór kolejnego monarchy jest zależny od działań gracza.",
+      "facts": [],
+      "tags": [
+        "klany",
+        "Freya"
+      ],
+      "regions": [
+        "Skellige"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "toussaint",
+      "type": "state",
+      "title": "Księstwo Toussaint",
+      "aliases": [],
+      "summary": "Bogate księstwo wasalne Nilfgaardu, kulturowo odrębne; słynie z wina, rycerstwa i dworskiego ceremoniału.",
+      "facts": [],
+      "tags": [
+        "Anna Henrietta",
+        "wino"
+      ],
+      "regions": [
+        "Toussaint"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "novigrad",
+      "type": "state",
+      "title": "Wolne Miasto Novigrad",
+      "aliases": [],
+      "summary": "Wielki port i centrum handlu; w Wiedźminie 3 pozostaje pod silnym wpływem Wiecznego Ognia i polityki Redanii.",
+      "facts": [],
+      "tags": [
+        "port",
+        "Wieczny Ogień"
+      ],
+      "regions": [
+        "Novigrad"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "mahakam",
+      "type": "state",
+      "title": "Mahakam",
+      "aliases": [],
+      "summary": "Górski region krasnoludów, ceniony za górnictwo i metalurgię.",
+      "facts": [],
+      "tags": [
+        "krasnoludy",
+        "metalurgia"
+      ],
+      "regions": [
+        "Mahakam"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "dol_blathanna",
+      "type": "state",
+      "title": "Dol Blathanna",
+      "aliases": [
+        "Dolina Kwiatów"
+      ],
+      "summary": "Dolina Kwiatów związana z elfami i polityką Franceski Findabair.",
+      "facts": [],
+      "tags": [
+        "elfy",
+        "Francesca"
+      ],
+      "regions": [
+        "Dol Blathanna"
+      ],
+      "valid": {
+        "fromYear": 1260,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "verden",
+      "type": "state",
+      "title": "Verden",
+      "aliases": [],
+      "summary": "Niewielkie królestwo południowego skraju Północy, sąsiadujące z Brokilonem i Cintrą.",
+      "facts": [],
+      "tags": [
+        "Brokilon"
+      ],
+      "regions": [
+        "Verden"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "cidaris",
+      "type": "state",
+      "title": "Cidaris",
+      "aliases": [],
+      "summary": "Nadmorskie królestwo Północy, uczestnik handlu morskiego.",
+      "facts": [],
+      "tags": [
+        "morze",
+        "handel"
+      ],
+      "regions": [
+        "Cidaris"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "brugge",
+      "type": "state",
+      "title": "Brugge",
+      "aliases": [],
+      "summary": "Terytorium Północy położone w strategicznym sąsiedztwie Jarugi.",
+      "facts": [],
+      "tags": [
+        "Jaruga"
+      ],
+      "regions": [
+        "Brugge"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "emhyr",
+      "type": "character",
+      "title": "Emhyr var Emreis",
+      "aliases": [
+        "Biały Płomień",
+        "Duny"
+      ],
+      "summary": "Cesarz Nilfgaardu i ojciec Ciri.",
+      "facts": [],
+      "tags": [
+        "Nilfgaard",
+        "władca"
+      ],
+      "regions": [
+        "Nilfgaard"
+      ],
+      "valid": {
+        "fromYear": 1257,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "foltest",
+      "type": "character",
+      "title": "Foltest",
+      "aliases": [],
+      "summary": "Król Temerii; ginie na początku wydarzeń Wiedźmina 2.",
+      "facts": [],
+      "tags": [
+        "Temeria",
+        "władca"
+      ],
+      "regions": [
+        "Temeria"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1271,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "vizimir",
+      "type": "character",
+      "title": "Vizimir II",
+      "aliases": [],
+      "summary": "Król Redanii w okresie sagi; współpracuje z Dijkstrą.",
+      "facts": [],
+      "tags": [
+        "Redania",
+        "władca"
+      ],
+      "regions": [
+        "Redania"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1267,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "radovid",
+      "type": "character",
+      "title": "Radovid V",
+      "aliases": [],
+      "summary": "Władca Redanii w grach; w Wiedźminie 3 prowadzi wojnę i represje przeciw magom.",
+      "facts": [],
+      "tags": [
+        "Redania",
+        "władca"
+      ],
+      "regions": [
+        "Redania",
+        "Novigrad"
+      ],
+      "valid": {
+        "fromYear": 1268,
+        "toYear": 1272,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "branch-dependent",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "henselt",
+      "type": "character",
+      "title": "Henselt",
+      "aliases": [],
+      "summary": "Król Kaedwen i kluczowa postać Wiedźmina 2; jego los jest zależny od gałęzi gry.",
+      "facts": [],
+      "tags": [
+        "Kaedwen",
+        "władca"
+      ],
+      "regions": [
+        "Kaedwen"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1271,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "branch-dependent",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "demawend",
+      "type": "character",
+      "title": "Demawend III",
+      "aliases": [],
+      "summary": "Król Aedirn zamordowany przez Letho przed Wiedźminem 2.",
+      "facts": [],
+      "tags": [
+        "Aedirn",
+        "władca"
+      ],
+      "regions": [
+        "Aedirn"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1271,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "meve",
+      "type": "character",
+      "title": "Meve",
+      "aliases": [],
+      "summary": "Królowa Lyrii i Rivii, dowódczyni północnego oporu.",
+      "facts": [],
+      "tags": [
+        "Lyria",
+        "Rivia"
+      ],
+      "regions": [
+        "Lyria",
+        "Rivia"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calanthe",
+      "type": "character",
+      "title": "Calanthe",
+      "aliases": [
+        "Lwica z Cintry"
+      ],
+      "summary": "Królowa Cintry i babka Ciri, ginie podczas upadku królestwa.",
+      "facts": [],
+      "tags": [
+        "Cintra"
+      ],
+      "regions": [
+        "Cintra"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1263,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "anna_henrietta",
+      "type": "character",
+      "title": "Anna Henrietta",
+      "aliases": [
+        "Anarietta"
+      ],
+      "summary": "Księżna Toussaint podczas wydarzeń Krwi i Wina.",
+      "facts": [],
+      "tags": [
+        "Toussaint"
+      ],
+      "regions": [
+        "Toussaint"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [],
+      "presence": [
+        {
+          "year": 1275,
+          "places": [
+            "Beauclair",
+            "Toussaint"
+          ],
+          "precision": "game-era"
+        }
+      ]
+    },
+    {
+      "id": "bran",
+      "type": "character",
+      "title": "Bran Tuirseach",
+      "aliases": [],
+      "summary": "Król Skellige przed sukcesją z Wiedźmina 3.",
+      "facts": [],
+      "tags": [
+        "Skellige"
+      ],
+      "regions": [
+        "Skellige"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1272,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "geralt",
+      "type": "character",
+      "title": "Geralt z Rivii",
+      "aliases": [
+        "Biały Wilk",
+        "Rzeźnik z Blaviken"
+      ],
+      "summary": "Wiedźmin Szkoły Wilka, centralna postać książek i gier.",
+      "facts": [],
+      "tags": [
+        "wiedźmin",
+        "Ciri",
+        "Yennefer"
+      ],
+      "regions": [
+        "Kaer Morhen"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [],
+      "presence": [
+        {
+          "year": 1263,
+          "places": [
+            "Cintra",
+            "Sodden / południe Północy"
+          ],
+          "precision": "era"
+        },
+        {
+          "year": 1267,
+          "places": [
+            "Thanedd",
+            "szlak przez Północ"
+          ],
+          "precision": "era"
+        },
+        {
+          "year": 1268,
+          "places": [
+            "Stygga",
+            "Rivia"
+          ],
+          "precision": "era"
+        },
+        {
+          "year": 1270,
+          "places": [
+            "Kaer Morhen",
+            "Wyzima"
+          ],
+          "precision": "game-era"
+        },
+        {
+          "year": 1271,
+          "places": [
+            "Flotsam",
+            "Aedirn/Kaedwen",
+            "Loc Muinne"
+          ],
+          "precision": "game-era"
+        },
+        {
+          "year": 1272,
+          "places": [
+            "Biały Sad",
+            "Velen",
+            "Novigrad",
+            "Skellige",
+            "Kaer Morhen"
+          ],
+          "precision": "game-progression"
+        },
+        {
+          "year": 1275,
+          "places": [
+            "Toussaint"
+          ],
+          "precision": "game-era"
+        }
+      ]
+    },
+    {
+      "id": "ciri",
+      "type": "character",
+      "title": "Cirilla Fiona Elen Riannon",
+      "aliases": [
+        "Ciri",
+        "Zireael"
+      ],
+      "summary": "Dziedziczka Cintry i nosicielka Starszej Krwi.",
+      "facts": [],
+      "tags": [
+        "Cintra",
+        "Starsza Krew"
+      ],
+      "regions": [
+        "Cintra"
+      ],
+      "valid": {
+        "fromYear": 1250,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [],
+      "presence": [
+        {
+          "year": 1263,
+          "places": [
+            "Cintra",
+            "Brokilon / uchodźczy szlak"
+          ],
+          "precision": "era"
+        },
+        {
+          "year": 1267,
+          "places": [
+            "Thanedd",
+            "Korath / szlak sagi"
+          ],
+          "precision": "era"
+        },
+        {
+          "year": 1268,
+          "places": [
+            "Stygga / inne światy"
+          ],
+          "precision": "era"
+        },
+        {
+          "year": 1272,
+          "places": [
+            "w ruchu między światami; później Velen/Novigrad/Skellige/Kaer Morhen zależnie od postępu"
+          ],
+          "precision": "game-progression"
+        }
+      ]
+    },
+    {
+      "id": "yennefer",
+      "type": "character",
+      "title": "Yennefer z Vengerbergu",
+      "aliases": [],
+      "summary": "Czarodziejka związana z Geraltem i Ciri.",
+      "facts": [],
+      "tags": [
+        "magia",
+        "Ciri"
+      ],
+      "regions": [
+        "Aedirn"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [],
+      "presence": [
+        {
+          "year": 1267,
+          "places": [
+            "Thanedd"
+          ],
+          "precision": "era"
+        },
+        {
+          "year": 1268,
+          "places": [
+            "szlak sagi / Stygga"
+          ],
+          "precision": "era"
+        },
+        {
+          "year": 1272,
+          "places": [
+            "Biały Sad",
+            "Wyzima",
+            "Skellige",
+            "Kaer Morhen"
+          ],
+          "precision": "game-progression"
+        }
+      ]
+    },
+    {
+      "id": "triss",
+      "type": "character",
+      "title": "Triss Merigold",
+      "aliases": [],
+      "summary": "Czarodziejka z Mariboru, ważna postać sagi i gier.",
+      "facts": [],
+      "tags": [
+        "magia",
+        "Temeria"
+      ],
+      "regions": [
+        "Temeria"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [],
+      "presence": [
+        {
+          "year": 1267,
+          "places": [
+            "Thanedd / Północ"
+          ],
+          "precision": "era"
+        },
+        {
+          "year": 1270,
+          "places": [
+            "Wyzima"
+          ],
+          "precision": "game-era"
+        },
+        {
+          "year": 1271,
+          "places": [
+            "Temeria / Loc Muinne zależnie od wydarzeń"
+          ],
+          "precision": "game-era"
+        },
+        {
+          "year": 1272,
+          "places": [
+            "Novigrad"
+          ],
+          "precision": "game-era"
+        }
+      ]
+    },
+    {
+      "id": "jaskier",
+      "type": "character",
+      "title": "Jaskier",
+      "aliases": [
+        "Dandelion"
+      ],
+      "summary": "Bard, poeta i przyjaciel Geralta.",
+      "facts": [],
+      "tags": [
+        "bard",
+        "Geralt"
+      ],
+      "regions": [
+        "Północ",
+        "Novigrad"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [],
+      "presence": [
+        {
+          "year": 1267,
+          "places": [
+            "Północ / szlak Geralta"
+          ],
+          "precision": "era"
+        },
+        {
+          "year": 1270,
+          "places": [
+            "Wyzima"
+          ],
+          "precision": "game-era"
+        },
+        {
+          "year": 1272,
+          "places": [
+            "Novigrad"
+          ],
+          "precision": "game-era"
+        }
+      ]
+    },
+    {
+      "id": "vesemir",
+      "type": "character",
+      "title": "Vesemir",
+      "aliases": [],
+      "summary": "Stary wiedźmin Szkoły Wilka i mentor wiedźminów Kaer Morhen.",
+      "facts": [],
+      "tags": [
+        "wiedźmin"
+      ],
+      "regions": [
+        "Kaedwen"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1272,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [],
+      "presence": [
+        {
+          "year": 1270,
+          "places": [
+            "Kaer Morhen"
+          ],
+          "precision": "game-era"
+        },
+        {
+          "year": 1272,
+          "places": [
+            "Kaer Morhen"
+          ],
+          "precision": "game-era"
+        }
+      ]
+    },
+    {
+      "id": "eskel",
+      "type": "character",
+      "title": "Eskel",
+      "aliases": [],
+      "summary": "Wiedźmin Szkoły Wilka.",
+      "facts": [],
+      "tags": [
+        "wiedźmin"
+      ],
+      "regions": [
+        "Kaedwen"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "lambert",
+      "type": "character",
+      "title": "Lambert",
+      "aliases": [],
+      "summary": "Wiedźmin Szkoły Wilka.",
+      "facts": [],
+      "tags": [
+        "wiedźmin"
+      ],
+      "regions": [
+        "Kaedwen"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "letho",
+      "type": "character",
+      "title": "Letho z Gulety",
+      "aliases": [],
+      "summary": "Wiedźmin Szkoły Żmii i zabójca królów; jego status zależy od decyzji gracza.",
+      "facts": [],
+      "tags": [
+        "Szkoła Żmii"
+      ],
+      "regions": [
+        "Nilfgaard"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1272,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "branch-dependent",
+      "relations": [],
+      "sourceNotes": [],
+      "presence": [
+        {
+          "year": 1271,
+          "places": [
+            "Północ",
+            "Loc Muinne"
+          ],
+          "precision": "game-era"
+        },
+        {
+          "year": 1272,
+          "places": [
+            "nieustalone; zależne od przeżycia i importu decyzji"
+          ],
+          "precision": "branch"
+        }
+      ]
+    },
+    {
+      "id": "dijkstra",
+      "type": "character",
+      "title": "Sigismund Dijkstra",
+      "aliases": [
+        "Sigi Reuven"
+      ],
+      "summary": "Redański mistrz wywiadu i wpływowy polityk.",
+      "facts": [],
+      "tags": [
+        "Redania",
+        "wywiad"
+      ],
+      "regions": [
+        "Redania",
+        "Novigrad"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1272,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "branch-dependent",
+      "relations": [],
+      "sourceNotes": [],
+      "presence": [
+        {
+          "year": 1267,
+          "places": [
+            "Thanedd / Redania"
+          ],
+          "precision": "era"
+        },
+        {
+          "year": 1272,
+          "places": [
+            "Novigrad"
+          ],
+          "precision": "game-era"
+        }
+      ]
+    },
+    {
+      "id": "philippa",
+      "type": "character",
+      "title": "Philippa Eilhart",
+      "aliases": [],
+      "summary": "Wpływowa czarodziejka i strateg polityczna Loży.",
+      "facts": [],
+      "tags": [
+        "Loża",
+        "Redania"
+      ],
+      "regions": [
+        "Redania"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [],
+      "presence": [
+        {
+          "year": 1267,
+          "places": [
+            "Thanedd / Redania"
+          ],
+          "precision": "era"
+        },
+        {
+          "year": 1271,
+          "places": [
+            "Loc Muinne / okolice polityki północnej"
+          ],
+          "precision": "game-era"
+        },
+        {
+          "year": 1272,
+          "places": [
+            "Redania / Novigrad zależnie od postępu"
+          ],
+          "precision": "game-progression"
+        }
+      ]
+    },
+    {
+      "id": "francesca",
+      "type": "character",
+      "title": "Francesca Findabair",
+      "aliases": [
+        "Enid an Gleanna"
+      ],
+      "summary": "Elfka, czarodziejka i przywódczyni związana z Dol Blathanna.",
+      "facts": [],
+      "tags": [
+        "elfy",
+        "Loża"
+      ],
+      "regions": [
+        "Dol Blathanna"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "fringilla",
+      "type": "character",
+      "title": "Fringilla Vigo",
+      "aliases": [],
+      "summary": "Nilfgaardzka czarodziejka, członkini Loży, związana także z Toussaint.",
+      "facts": [],
+      "tags": [
+        "Nilfgaard",
+        "Loża"
+      ],
+      "regions": [
+        "Nilfgaard",
+        "Toussaint"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "vilgefortz",
+      "type": "character",
+      "title": "Vilgefortz z Roggeveen",
+      "aliases": [],
+      "summary": "Potężny mag i główny antagonista sagi.",
+      "facts": [],
+      "tags": [
+        "magia",
+        "Thanedd"
+      ],
+      "regions": [
+        "Północ"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1268,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "avallach",
+      "type": "character",
+      "title": "Avallac'h",
+      "aliases": [],
+      "summary": "Aen Saevherne związany ze Starszą Krwią i losem Ciri.",
+      "facts": [],
+      "tags": [
+        "Aen Elle",
+        "Ciri"
+      ],
+      "regions": [
+        "inne światy"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "eredin",
+      "type": "character",
+      "title": "Eredin",
+      "aliases": [],
+      "summary": "Dowódca Dzikiego Gonu i antagonista Wiedźmina 3.",
+      "facts": [],
+      "tags": [
+        "Dziki Gon",
+        "Aen Elle"
+      ],
+      "regions": [
+        "inne światy"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1272,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "cahir",
+      "type": "character",
+      "title": "Cahir",
+      "aliases": [],
+      "summary": "Nilfgaardczyk, później członek hanzy Geralta.",
+      "facts": [],
+      "tags": [
+        "Nilfgaard",
+        "hanza"
+      ],
+      "regions": [
+        "Nilfgaard"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1268,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "milva",
+      "type": "character",
+      "title": "Milva",
+      "aliases": [],
+      "summary": "Łuczniczka z Brokilonu i członkini hanzy Geralta.",
+      "facts": [],
+      "tags": [
+        "Brokilon",
+        "hanza"
+      ],
+      "regions": [
+        "Brokilon"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1268,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "regis",
+      "type": "character",
+      "title": "Emiel Regis",
+      "aliases": [
+        "Regis"
+      ],
+      "summary": "Wyższy wampir, członek hanzy Geralta; powraca w Krwi i Winie.",
+      "facts": [],
+      "tags": [
+        "wampir",
+        "Toussaint"
+      ],
+      "regions": [
+        "Północ",
+        "Toussaint"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [],
+      "presence": [
+        {
+          "year": 1268,
+          "places": [
+            "hanza Geralta / Stygga"
+          ],
+          "precision": "era"
+        },
+        {
+          "year": 1275,
+          "places": [
+            "Toussaint"
+          ],
+          "precision": "game-era"
+        }
+      ]
+    },
+    {
+      "id": "angouleme",
+      "type": "character",
+      "title": "Angoulême",
+      "aliases": [],
+      "summary": "Młoda rozbójniczka i członkini hanzy Geralta.",
+      "facts": [],
+      "tags": [
+        "hanza"
+      ],
+      "regions": [
+        "Północ"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1268,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "zoltan",
+      "type": "character",
+      "title": "Zoltan Chivay",
+      "aliases": [],
+      "summary": "Krasnolud i przyjaciel Geralta.",
+      "facts": [],
+      "tags": [
+        "krasnolud"
+      ],
+      "regions": [
+        "Północ"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "iorveth",
+      "type": "character",
+      "title": "Iorweth",
+      "aliases": [],
+      "summary": "Dowódca Scoia'tael, ważna postać Wiedźmina 2.",
+      "facts": [],
+      "tags": [
+        "Scoia'tael"
+      ],
+      "regions": [
+        "Aedirn"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1272,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "branch-dependent",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "roche",
+      "type": "character",
+      "title": "Vernon Roche",
+      "aliases": [],
+      "summary": "Dowódca temerskich Błękitnych Pasów.",
+      "facts": [],
+      "tags": [
+        "Temeria",
+        "Błękitne Pasy"
+      ],
+      "regions": [
+        "Temeria"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1272,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "branch-dependent",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "crach",
+      "type": "character",
+      "title": "Crach an Craite",
+      "aliases": [],
+      "summary": "Jarl Skellige i ważny polityk wysp.",
+      "facts": [],
+      "tags": [
+        "Skellige"
+      ],
+      "regions": [
+        "Skellige"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1272,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [],
+      "presence": [
+        {
+          "year": 1272,
+          "places": [
+            "Kaer Trolde",
+            "Skellige"
+          ],
+          "precision": "game-era"
+        }
+      ]
+    },
+    {
+      "id": "cerys",
+      "type": "character",
+      "title": "Cerys an Craite",
+      "aliases": [],
+      "summary": "Może zostać władczynią Skellige w jednej z gałęzi Wiedźmina 3.",
+      "facts": [],
+      "tags": [
+        "Skellige",
+        "sukcesja"
+      ],
+      "regions": [
+        "Skellige"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "branch-dependent",
+      "relations": [],
+      "sourceNotes": [],
+      "presence": [
+        {
+          "year": 1272,
+          "places": [
+            "Skellige"
+          ],
+          "precision": "game-era"
+        }
+      ]
+    },
+    {
+      "id": "hjalmar",
+      "type": "character",
+      "title": "Hjalmar an Craite",
+      "aliases": [],
+      "summary": "Może zostać władcą Skellige w jednej z gałęzi Wiedźmina 3.",
+      "facts": [],
+      "tags": [
+        "Skellige",
+        "sukcesja"
+      ],
+      "regions": [
+        "Skellige"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "branch-dependent",
+      "relations": [],
+      "sourceNotes": [],
+      "presence": [
+        {
+          "year": 1272,
+          "places": [
+            "Skellige"
+          ],
+          "precision": "game-era"
+        }
+      ]
+    },
+    {
+      "id": "priscilla",
+      "type": "character",
+      "title": "Priscilla",
+      "aliases": [
+        "Callonetta"
+      ],
+      "summary": "Poetka i śpiewaczka działająca w Novigradzie w okresie Wiedźmina 3.",
+      "facts": [],
+      "tags": [
+        "Novigrad",
+        "bard"
+      ],
+      "regions": [
+        "Novigrad"
+      ],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "shani",
+      "type": "character",
+      "title": "Shani",
+      "aliases": [],
+      "summary": "Medyczka związana z Geraltem, Oxenfurtem i Sercami z Kamienia.",
+      "facts": [],
+      "tags": [
+        "medycyna"
+      ],
+      "regions": [
+        "Redania"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1272,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "olgierd",
+      "type": "character",
+      "title": "Olgierd von Everec",
+      "aliases": [],
+      "summary": "Redański szlachcic i centralna postać Serc z Kamienia.",
+      "facts": [],
+      "tags": [
+        "Serca z Kamienia"
+      ],
+      "regions": [
+        "Redania"
+      ],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "gaunter",
+      "type": "character",
+      "title": "Gaunter O'Dimm",
+      "aliases": [
+        "Pan Lusterko"
+      ],
+      "summary": "Tajemnicza nadnaturalna istota zawierająca umowy.",
+      "facts": [],
+      "tags": [
+        "Serca z Kamienia"
+      ],
+      "regions": [
+        "Redania"
+      ],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "detlaff",
+      "type": "character",
+      "title": "Dettlaff van der Eretein",
+      "aliases": [],
+      "summary": "Wyższy wampir centralny dla konfliktu Krwi i Wina.",
+      "facts": [],
+      "tags": [
+        "wampir",
+        "Toussaint"
+      ],
+      "regions": [
+        "Toussaint"
+      ],
+      "valid": {
+        "fromYear": 1275,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [],
+      "presence": [
+        {
+          "year": 1275,
+          "places": [
+            "Toussaint"
+          ],
+          "precision": "game-era"
+        }
+      ]
+    },
+    {
+      "id": "syanna",
+      "type": "character",
+      "title": "Sylvia Anna",
+      "aliases": [
+        "Syanna"
+      ],
+      "summary": "Starsza siostra Anny Henrietty i centralna postać intrygi Krwi i Wina.",
+      "facts": [],
+      "tags": [
+        "Toussaint"
+      ],
+      "regions": [
+        "Toussaint"
+      ],
+      "valid": {
+        "fromYear": 1275,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "vizima",
+      "type": "city",
+      "title": "Wyzima",
+      "aliases": [
+        "Vizima"
+      ],
+      "summary": "Stolica Temerii i główna lokacja pierwszej gry.",
+      "facts": [],
+      "tags": [
+        "stolica",
+        "Temeria"
+      ],
+      "regions": [
+        "Temeria"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "tretogor",
+      "type": "city",
+      "title": "Tretogor",
+      "aliases": [],
+      "summary": "Stolica Redanii.",
+      "facts": [],
+      "tags": [
+        "stolica",
+        "Redania"
+      ],
+      "regions": [
+        "Redania"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "oxenfurt",
+      "type": "city",
+      "title": "Oxenfurt",
+      "aliases": [],
+      "summary": "Miasto uniwersyteckie nad Pontarem, siedziba Akademii Oxenfurckiej.",
+      "facts": [],
+      "tags": [
+        "uniwersytet",
+        "Redania"
+      ],
+      "regions": [
+        "Redania"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "novigrad_city",
+      "type": "city",
+      "title": "Novigrad",
+      "aliases": [],
+      "summary": "Wielki port, banki, cechy i świątynia Wiecznego Ognia.",
+      "facts": [],
+      "tags": [
+        "port",
+        "handel"
+      ],
+      "regions": [
+        "Novigrad"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "kaer_morhen",
+      "type": "location",
+      "title": "Kaer Morhen",
+      "aliases": [],
+      "summary": "Warownia Szkoły Wilka w górach Kaedwen.",
+      "facts": [],
+      "tags": [
+        "wiedźmini"
+      ],
+      "regions": [
+        "Kaedwen"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "vengerberg",
+      "type": "city",
+      "title": "Vengerberg",
+      "aliases": [],
+      "summary": "Główne miasto Aedirn i miejsce pochodzenia Yennefer.",
+      "facts": [],
+      "tags": [
+        "Aedirn"
+      ],
+      "regions": [
+        "Aedirn"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "beauclair",
+      "type": "city",
+      "title": "Beauclair",
+      "aliases": [],
+      "summary": "Stolica Toussaint i siedziba książęcego dworu.",
+      "facts": [],
+      "tags": [
+        "Toussaint",
+        "dwór"
+      ],
+      "regions": [
+        "Toussaint"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "gors_velen",
+      "type": "city",
+      "title": "Gors Velen",
+      "aliases": [],
+      "summary": "Bogaty port położony w pobliżu Thanedd.",
+      "facts": [],
+      "tags": [
+        "port",
+        "Thanedd"
+      ],
+      "regions": [
+        "Temeria"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "thanedd",
+      "type": "location",
+      "title": "Wyspa Thanedd",
+      "aliases": [],
+      "summary": "Wyspa Aretuzy i miejsce przewrotu w 1267.",
+      "facts": [],
+      "tags": [
+        "Aretuza",
+        "magowie"
+      ],
+      "regions": [
+        "Temeria"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "brokilon",
+      "type": "region",
+      "title": "Brokilon",
+      "aliases": [],
+      "summary": "Las driad, politycznie i kulturowo niezależny.",
+      "facts": [],
+      "tags": [
+        "driady"
+      ],
+      "regions": [
+        "Brokilon"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "sodden",
+      "type": "region",
+      "title": "Sodden",
+      "aliases": [],
+      "summary": "Region przy Jarudze i miejsce słynnej bitwy z Nilfgaardem.",
+      "facts": [],
+      "tags": [
+        "wojna"
+      ],
+      "regions": [
+        "Sodden"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "brenna",
+      "type": "location",
+      "title": "Brenna",
+      "aliases": [],
+      "summary": "Miejsce kluczowej bitwy drugiej wojny z Nilfgaardem.",
+      "facts": [],
+      "tags": [
+        "wojna"
+      ],
+      "regions": [
+        "Północ"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "rivia_city",
+      "type": "city",
+      "title": "Rivia",
+      "aliases": [],
+      "summary": "Miasto, w którym pod koniec sagi dochodzi do pogromu.",
+      "facts": [],
+      "tags": [
+        "pogrom"
+      ],
+      "regions": [
+        "Rivia"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "loc_muine",
+      "type": "location",
+      "title": "Loc Muinne",
+      "aliases": [],
+      "summary": "Starożytne miasto i miejsce szczytu politycznego w Wiedźminie 2.",
+      "facts": [],
+      "tags": [
+        "Wiedźmin 2"
+      ],
+      "regions": [
+        "Kaedwen"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "flotsam",
+      "type": "city",
+      "title": "Flotsam",
+      "aliases": [],
+      "summary": "Portowe miasteczko nad Pontarem w Wiedźminie 2.",
+      "facts": [],
+      "tags": [
+        "Wiedźmin 2"
+      ],
+      "regions": [
+        "Temeria"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "vergen",
+      "type": "city",
+      "title": "Vergen",
+      "aliases": [],
+      "summary": "Krasnoludzkie miasto Górnego Aedirn w Wiedźminie 2.",
+      "facts": [],
+      "tags": [
+        "krasnoludy"
+      ],
+      "regions": [
+        "Aedirn"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "white_orchard",
+      "type": "region",
+      "title": "Biały Sad",
+      "aliases": [
+        "White Orchard"
+      ],
+      "summary": "Temerski region zajęty przez Nilfgaard na początku Wiedźmina 3.",
+      "facts": [],
+      "tags": [
+        "Wiedźmin 3"
+      ],
+      "regions": [
+        "Temeria"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "velen",
+      "type": "region",
+      "title": "Velen",
+      "aliases": [],
+      "summary": "Wyniszczona wojną część Temerii, Ziemia Niczyja w Wiedźminie 3.",
+      "facts": [],
+      "tags": [
+        "wojna"
+      ],
+      "regions": [
+        "Temeria"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "crow_perch",
+      "type": "location",
+      "title": "Wrońce",
+      "aliases": [
+        "Crow's Perch"
+      ],
+      "summary": "Kasztel będący lokalnym ośrodkiem władzy w Velen.",
+      "facts": [],
+      "tags": [
+        "Velen"
+      ],
+      "regions": [
+        "Temeria"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "ard_skellig",
+      "type": "region",
+      "title": "Ard Skellig",
+      "aliases": [],
+      "summary": "Największa wyspa Skellige.",
+      "facts": [],
+      "tags": [
+        "Skellige"
+      ],
+      "regions": [
+        "Skellige"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "kaer_trolde",
+      "type": "city",
+      "title": "Kaer Trolde",
+      "aliases": [],
+      "summary": "Główna twierdza polityczna na Ard Skellig.",
+      "facts": [],
+      "tags": [
+        "Skellige"
+      ],
+      "regions": [
+        "Skellige"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "hindersfjall",
+      "type": "region",
+      "title": "Hindarsfjall",
+      "aliases": [],
+      "summary": "Wyspa silnie związana z kultem Freyi.",
+      "facts": [],
+      "tags": [
+        "Freya"
+      ],
+      "regions": [
+        "Skellige"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "tir_na_lia",
+      "type": "location",
+      "title": "Tir ná Lia",
+      "aliases": [],
+      "summary": "Miasto Aen Elle w innym świecie.",
+      "facts": [],
+      "tags": [
+        "Aen Elle"
+      ],
+      "regions": [
+        "inne światy"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "mahakam_loc",
+      "type": "region",
+      "title": "Mahakam",
+      "aliases": [],
+      "summary": "Góry krasnoludów, centrum górnictwa i rzemiosła.",
+      "facts": [],
+      "tags": [
+        "krasnoludy"
+      ],
+      "regions": [
+        "Mahakam"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "dol_blathanna_loc",
+      "type": "region",
+      "title": "Dol Blathanna",
+      "aliases": [
+        "Dolina Kwiatów"
+      ],
+      "summary": "Dolina Kwiatów i ważne terytorium elfów.",
+      "facts": [],
+      "tags": [
+        "elfy"
+      ],
+      "regions": [
+        "Dol Blathanna"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "school_wolf",
+      "type": "witcher_school",
+      "title": "Szkoła Wilka",
+      "aliases": [],
+      "summary": "Najlepiej udokumentowana szkoła; pod koniec epoki aktywna pozostaje garstka wiedźminów.",
+      "facts": [
+        "Baza/tradycja: Kaer Morhen"
+      ],
+      "tags": [
+        "wiedźmini",
+        "szkoła"
+      ],
+      "regions": [
+        "Kaer Morhen"
+      ],
+      "valid": {
+        "fromYear": 900,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [
+        "Szczegóły szkół poza Wilkiem mają różny poziom oparcia w książkach, grach i licencjonowanym rozszerzonym lore."
+      ]
+    },
+    {
+      "id": "school_cat",
+      "type": "witcher_school",
+      "title": "Szkoła Kota",
+      "aliases": [],
+      "summary": "Szkoła o odmiennej reputacji; część Kotów podejmowała kontrakty na ludzi.",
+      "facts": [
+        "Baza/tradycja: rozproszone"
+      ],
+      "tags": [
+        "wiedźmini",
+        "szkoła"
+      ],
+      "regions": [
+        "rozproszone"
+      ],
+      "valid": {
+        "fromYear": 900,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [
+        "Szczegóły szkół poza Wilkiem mają różny poziom oparcia w książkach, grach i licencjonowanym rozszerzonym lore."
+      ]
+    },
+    {
+      "id": "school_griffin",
+      "type": "witcher_school",
+      "title": "Szkoła Gryfa",
+      "aliases": [],
+      "summary": "Rozwinięta przede wszystkim w growym/licencjonowanym lore; kojarzona z dyscypliną i Znakami.",
+      "facts": [
+        "Baza/tradycja: Kaer Seren"
+      ],
+      "tags": [
+        "wiedźmini",
+        "szkoła"
+      ],
+      "regions": [
+        "Kaer Seren"
+      ],
+      "valid": {
+        "fromYear": 900,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [
+        "Szczegóły szkół poza Wilkiem mają różny poziom oparcia w książkach, grach i licencjonowanym rozszerzonym lore."
+      ]
+    },
+    {
+      "id": "school_bear",
+      "type": "witcher_school",
+      "title": "Szkoła Niedźwiedzia",
+      "aliases": [],
+      "summary": "Rozwinięta w growym/licencjonowanym lore; kojarzona z cięższym stylem.",
+      "facts": [
+        "Baza/tradycja: Haern Caduch"
+      ],
+      "tags": [
+        "wiedźmini",
+        "szkoła"
+      ],
+      "regions": [
+        "Haern Caduch"
+      ],
+      "valid": {
+        "fromYear": 900,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [
+        "Szczegóły szkół poza Wilkiem mają różny poziom oparcia w książkach, grach i licencjonowanym rozszerzonym lore."
+      ]
+    },
+    {
+      "id": "school_viper",
+      "type": "witcher_school",
+      "title": "Szkoła Żmii",
+      "aliases": [],
+      "summary": "Szkoła Letho i wiedźminów zabójców królów.",
+      "facts": [
+        "Baza/tradycja: Gorthur Gvaed"
+      ],
+      "tags": [
+        "wiedźmini",
+        "szkoła"
+      ],
+      "regions": [
+        "Gorthur Gvaed"
+      ],
+      "valid": {
+        "fromYear": 900,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [
+        "Szczegóły szkół poza Wilkiem mają różny poziom oparcia w książkach, grach i licencjonowanym rozszerzonym lore."
+      ]
+    },
+    {
+      "id": "school_manticore",
+      "type": "witcher_school",
+      "title": "Szkoła Mantikory",
+      "aliases": [],
+      "summary": "Szkoła wzmiankowana i rozwinięta w materiałach growych/licencjonowanych.",
+      "facts": [
+        "Baza/tradycja: południe"
+      ],
+      "tags": [
+        "wiedźmini",
+        "szkoła"
+      ],
+      "regions": [
+        "południe"
+      ],
+      "valid": {
+        "fromYear": 900,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": [
+        "Szczegóły szkół poza Wilkiem mają różny poziom oparcia w książkach, grach i licencjonowanym rozszerzonym lore."
+      ]
+    },
+    {
+      "id": "brotherhood",
+      "type": "organization",
+      "title": "Bractwo Czarodziejów",
+      "aliases": [],
+      "summary": "Główna organizacja magów przed przewrotem na Thanedd.",
+      "facts": [],
+      "tags": [
+        "magowie"
+      ],
+      "regions": [
+        "Północ"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1267,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "chapter",
+      "type": "organization",
+      "title": "Kapituła i Rada Czarodziejów",
+      "aliases": [],
+      "summary": "Elitarne organy polityczne środowiska magicznego przed Thanedd.",
+      "facts": [],
+      "tags": [
+        "magowie"
+      ],
+      "regions": [
+        "Północ"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1267,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "lodge",
+      "type": "organization",
+      "title": "Loża Czarodziejek",
+      "aliases": [],
+      "summary": "Tajna organizacja wpływowych czarodziejek powstała po Thanedd.",
+      "facts": [],
+      "tags": [
+        "Loża",
+        "magowie"
+      ],
+      "regions": [
+        "Północ",
+        "Nilfgaard"
+      ],
+      "valid": {
+        "fromYear": 1267,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "aretuza",
+      "type": "organization",
+      "title": "Aretuza",
+      "aliases": [],
+      "summary": "Szkoła czarodziejek na Thanedd.",
+      "facts": [],
+      "tags": [
+        "edukacja",
+        "magia"
+      ],
+      "regions": [
+        "Thanedd"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "ban_ard",
+      "type": "organization",
+      "title": "Ban Ard",
+      "aliases": [],
+      "summary": "Szkoła magów w Kaedwen.",
+      "facts": [],
+      "tags": [
+        "edukacja",
+        "magia"
+      ],
+      "regions": [
+        "Kaedwen"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "eternal_fire",
+      "type": "religion",
+      "title": "Wieczny Ogień",
+      "aliases": [],
+      "summary": "Dominujący kult Novigradu; w 1272 związany z radykalnymi prześladowaniami.",
+      "facts": [],
+      "tags": [
+        "religia",
+        "Novigrad"
+      ],
+      "regions": [
+        "Novigrad"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "melitele",
+      "type": "religion",
+      "title": "Melitele",
+      "aliases": [],
+      "summary": "Szeroko czczona bogini opiekuńcza; ważna świątynia znajduje się w Ellander.",
+      "facts": [],
+      "tags": [
+        "religia"
+      ],
+      "regions": [
+        "Północ"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "freya",
+      "type": "religion",
+      "title": "Freya",
+      "aliases": [],
+      "summary": "Główna bogini Skellige, szczególnie czczona na Hindarsfjall.",
+      "facts": [],
+      "tags": [
+        "religia",
+        "Skellige"
+      ],
+      "regions": [
+        "Skellige"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "kreve",
+      "type": "religion",
+      "title": "Kreve",
+      "aliases": [],
+      "summary": "Bóstwo obecne w religijnym krajobrazie Północy.",
+      "facts": [],
+      "tags": [
+        "religia"
+      ],
+      "regions": [
+        "Północ"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "lebioda",
+      "type": "religion",
+      "title": "Lebioda",
+      "aliases": [],
+      "summary": "Prorok i postać kultowa szczególnie istotna w Toussaint.",
+      "facts": [],
+      "tags": [
+        "religia"
+      ],
+      "regions": [
+        "Toussaint"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "lion_spider",
+      "type": "religion",
+      "title": "Kult Lwiogłowego Pająka",
+      "aliases": [],
+      "summary": "Mroczny kult kojarzony z zakazanymi praktykami.",
+      "facts": [],
+      "tags": [
+        "kult",
+        "zakazane"
+      ],
+      "regions": [
+        "Północ"
+      ],
+      "valid": {
+        "fromYear": 1100,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "mage_hunt",
+      "type": "law",
+      "title": "Polowania na magów",
+      "aliases": [],
+      "summary": "W 1272 w Redanii i Novigradzie nasilają się represje wobec magów, alchemików i następnie nieludzi.",
+      "facts": [],
+      "tags": [
+        "prawo",
+        "prześladowania"
+      ],
+      "regions": [
+        "Redania",
+        "Novigrad"
+      ],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "north_nilfgaard",
+      "type": "diplomacy",
+      "title": "Nilfgaard–Północ",
+      "aliases": [],
+      "summary": "Kolejne wojny, rozejmy i próby podporządkowania północnych monarchii.",
+      "facts": [],
+      "tags": [
+        "Nilfgaard",
+        "Północ"
+      ],
+      "regions": [
+        "Nilfgaard",
+        "Północ"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "nilfgaard_toussaint",
+      "type": "diplomacy",
+      "title": "Nilfgaard–Toussaint",
+      "aliases": [],
+      "summary": "Toussaint pozostaje wasalem cesarstwa, lecz zachowuje odrębność kulturową.",
+      "facts": [],
+      "tags": [
+        "Nilfgaard",
+        "Toussaint"
+      ],
+      "regions": [
+        "Nilfgaard",
+        "Toussaint"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "skellige_nilfgaard",
+      "type": "diplomacy",
+      "title": "Skellige–Nilfgaard",
+      "aliases": [],
+      "summary": "Relacja tradycyjnie wroga, obejmująca rajdy i działania wojenne.",
+      "facts": [],
+      "tags": [
+        "Skellige",
+        "Nilfgaard"
+      ],
+      "regions": [
+        "Skellige",
+        "Nilfgaard"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "skellige_north",
+      "type": "diplomacy",
+      "title": "Skellige–Północ",
+      "aliases": [],
+      "summary": "Wyspy są samodzielne, lecz łączą je dynastyczne i osobiste więzi z Cintrą i Północą.",
+      "facts": [],
+      "tags": [
+        "Skellige",
+        "Północ"
+      ],
+      "regions": [
+        "Skellige",
+        "Północ"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "redania_temaria",
+      "type": "diplomacy",
+      "title": "Redania–Temeria",
+      "aliases": [],
+      "summary": "Po śmierci Foltesta Redania wykorzystuje słabość Temerii w walce o dominację.",
+      "facts": [],
+      "tags": [
+        "Redania",
+        "Temeria"
+      ],
+      "regions": [
+        "Redania",
+        "Temeria"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "scoiatael",
+      "type": "organization",
+      "title": "Scoia'tael",
+      "aliases": [],
+      "summary": "Partyzanckie komanda nieludzi walczące z państwami ludzkimi; ich relacje z Nilfgaardem są instrumentalne i złożone.",
+      "facts": [],
+      "tags": [
+        "elfy",
+        "partyzanci"
+      ],
+      "regions": [
+        "Północ"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "prejudice",
+      "type": "culture",
+      "title": "Uprzedzenia wobec nieludzi",
+      "aliases": [],
+      "summary": "Elfy i krasnoludy spotykają się w wielu miastach Północy z dyskryminacją, segregacją i przemocą; natężenie zależy od miejsca i epoki.",
+      "facts": [],
+      "tags": [
+        "elfy",
+        "krasnoludy"
+      ],
+      "regions": [
+        "Północ"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "skellige_culture",
+      "type": "culture",
+      "title": "Zwyczaje Skellige",
+      "aliases": [],
+      "summary": "Społeczeństwo klanowe, kultura morska, honor, uczty i wybieralna monarchia.",
+      "facts": [],
+      "tags": [
+        "klany",
+        "morze"
+      ],
+      "regions": [
+        "Skellige"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "toussaint_culture",
+      "type": "culture",
+      "title": "Dworskość Toussaint",
+      "aliases": [],
+      "summary": "Rycerski ceremoniał, turnieje i idealizowany język honoru są ważne dla lokalnych elit.",
+      "facts": [],
+      "tags": [
+        "rycerstwo",
+        "dwór"
+      ],
+      "regions": [
+        "Toussaint"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "econ_crown",
+      "type": "economy",
+      "title": "Korona redańska/novigradzka",
+      "aliases": [],
+      "summary": "Podstawowa waluta północnego obiegu w Wiedźminie 3.",
+      "facts": [],
+      "tags": [
+        "korona"
+      ],
+      "regions": [
+        "Redania",
+        "Novigrad"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "econ_oren",
+      "type": "economy",
+      "title": "Oren",
+      "aliases": [],
+      "summary": "Waluta związana głównie z Temerią i jej terytoriami.",
+      "facts": [],
+      "tags": [
+        "oren"
+      ],
+      "regions": [
+        "Temeria"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "econ_floren",
+      "type": "economy",
+      "title": "Floren",
+      "aliases": [],
+      "summary": "Waluta Nilfgaardu, wymienialna w Novigradzie.",
+      "facts": [],
+      "tags": [
+        "floren"
+      ],
+      "regions": [
+        "Nilfgaard"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "econ_kaedwen_mark",
+      "type": "economy",
+      "title": "Marka kaedweńska",
+      "aliases": [],
+      "summary": "Waluta Kaedwen.",
+      "facts": [],
+      "tags": [
+        "marka"
+      ],
+      "regions": [
+        "Kaedwen"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "econ_gulden",
+      "type": "economy",
+      "title": "Gulden",
+      "aliases": [],
+      "summary": "Jednostka pieniężna Lyrii i Rivii.",
+      "facts": [],
+      "tags": [
+        "gulden"
+      ],
+      "regions": [
+        "Lyria",
+        "Rivia"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "econ_novigrad_trade",
+      "type": "economy",
+      "title": "Handel Novigradu",
+      "aliases": [],
+      "summary": "Port, banki, cechy i wymiana międzynarodowa czynią Novigrad kluczowym centrum gospodarczym.",
+      "facts": [],
+      "tags": [
+        "handel",
+        "port"
+      ],
+      "regions": [
+        "Novigrad"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "econ_mahakam_trade",
+      "type": "economy",
+      "title": "Metalurgia Mahakamu",
+      "aliases": [],
+      "summary": "Mahakam eksportuje cenione metale, broń i wyroby rzemieślnicze.",
+      "facts": [],
+      "tags": [
+        "metalurgia"
+      ],
+      "regions": [
+        "Mahakam"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "econ_toussaint_wine",
+      "type": "economy",
+      "title": "Wina Toussaint",
+      "aliases": [],
+      "summary": "Winnice i wino są filarem lokalnej gospodarki i kultury.",
+      "facts": [],
+      "tags": [
+        "wino"
+      ],
+      "regions": [
+        "Toussaint"
+      ],
+      "valid": {
+        "fromYear": 1200,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "public",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "cat_beast",
+      "type": "bestiary_category",
+      "title": "Bestie",
+      "aliases": [],
+      "summary": "Kategoria bestiariusza używana w grach CDPR; konkretne słabości zależą od gatunku.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "beast"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "cat_cursed",
+      "type": "bestiary_category",
+      "title": "Przeklęte",
+      "aliases": [],
+      "summary": "Kategoria bestiariusza używana w grach CDPR; konkretne słabości zależą od gatunku.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "cursed"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "cat_draconid",
+      "type": "bestiary_category",
+      "title": "Drakonidy",
+      "aliases": [],
+      "summary": "Kategoria bestiariusza używana w grach CDPR; konkretne słabości zależą od gatunku.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "draconid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "cat_elementa",
+      "type": "bestiary_category",
+      "title": "Żywiołaki",
+      "aliases": [],
+      "summary": "Kategoria bestiariusza używana w grach CDPR; konkretne słabości zależą od gatunku.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "elementa"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "cat_hybrid",
+      "type": "bestiary_category",
+      "title": "Hybrydy",
+      "aliases": [],
+      "summary": "Kategoria bestiariusza używana w grach CDPR; konkretne słabości zależą od gatunku.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "hybrid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "cat_insectoid",
+      "type": "bestiary_category",
+      "title": "Insektoidy",
+      "aliases": [],
+      "summary": "Kategoria bestiariusza używana w grach CDPR; konkretne słabości zależą od gatunku.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "insectoid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "cat_necrophage",
+      "type": "bestiary_category",
+      "title": "Nekrofagi",
+      "aliases": [],
+      "summary": "Kategoria bestiariusza używana w grach CDPR; konkretne słabości zależą od gatunku.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "necrophage"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "cat_ogroid",
+      "type": "bestiary_category",
+      "title": "Ogroidy",
+      "aliases": [],
+      "summary": "Kategoria bestiariusza używana w grach CDPR; konkretne słabości zależą od gatunku.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "ogroid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "cat_relict",
+      "type": "bestiary_category",
+      "title": "Relikty",
+      "aliases": [],
+      "summary": "Kategoria bestiariusza używana w grach CDPR; konkretne słabości zależą od gatunku.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "relict"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "cat_specter",
+      "type": "bestiary_category",
+      "title": "Widma",
+      "aliases": [],
+      "summary": "Kategoria bestiariusza używana w grach CDPR; konkretne słabości zależą od gatunku.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "specter"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "cat_vampire",
+      "type": "bestiary_category",
+      "title": "Wampiry",
+      "aliases": [],
+      "summary": "Kategoria bestiariusza używana w grach CDPR; konkretne słabości zależą od gatunku.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "vampire"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_ghoul",
+      "type": "monster",
+      "title": "Ghul",
+      "aliases": [],
+      "summary": "Padlinożerca przyciągany przez miejsca śmierci.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "necrophage"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_necrophage"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_alghoul",
+      "type": "monster",
+      "title": "Alghul",
+      "aliases": [],
+      "summary": "Silniejszy krewniak ghula.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "necrophage"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_necrophage"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_drowner",
+      "type": "monster",
+      "title": "Utopiec",
+      "aliases": [],
+      "summary": "Wodny humanoidalny potwór bagien, rzek i wybrzeży.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "necrophage"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_necrophage"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_rotfiend",
+      "type": "monster",
+      "title": "Trupojad",
+      "aliases": [],
+      "summary": "Nekrofag o niebezpiecznie niestabilnym ciele.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "necrophage"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_necrophage"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_noonwraith",
+      "type": "monster",
+      "title": "Południca",
+      "aliases": [],
+      "summary": "Widmo związane z tragiczną śmiercią i polami.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "specter"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_specter"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_nightwraith",
+      "type": "monster",
+      "title": "Północnica",
+      "aliases": [],
+      "summary": "Nocne widmo powiązane z silnymi emocjami i miejscem śmierci.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "specter"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_specter"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_leshen",
+      "type": "monster",
+      "title": "Leszy",
+      "aliases": [],
+      "summary": "Stary leśny relikt silnie związany z terytorium.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "relict"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_relict"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_fiend",
+      "type": "monster",
+      "title": "Bies",
+      "aliases": [],
+      "summary": "Ogromny relikt o wielkiej sile i zdolnościach zaburzających percepcję.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "relict"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_relict"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_chort",
+      "type": "monster",
+      "title": "Czart",
+      "aliases": [],
+      "summary": "Mniejszy krewniak biesa.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "relict"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_relict"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_griffin",
+      "type": "monster",
+      "title": "Gryf",
+      "aliases": [],
+      "summary": "Skrzydlaty drapieżnik będący hybrydą cech ptasich i ssaczych.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "hybrid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_hybrid"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_harpy",
+      "type": "monster",
+      "title": "Harpia",
+      "aliases": [],
+      "summary": "Skrzydlaty humanoidalny drapieżnik.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "hybrid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_hybrid"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_siren",
+      "type": "monster",
+      "title": "Syrena",
+      "aliases": [],
+      "summary": "Morska hybryda atakująca wybrzeża i statki.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "hybrid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_hybrid"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_wyvern",
+      "type": "monster",
+      "title": "Wywerna",
+      "aliases": [],
+      "summary": "Latający drakonid, niebędący prawdziwym smokiem.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "draconid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_draconid"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_basilisk",
+      "type": "monster",
+      "title": "Bazyliszek",
+      "aliases": [],
+      "summary": "Groźny drakonid o toksycznych cechach.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "draconid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_draconid"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_forktail",
+      "type": "monster",
+      "title": "Widłogon",
+      "aliases": [],
+      "summary": "Duży skrzydlaty drakonid.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "draconid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_draconid"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_water_hag",
+      "type": "monster",
+      "title": "Baba wodna",
+      "aliases": [],
+      "summary": "Bagienny humanoidalny potwór.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "necrophage"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_necrophage"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_foglet",
+      "type": "monster",
+      "title": "Mglak",
+      "aliases": [],
+      "summary": "Potwór wykorzystujący mgłę i złudzenia.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "necrophage"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_necrophage"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_nekker",
+      "type": "monster",
+      "title": "Nekker",
+      "aliases": [],
+      "summary": "Mały stadny ogroid żyjący w norach.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "ogroid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_ogroid"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_rock_troll",
+      "type": "monster",
+      "title": "Troll skalny",
+      "aliases": [],
+      "summary": "Duży humanoid o skalistej skórze; część osobników potrafi mówić.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "ogroid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_ogroid"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_cyclops",
+      "type": "monster",
+      "title": "Cyklop",
+      "aliases": [],
+      "summary": "Olbrzymi jednooki ogroid.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "ogroid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_ogroid"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_werewolf",
+      "type": "monster",
+      "title": "Wilkołak",
+      "aliases": [],
+      "summary": "Człowiek dotknięty likantropią lub klątwą.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "cursed"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_cursed"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_botchling",
+      "type": "monster",
+      "title": "Poroniec",
+      "aliases": [],
+      "summary": "Istota powstająca z martwego, niepogrzebanego niemowlęcia; jej klątwa może mieć alternatywne rozwiązanie.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "cursed"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_cursed"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_striga",
+      "type": "monster",
+      "title": "Strzyga",
+      "aliases": [],
+      "summary": "Człowiek przemieniony przez klątwę; słynny przypadek dotyczy córki Foltesta.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "cursed"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_cursed"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_bruxa",
+      "type": "monster",
+      "title": "Bruxa",
+      "aliases": [],
+      "summary": "Inteligentny i bardzo niebezpieczny wampir.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "vampire"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_vampire"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_katakan",
+      "type": "monster",
+      "title": "Katakan",
+      "aliases": [],
+      "summary": "Groźny inteligentny wampir w growym bestiariuszu.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "vampire"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_vampire"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_higher_vampire",
+      "type": "monster",
+      "title": "Wyższy wampir",
+      "aliases": [],
+      "summary": "Niezwykle potężna i inteligentna istota, znacznie odmienna od pospolitych wampirów.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "vampire"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_vampire"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_golem",
+      "type": "monster",
+      "title": "Golem",
+      "aliases": [],
+      "summary": "Magicznie animowany konstrukt.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "elementa"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_elementa"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_fire_elemental",
+      "type": "monster",
+      "title": "Żywiołak ognia",
+      "aliases": [],
+      "summary": "Istota związana z energią ognia.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "elementa"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_elementa"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_arachas",
+      "type": "monster",
+      "title": "Krabopająk",
+      "aliases": [],
+      "summary": "Duży insektoid używający jadu lub kamuflażu.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "insectoid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_insectoid"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_endrega",
+      "type": "monster",
+      "title": "Endriaga",
+      "aliases": [],
+      "summary": "Kolonijny insektoid spotykany w lasach i na wilgotnych terenach.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "insectoid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_insectoid"
+      ],
+      "sourceNotes": []
+    },
+    {
+      "id": "event_conjunction",
+      "type": "event",
+      "title": "Koniunkcja Sfer",
+      "aliases": [],
+      "summary": "Kataklizm łączący światy; fundament obecności wielu gatunków i zjawisk na Kontynencie.",
+      "facts": [
+        "Nie nadawaj dokładniejszej daty bez źródła."
+      ],
+      "tags": [
+        "timeline"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -230,
+        "toYear": -230,
+        "month": null,
+        "precision": "year"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "event_cintra",
+      "type": "event",
+      "title": "Upadek Cintry",
+      "aliases": [],
+      "summary": "Nilfgaard podbija Cintrę; Calanthe ginie, Ciri uchodzi.",
+      "facts": [
+        "Nie nadawaj dokładniejszej daty bez źródła."
+      ],
+      "tags": [
+        "timeline"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1263,
+        "toYear": 1263,
+        "month": null,
+        "precision": "year"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "event_sodden",
+      "type": "event",
+      "title": "Bitwa pod Sodden",
+      "aliases": [],
+      "summary": "Magowie i Północ zatrzymują ofensywę Nilfgaardu.",
+      "facts": [
+        "Nie nadawaj dokładniejszej daty bez źródła."
+      ],
+      "tags": [
+        "timeline"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1263,
+        "toYear": 1263,
+        "month": null,
+        "precision": "year"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "event_thanedd",
+      "type": "event",
+      "title": "Przewrót na Thanedd",
+      "aliases": [],
+      "summary": "Rozpad dotychczasowego porządku politycznego magów.",
+      "facts": [
+        "Nie nadawaj dokładniejszej daty bez źródła."
+      ],
+      "tags": [
+        "timeline"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1267,
+        "toYear": 1267,
+        "month": 7,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "event_brenna",
+      "type": "event",
+      "title": "Bitwa pod Brenną",
+      "aliases": [],
+      "summary": "Kluczowe północne zwycięstwo w końcowej fazie wojny.",
+      "facts": [
+        "Nie nadawaj dokładniejszej daty bez źródła."
+      ],
+      "tags": [
+        "timeline"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1268,
+        "toYear": 1268,
+        "month": null,
+        "precision": "year"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "event_rivia",
+      "type": "event",
+      "title": "Pogrom w Rivii",
+      "aliases": [],
+      "summary": "Pogrom zamykający główną sagę Geralta.",
+      "facts": [
+        "Nie nadawaj dokładniejszej daty bez źródła."
+      ],
+      "tags": [
+        "timeline"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1268,
+        "toYear": 1268,
+        "month": null,
+        "precision": "year"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "event_witcher1",
+      "type": "event",
+      "title": "Wiedźmin 1",
+      "aliases": [],
+      "summary": "Geralt wraca bez pamięci; konflikt wokół Salamandry i Wyzimy.",
+      "facts": [
+        "Nie nadawaj dokładniejszej daty bez źródła."
+      ],
+      "tags": [
+        "timeline"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1270,
+        "toYear": 1270,
+        "month": null,
+        "precision": "game-era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "event_witcher2",
+      "type": "event",
+      "title": "Wiedźmin 2",
+      "aliases": [],
+      "summary": "Zabójstwa królów destabilizują Północ; Loc Muinne staje się centrum politycznego przesilenia.",
+      "facts": [
+        "Nie nadawaj dokładniejszej daty bez źródła."
+      ],
+      "tags": [
+        "timeline"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1271,
+        "toYear": 1271,
+        "month": null,
+        "precision": "game-era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "event_witcher3",
+      "type": "event",
+      "title": "Wiedźmin 3: Dziki Gon",
+      "aliases": [],
+      "summary": "Nowa wojna Nilfgaardu z Północą, poszukiwanie Ciri i kryzys polityczny Redanii.",
+      "facts": [
+        "Nie nadawaj dokładniejszej daty bez źródła."
+      ],
+      "tags": [
+        "timeline"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": null,
+        "precision": "game-era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "event_hearts",
+      "type": "event",
+      "title": "Serca z Kamienia",
+      "aliases": [],
+      "summary": "Historia Olgierda von Everec i Gauntera O'Dimma.",
+      "facts": [
+        "Nie nadawaj dokładniejszej daty bez źródła."
+      ],
+      "tags": [
+        "timeline"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": null,
+        "precision": "game-era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "event_blood_wine",
+      "type": "event",
+      "title": "Krew i Wino",
+      "aliases": [],
+      "summary": "Geralt trafia do Toussaint, gdzie rozgrywa się konflikt wokół wyższych wampirów.",
+      "facts": [
+        "Nie nadawaj dokładniejszej daty bez źródła."
+      ],
+      "tags": [
+        "timeline"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1275,
+        "toYear": 1275,
+        "month": null,
+        "precision": "game-era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "educated",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1263_01",
+      "type": "calendar_slot",
+      "title": "1263-01",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1263,
+        "toYear": 1263,
+        "month": 1,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1263_02",
+      "type": "calendar_slot",
+      "title": "1263-02",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1263,
+        "toYear": 1263,
+        "month": 2,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1263_03",
+      "type": "calendar_slot",
+      "title": "1263-03",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1263,
+        "toYear": 1263,
+        "month": 3,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1263_04",
+      "type": "calendar_slot",
+      "title": "1263-04",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1263,
+        "toYear": 1263,
+        "month": 4,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1263_05",
+      "type": "calendar_slot",
+      "title": "1263-05",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1263,
+        "toYear": 1263,
+        "month": 5,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1263_06",
+      "type": "calendar_slot",
+      "title": "1263-06",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1263,
+        "toYear": 1263,
+        "month": 6,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1263_07",
+      "type": "calendar_slot",
+      "title": "1263-07",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1263,
+        "toYear": 1263,
+        "month": 7,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1263_08",
+      "type": "calendar_slot",
+      "title": "1263-08",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1263,
+        "toYear": 1263,
+        "month": 8,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1263_09",
+      "type": "calendar_slot",
+      "title": "1263-09",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1263,
+        "toYear": 1263,
+        "month": 9,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1263_10",
+      "type": "calendar_slot",
+      "title": "1263-10",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1263,
+        "toYear": 1263,
+        "month": 10,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1263_11",
+      "type": "calendar_slot",
+      "title": "1263-11",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1263,
+        "toYear": 1263,
+        "month": 11,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1263_12",
+      "type": "calendar_slot",
+      "title": "1263-12",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1263,
+        "toYear": 1263,
+        "month": 12,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1267_01",
+      "type": "calendar_slot",
+      "title": "1267-01",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1267,
+        "toYear": 1267,
+        "month": 1,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1267_02",
+      "type": "calendar_slot",
+      "title": "1267-02",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1267,
+        "toYear": 1267,
+        "month": 2,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1267_03",
+      "type": "calendar_slot",
+      "title": "1267-03",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1267,
+        "toYear": 1267,
+        "month": 3,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1267_04",
+      "type": "calendar_slot",
+      "title": "1267-04",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1267,
+        "toYear": 1267,
+        "month": 4,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1267_05",
+      "type": "calendar_slot",
+      "title": "1267-05",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1267,
+        "toYear": 1267,
+        "month": 5,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1267_06",
+      "type": "calendar_slot",
+      "title": "1267-06",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1267,
+        "toYear": 1267,
+        "month": 6,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1267_07",
+      "type": "calendar_slot",
+      "title": "1267-07",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1267,
+        "toYear": 1267,
+        "month": 7,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1267_08",
+      "type": "calendar_slot",
+      "title": "1267-08",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1267,
+        "toYear": 1267,
+        "month": 8,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1267_09",
+      "type": "calendar_slot",
+      "title": "1267-09",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1267,
+        "toYear": 1267,
+        "month": 9,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1267_10",
+      "type": "calendar_slot",
+      "title": "1267-10",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1267,
+        "toYear": 1267,
+        "month": 10,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1267_11",
+      "type": "calendar_slot",
+      "title": "1267-11",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1267,
+        "toYear": 1267,
+        "month": 11,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1267_12",
+      "type": "calendar_slot",
+      "title": "1267-12",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1267,
+        "toYear": 1267,
+        "month": 12,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1268_01",
+      "type": "calendar_slot",
+      "title": "1268-01",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1268,
+        "toYear": 1268,
+        "month": 1,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1268_02",
+      "type": "calendar_slot",
+      "title": "1268-02",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1268,
+        "toYear": 1268,
+        "month": 2,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1268_03",
+      "type": "calendar_slot",
+      "title": "1268-03",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1268,
+        "toYear": 1268,
+        "month": 3,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1268_04",
+      "type": "calendar_slot",
+      "title": "1268-04",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1268,
+        "toYear": 1268,
+        "month": 4,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1268_05",
+      "type": "calendar_slot",
+      "title": "1268-05",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1268,
+        "toYear": 1268,
+        "month": 5,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1268_06",
+      "type": "calendar_slot",
+      "title": "1268-06",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1268,
+        "toYear": 1268,
+        "month": 6,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1268_07",
+      "type": "calendar_slot",
+      "title": "1268-07",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1268,
+        "toYear": 1268,
+        "month": 7,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1268_08",
+      "type": "calendar_slot",
+      "title": "1268-08",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1268,
+        "toYear": 1268,
+        "month": 8,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1268_09",
+      "type": "calendar_slot",
+      "title": "1268-09",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1268,
+        "toYear": 1268,
+        "month": 9,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1268_10",
+      "type": "calendar_slot",
+      "title": "1268-10",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1268,
+        "toYear": 1268,
+        "month": 10,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1268_11",
+      "type": "calendar_slot",
+      "title": "1268-11",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1268,
+        "toYear": 1268,
+        "month": 11,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1268_12",
+      "type": "calendar_slot",
+      "title": "1268-12",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1268,
+        "toYear": 1268,
+        "month": 12,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1270_01",
+      "type": "calendar_slot",
+      "title": "1270-01",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1270,
+        "toYear": 1270,
+        "month": 1,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1270_02",
+      "type": "calendar_slot",
+      "title": "1270-02",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1270,
+        "toYear": 1270,
+        "month": 2,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1270_03",
+      "type": "calendar_slot",
+      "title": "1270-03",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1270,
+        "toYear": 1270,
+        "month": 3,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1270_04",
+      "type": "calendar_slot",
+      "title": "1270-04",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1270,
+        "toYear": 1270,
+        "month": 4,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1270_05",
+      "type": "calendar_slot",
+      "title": "1270-05",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1270,
+        "toYear": 1270,
+        "month": 5,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1270_06",
+      "type": "calendar_slot",
+      "title": "1270-06",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1270,
+        "toYear": 1270,
+        "month": 6,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1270_07",
+      "type": "calendar_slot",
+      "title": "1270-07",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1270,
+        "toYear": 1270,
+        "month": 7,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1270_08",
+      "type": "calendar_slot",
+      "title": "1270-08",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1270,
+        "toYear": 1270,
+        "month": 8,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1270_09",
+      "type": "calendar_slot",
+      "title": "1270-09",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1270,
+        "toYear": 1270,
+        "month": 9,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1270_10",
+      "type": "calendar_slot",
+      "title": "1270-10",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1270,
+        "toYear": 1270,
+        "month": 10,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1270_11",
+      "type": "calendar_slot",
+      "title": "1270-11",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1270,
+        "toYear": 1270,
+        "month": 11,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1270_12",
+      "type": "calendar_slot",
+      "title": "1270-12",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1270,
+        "toYear": 1270,
+        "month": 12,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1271_01",
+      "type": "calendar_slot",
+      "title": "1271-01",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1271,
+        "toYear": 1271,
+        "month": 1,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1271_02",
+      "type": "calendar_slot",
+      "title": "1271-02",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1271,
+        "toYear": 1271,
+        "month": 2,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1271_03",
+      "type": "calendar_slot",
+      "title": "1271-03",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1271,
+        "toYear": 1271,
+        "month": 3,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1271_04",
+      "type": "calendar_slot",
+      "title": "1271-04",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1271,
+        "toYear": 1271,
+        "month": 4,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1271_05",
+      "type": "calendar_slot",
+      "title": "1271-05",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1271,
+        "toYear": 1271,
+        "month": 5,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1271_06",
+      "type": "calendar_slot",
+      "title": "1271-06",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1271,
+        "toYear": 1271,
+        "month": 6,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1271_07",
+      "type": "calendar_slot",
+      "title": "1271-07",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1271,
+        "toYear": 1271,
+        "month": 7,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1271_08",
+      "type": "calendar_slot",
+      "title": "1271-08",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1271,
+        "toYear": 1271,
+        "month": 8,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1271_09",
+      "type": "calendar_slot",
+      "title": "1271-09",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1271,
+        "toYear": 1271,
+        "month": 9,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1271_10",
+      "type": "calendar_slot",
+      "title": "1271-10",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1271,
+        "toYear": 1271,
+        "month": 10,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1271_11",
+      "type": "calendar_slot",
+      "title": "1271-11",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1271,
+        "toYear": 1271,
+        "month": 11,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1271_12",
+      "type": "calendar_slot",
+      "title": "1271-12",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1271,
+        "toYear": 1271,
+        "month": 12,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1272_01",
+      "type": "calendar_slot",
+      "title": "1272-01",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": 1,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1272_02",
+      "type": "calendar_slot",
+      "title": "1272-02",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": 2,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1272_03",
+      "type": "calendar_slot",
+      "title": "1272-03",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": 3,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1272_04",
+      "type": "calendar_slot",
+      "title": "1272-04",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": 4,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1272_05",
+      "type": "calendar_slot",
+      "title": "1272-05",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": 5,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1272_06",
+      "type": "calendar_slot",
+      "title": "1272-06",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": 6,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1272_07",
+      "type": "calendar_slot",
+      "title": "1272-07",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": 7,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1272_08",
+      "type": "calendar_slot",
+      "title": "1272-08",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": 8,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1272_09",
+      "type": "calendar_slot",
+      "title": "1272-09",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": 9,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1272_10",
+      "type": "calendar_slot",
+      "title": "1272-10",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": 10,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1272_11",
+      "type": "calendar_slot",
+      "title": "1272-11",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": 11,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1272_12",
+      "type": "calendar_slot",
+      "title": "1272-12",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1272,
+        "toYear": 1272,
+        "month": 12,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1275_01",
+      "type": "calendar_slot",
+      "title": "1275-01",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1275,
+        "toYear": 1275,
+        "month": 1,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1275_02",
+      "type": "calendar_slot",
+      "title": "1275-02",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1275,
+        "toYear": 1275,
+        "month": 2,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1275_03",
+      "type": "calendar_slot",
+      "title": "1275-03",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1275,
+        "toYear": 1275,
+        "month": 3,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1275_04",
+      "type": "calendar_slot",
+      "title": "1275-04",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1275,
+        "toYear": 1275,
+        "month": 4,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1275_05",
+      "type": "calendar_slot",
+      "title": "1275-05",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1275,
+        "toYear": 1275,
+        "month": 5,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1275_06",
+      "type": "calendar_slot",
+      "title": "1275-06",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1275,
+        "toYear": 1275,
+        "month": 6,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1275_07",
+      "type": "calendar_slot",
+      "title": "1275-07",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1275,
+        "toYear": 1275,
+        "month": 7,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1275_08",
+      "type": "calendar_slot",
+      "title": "1275-08",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1275,
+        "toYear": 1275,
+        "month": 8,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1275_09",
+      "type": "calendar_slot",
+      "title": "1275-09",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1275,
+        "toYear": 1275,
+        "month": 9,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1275_10",
+      "type": "calendar_slot",
+      "title": "1275-10",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1275,
+        "toYear": 1275,
+        "month": 10,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1275_11",
+      "type": "calendar_slot",
+      "title": "1275-11",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1275,
+        "toYear": 1275,
+        "month": 11,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "calendar_1275_12",
+      "type": "calendar_slot",
+      "title": "1275-12",
+      "aliases": [],
+      "summary": "Slot kalendarza dla wydarzeń kampanii i tych kanonicznych, które mają wiarygodną datę miesięczną.",
+      "facts": [
+        "Brak wpisu kanonicznego nie oznacza braku zdarzeń w świecie."
+      ],
+      "tags": [
+        "calendar"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": 1275,
+        "toYear": 1275,
+        "month": 12,
+        "precision": "month"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "gm",
+      "branch": "fixed",
+      "relations": [],
+      "sourceNotes": []
+    },
+    {
+      "id": "monster_wraith",
+      "type": "monster",
+      "title": "Upiór",
+      "aliases": [],
+      "summary": "Ogólna kategoria zjawy związanej z miejscem, emocją lub śmiercią.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "specter"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_specter"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_plague_maiden",
+      "type": "monster",
+      "title": "Morowa Dziewica",
+      "aliases": [],
+      "summary": "Widmo powiązane z zarazą i skażonym miejscem.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "specter"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_specter"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_hym",
+      "type": "monster",
+      "title": "Hym",
+      "aliases": [],
+      "summary": "Demoniczna istota żerująca na poczuciu winy i cierpieniu ofiary.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "specter"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_specter"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_barghest",
+      "type": "monster",
+      "title": "Barghest",
+      "aliases": [],
+      "summary": "Widmowy pies pojawiający się w growym lore.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "specter"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_specter"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_alp",
+      "type": "monster",
+      "title": "Alp",
+      "aliases": [],
+      "summary": "Inteligentny wampir o humanoidalnej postaci.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "vampire"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_vampire"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_ekimmara",
+      "type": "monster",
+      "title": "Ekimmara",
+      "aliases": [],
+      "summary": "Groźny wampir niższego rzędu, silny i szybki.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "vampire"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_vampire"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_fleder",
+      "type": "monster",
+      "title": "Fleder",
+      "aliases": [],
+      "summary": "Bestialski wampir o dużej sile fizycznej.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "vampire"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_vampire"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_garkain",
+      "type": "monster",
+      "title": "Garkain",
+      "aliases": [],
+      "summary": "Brutalny wampir spotykany w Toussaint.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "vampire"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_vampire"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_garkain_alpha",
+      "type": "monster",
+      "title": "Alfa garkain",
+      "aliases": [],
+      "summary": "Silniejszy wariant garkaina.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "vampire"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_vampire"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_archespore",
+      "type": "monster",
+      "title": "Archespora",
+      "aliases": [],
+      "summary": "Roślinny potwór związany z toksynami i gwałtownym wzrostem.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "relict"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_relict"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_godling",
+      "type": "monster",
+      "title": "Bożątko",
+      "aliases": [],
+      "summary": "Niewielki inteligentny relikt związany z konkretnym miejscem.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "relict"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_relict"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_sylvan",
+      "type": "monster",
+      "title": "Sylwan",
+      "aliases": [],
+      "summary": "Inteligentny rogatny relikt, często mylony przez ludzi z diabłem.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "relict"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_relict"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_shaelmaar",
+      "type": "monster",
+      "title": "Szaelmaar",
+      "aliases": [],
+      "summary": "Opancerzony podziemny potwór znany z Toussaint.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "relict"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_relict"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_wight",
+      "type": "monster",
+      "title": "Wight",
+      "aliases": [],
+      "summary": "Przeklęta istota spotykana w Toussaint; niektóre przypadki można odczarować.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "relict"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_relict"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_doppler",
+      "type": "monster",
+      "title": "Doppler",
+      "aliases": [],
+      "summary": "Zmiennokształtna inteligentna istota zdolna naśladować ludzi i nieludzi.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "relict"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_relict"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_succubus",
+      "type": "monster",
+      "title": "Sukkub",
+      "aliases": [],
+      "summary": "Inteligentna istota humanoidalna związana z uwodzeniem i silnymi emocjami; nie zawsze zachowuje się wrogo.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "hybrid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_hybrid"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_cockatrice",
+      "type": "monster",
+      "title": "Kuroliszek",
+      "aliases": [],
+      "summary": "Drakonid często mylony z bazyliszkiem.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "draconid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_draconid"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_slyzard",
+      "type": "monster",
+      "title": "Ślizgacz",
+      "aliases": [],
+      "summary": "Duży skrzydlaty drakonid spotykany m.in. w Toussaint.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "draconid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_draconid"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_dracolizard",
+      "type": "monster",
+      "title": "Drakoliszek",
+      "aliases": [],
+      "summary": "Rzadki drakonid z growego bestiariusza.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "draconid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_draconid"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_ekhidna",
+      "type": "monster",
+      "title": "Echidna",
+      "aliases": [],
+      "summary": "Morska hybryda blisko spokrewniona z syrenami.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "hybrid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_hybrid"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_melusine",
+      "type": "monster",
+      "title": "Meluzyna",
+      "aliases": [],
+      "summary": "Potężna odmiana morskiej hybrydy związana ze Skellige.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "hybrid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_hybrid"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_erynia",
+      "type": "monster",
+      "title": "Erynia",
+      "aliases": [],
+      "summary": "Silniejsza odmiana harpii.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "hybrid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_hybrid"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_gryphon_royal",
+      "type": "monster",
+      "title": "Gryf królewski",
+      "aliases": [],
+      "summary": "Silniejszy wariant gryfa.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "hybrid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_hybrid"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_endrega_worker",
+      "type": "monster",
+      "title": "Endriaga robotnica",
+      "aliases": [],
+      "summary": "Robotnicza kasta kolonii endriag.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "insectoid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_insectoid"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_endrega_warrior",
+      "type": "monster",
+      "title": "Endriaga wojownik",
+      "aliases": [],
+      "summary": "Bojowa kasta endriag.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "insectoid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_insectoid"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_arachas_armored",
+      "type": "monster",
+      "title": "Opancerzony krabopająk",
+      "aliases": [],
+      "summary": "Silnie opancerzona odmiana krabopająka.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "insectoid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_insectoid"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_arachnomorph",
+      "type": "monster",
+      "title": "Arachnomorf",
+      "aliases": [],
+      "summary": "Szybki pajęczy insektoid z growego bestiariusza.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "insectoid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_insectoid"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_giant_centipede",
+      "type": "monster",
+      "title": "Olbrzymia stonoga",
+      "aliases": [],
+      "summary": "Wielki jadowity insektoid spotykany w Toussaint.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "insectoid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_insectoid"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_scurver",
+      "type": "monster",
+      "title": "Skurwiel",
+      "aliases": [],
+      "summary": "Nekrofag blisko spokrewniony z trupojadem, niebezpieczny przy śmierci.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "necrophage"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_necrophage"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_devourer",
+      "type": "monster",
+      "title": "Pożeracz",
+      "aliases": [],
+      "summary": "Silny humanoidalny nekrofag.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "necrophage"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_necrophage"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_grave_hag",
+      "type": "monster",
+      "title": "Cmentarna baba",
+      "aliases": [],
+      "summary": "Nekrofag związany z cmentarzami i żerowaniem na zwłokach.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "necrophage"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_necrophage"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_ice_troll",
+      "type": "monster",
+      "title": "Troll lodowy",
+      "aliases": [],
+      "summary": "Troll przystosowany do zimnych regionów.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "ogroid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_ogroid"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_ice_giant",
+      "type": "monster",
+      "title": "Lodowy gigant",
+      "aliases": [],
+      "summary": "Ogromny ogroid ze Skellige.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "ogroid"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_ogroid"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_gargoyle",
+      "type": "monster",
+      "title": "Gargulec",
+      "aliases": [],
+      "summary": "Kamienny konstrukt/istota magiczna klasyfikowana jako elementa.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "elementa"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_elementa"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_earth_elemental",
+      "type": "monster",
+      "title": "Żywiołak ziemi",
+      "aliases": [],
+      "summary": "Potężna istota związana z ziemią i magią konstrukcyjną.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "elementa"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_elementa"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_ice_elemental",
+      "type": "monster",
+      "title": "Żywiołak lodu",
+      "aliases": [],
+      "summary": "Istota magiczna związana z lodem i zimnem.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "elementa"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_elementa"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_djinn",
+      "type": "monster",
+      "title": "Dżinn",
+      "aliases": [],
+      "summary": "Potężna istota żywiołowa, zdolna do ekstremalnych manifestacji magii.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "elementa"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_elementa"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_berserker",
+      "type": "monster",
+      "title": "Berserker",
+      "aliases": [],
+      "summary": "Człowiek przemieniający się w bestię niedźwiedzią pod wpływem rytuału lub klątwy.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "cursed"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_cursed"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_ulfhedinn",
+      "type": "monster",
+      "title": "Ulfhedinn",
+      "aliases": [],
+      "summary": "Silniejsza odmiana wilkołaka znana ze Skellige.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "cursed"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_cursed"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_lubberkin",
+      "type": "monster",
+      "title": "Kłobuk",
+      "aliases": [],
+      "summary": "Dobroczynna forma odczarowanego porońca, związana z rodziną i domem.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "cursed"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_cursed"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_hound_wild_hunt",
+      "type": "monster",
+      "title": "Ogar Dzikiego Gonu",
+      "aliases": [],
+      "summary": "Magiczny ogar związany z Dzikim Gonem.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "elementa"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_elementa"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    },
+    {
+      "id": "monster_iris_nightmare",
+      "type": "monster",
+      "title": "Koszmar",
+      "aliases": [],
+      "summary": "Widmowa manifestacja traumy lub wspomnienia w Sercach z Kamienia.",
+      "facts": [],
+      "tags": [
+        "bestiariusz",
+        "specter"
+      ],
+      "regions": [],
+      "valid": {
+        "fromYear": -1000,
+        "toYear": 1275,
+        "month": null,
+        "precision": "era"
+      },
+      "canonLane": "saga_cdpr",
+      "knowledgeTier": "specialist",
+      "branch": "fixed",
+      "relations": [
+        "cat_specter"
+      ],
+      "sourceNotes": [
+        "growy bestiariusz / ciągłość CDPR"
+      ]
+    }
+  ]
+}

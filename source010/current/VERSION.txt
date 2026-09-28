@@ -1,0 +1,2 @@
+Kroniki RPG 0.8.1
+Godot + Rust Core + Release Pipeline
