@@ -132,6 +132,14 @@ jobs:
           $src = $src.Replace($oldImport,$newImport).Replace($oldExport,$newExport)
           $src = $src.Replace("Pop-Location", "Pop-Location`r`nif (!(Test-Path (Join-Path `$App 'KronikiRPG.exe'))) { throw 'Godot export finished without KronikiRPG.exe' }")
           Set-Content -Path $path -Value $src -Encoding utf8
+      - name: Upload reconstructed source snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: kroniki-rpg-source-snapshot
+          path: kroniki-rpg-godot
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
