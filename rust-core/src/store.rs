@@ -35,6 +35,11 @@ impl Store {
                 key TEXT PRIMARY KEY,
                 value TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS campaigns(
+                campaign_id TEXT PRIMARY KEY,
+                state_json TEXT NOT NULL,
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
             CREATE TABLE IF NOT EXISTS events(
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 campaign_id TEXT NOT NULL,
@@ -113,6 +118,26 @@ impl Store {
         Ok(())
     }
 
+    pub fn latest(&self) -> Result<Option<GameState>, String> {
+        use rusqlite::OptionalExtension;
+        let c = self.conn.lock().map_err(|_| "DB lock poisoned".to_string())?;
+        let txt: Option<String> = c.query_row("SELECT state_json FROM campaigns WHERE campaign_id=(SELECT value FROM settings WHERE key='active_campaign')", [], |r|r.get(0))
+            .optional().map_err(|e|e.to_string())?;
+        txt.map(|t|serde_json::from_str(&t).map_err(|e|e.to_string())).transpose()
+    }
+
+    pub fn checkpoint(&self, state: &GameState, kind: &str, payload: &str) -> Result<(), String> {
+        let txt = serde_json::to_string(state).map_err(|e|e.to_string())?;
+        let mut c = self.conn.lock().map_err(|_| "DB lock poisoned".to_string())?;
+        let tx = c.transaction().map_err(|e|e.to_string())?;
+        tx.execute("INSERT INTO campaigns(campaign_id,state_json,updated_at) VALUES(?1,?2,strftime('%Y-%m-%d %H:%M:%f','now')) ON CONFLICT(campaign_id) DO UPDATE SET state_json=excluded.state_json,updated_at=excluded.updated_at",
+            params![state.campaign_id,txt]).map_err(|e|e.to_string())?;
+        tx.execute("INSERT INTO events(campaign_id,revision,kind,payload) VALUES(?1,?2,?3,?4)",
+            params![state.campaign_id,state.revision,kind,payload]).map_err(|e|e.to_string())?;
+        tx.execute("INSERT INTO settings(key,value) VALUES('active_campaign',?1) ON CONFLICT(key) DO UPDATE SET value=excluded.value",params![state.campaign_id]).map_err(|e|e.to_string())?;
+        tx.commit().map_err(|e|e.to_string())
+    }
+
     pub fn event(&self, state: &GameState, kind: &str, payload: &str) {
         if let Ok(c) = self.conn.lock() {
             let _ = c.execute(
@@ -122,3 +147,4 @@ impl Store {
         }
     }
 }
+
