@@ -199,6 +199,7 @@ pub fn simulate_background(state: &mut GameState, elapsed_minutes: i64) -> Vec<S
             }
         }
     }
+    events.extend(crate::bell::advance(state,elapsed_minutes));
     state.world.chronicle.extend(events.clone());
     if !events.is_empty() { state.revision += 1; }
     events

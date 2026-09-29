@@ -58,12 +58,13 @@ pub struct Campaign {
     pub threads: BTreeMap<String, StoryThread>,
     pub clues: BTreeMap<String, Clue>,
     pub exits: BTreeMap<String, Vec<String>>,
+    pub bell: Option<crate::bell::BellAdventure>,
 }
 impl Default for Campaign {
     fn default() -> Self {
         Self { title: "Kampania".into(), setting: "Mroczne fantasy inspirowane światem Wiedźmina".into(),
             tone: "Przygodowy, konkretny; decyzje należą do gracza".into(), boundaries: String::new(),
-            scene: "opening".into(), scene_turns: 0, threads: BTreeMap::new(), clues: BTreeMap::new(), exits: BTreeMap::new() }
+            scene: "opening".into(), scene_turns: 0, threads: BTreeMap::new(), clues: BTreeMap::new(), exits: BTreeMap::new(), bell: None }
     }
 }
 
@@ -198,6 +199,7 @@ pub fn apply_turn(state: &mut GameState, plan: &TurnPlan, action: &PlayerAction,
     let discovered: BTreeSet<_> = state.campaign.clues.values().filter(|c|c.discovered).map(|c|c.id.clone()).collect();
     for thread in state.campaign.threads.values_mut().filter(|t|!t.resolved) {
         thread.clock += 1;
+        if state.campaign.bell.is_some() && thread.id=="missing-courier" {continue;}
         if !thread.required_clues.is_empty() && thread.required_clues.iter().all(|id|discovered.contains(id)) {
             thread.resolved = true;
             events.push(format!("Zebrane wskazówki pozwalają rozwiązać wątek: {}.",thread.title));
@@ -232,6 +234,7 @@ pub fn new_campaign(req: NewCampaign) -> GameState {
     if !req.tone.trim().is_empty(){s.campaign.tone=short(&req.tone,240);}
     s.campaign.boundaries=short(&req.boundaries,1000);
     s.world.location="Gospoda nad brodem".into();
+    s.campaign.bell=Some(crate::bell::BellAdventure::default());
     s.campaign.exits=BTreeMap::from([
         ("Gospoda nad brodem".into(),vec!["Stary most".into(),"Młyn".into()]),
         ("Stary most".into(),vec!["Gospoda nad brodem".into(),"Młyn".into()]),
@@ -243,6 +246,12 @@ pub fn new_campaign(req: NewCampaign) -> GameState {
     ] {
         s.world.npcs.insert(id.into(),Npc { id:id.into(),name:name.into(),role:role.into(),personality:personality.into(),public_goal:goal.into(),secret:secret.into(),location:location.into(),active:true,plan:vec!["sprawdzić najbliższe otoczenie".into()],..Default::default() });
     }
+    for (id,name,role,location,goal,active) in [
+        ("jan","Jan","kurier","Młyn","odzyskać bezpieczeństwo",false),
+        ("poborca","Olgierd","poborca myta","Stary most","uzyskać poręczenie lub zatrzymać dłużnika",false)
+    ] {
+        s.world.npcs.insert(id.into(),Npc{id:id.into(),name:name.into(),role:role.into(),location:location.into(),public_goal:goal.into(),active,..Default::default()});
+    }
     for (id,location,text,requires) in [
         ("tracks","Stary most","Ślady wozu prowadzą spod mostu do młyna; na poręczy została tkanina kuriera.",vec![]),
         ("letter","Gospoda nad brodem","Na stole pod rachunkami leży list: kurier przewoził lekarstwo dla młynarki.",vec![]),
@@ -253,7 +262,7 @@ pub fn new_campaign(req: NewCampaign) -> GameState {
     s.world.quests.insert(id.into(),Quest{id:id.into(),title:"Zaginiony kurier".into(),status:"active".into(),summary:"Marta prosi o ustalenie losu kuriera.".into(),..Default::default()});
     s.director.scene_goal="Poznaj Martę i wybierz pierwszy trop.".into();
     s.last_narration="Deszcz bębni o dach gospody nad brodem. Marta odkłada nietkniętą miskę. «Kurier miał wrócić przed zmrokiem. Strażnik widział go przy starym moście, ale młyn też dziś milczy». Przesuwa ku tobie lampę i czeka na odpowiedź. Co robisz?".into();
-    s.last_suggestions=vec!["Pytam Martę o kuriera".into(),"Idę do miejsca Stary most".into(),"Badam pozostawione na stole rzeczy".into()];
+    s.last_suggestions=vec!["Pytam Martę, co mogę zrobić dla kuriera".into(),"Idę do miejsca Stary most".into(),"Badam pozostawione na stole rzeczy".into()];
     s
 }
 
@@ -262,5 +271,6 @@ pub fn public_campaign(s: &GameState) -> Value {
         "threads":s.campaign.threads.values().map(|t|json!({"id":t.id,"title":t.title,"question":t.question,"urgency":t.urgency,"resolved":t.resolved})).collect::<Vec<_>>(),
         "clues":s.campaign.clues.values().filter(|c|c.discovered).map(|c|json!({"id":c.id,"text":c.text})).collect::<Vec<_>>(),
         "exits":s.campaign.exits.get(&s.world.location).cloned().unwrap_or_default(),
+        "adventure":crate::bell::public(s),
         "turns":s.memory.turns})
 }
