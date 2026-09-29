@@ -243,6 +243,10 @@ pub struct DirectorState {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GameState {
+    #[serde(default)]
+    pub memory: crate::dm::CampaignMemory,
+    #[serde(default)]
+    pub campaign: crate::dm::Campaign,
     pub schema: i32,
     pub campaign_id: String,
     pub character: Character,
@@ -256,6 +260,8 @@ pub struct GameState {
 impl Default for GameState {
     fn default() -> Self {
         Self {
+            memory: Default::default(),
+            campaign: Default::default(),
             schema: 10,
             campaign_id: "default".into(),
             character: Character::default(),
@@ -342,13 +348,17 @@ pub struct AiProposal {
 
 pub fn state_summary(s: &GameState) -> Value {
     json!({
+        "schema": s.schema,
+        "campaign": crate::dm::public_campaign(s),
+        "recent_turns": &s.memory.recent,
         "revision": s.revision,
         "campaign_id": &s.campaign_id,
         "character": {"name": &s.character.name, "hp": s.character.hp, "stamina": s.character.stamina, "vigor": s.character.vigor, "chaos": s.character.chaos},
         "world": {"location": &s.world.location, "clock": &s.world.clock, "weather": &s.world.weather, "tension": s.world.tension},
         "combat": &s.world.combat,
-        "hunt": &s.world.hunt,
+        "hunt": {"active":s.world.hunt.active,"contract":s.world.hunt.contract,"confidence":s.world.hunt.confidence,"clues":s.world.hunt.clues,"hypotheses":s.world.hunt.hypotheses},
         "last_narration": &s.last_narration,
         "suggestions": &s.last_suggestions,
     })
 }
+

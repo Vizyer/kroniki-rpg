@@ -18,6 +18,7 @@ var cancel_button:Button
 var save_id := -1
 var pending_action_id := -1
 var state:Dictionary = {}
+var pending_campaign := false
 
 func _ready() -> void:
     set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -59,6 +60,8 @@ func _build_ui() -> void:
     status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
     status.add_theme_color_override("font_color", MUTED)
     th.add_child(status)
+    th.add_child(_button("NOWA KAMPANIA", _new_campaign_dialog))
+    th.add_child(_button("DZIENNIK", _show_journal))
     th.add_child(_button("ZAPISZ", _save_game))
     th.add_child(_button("WCZYTAJ", _load_dialog))
 
@@ -153,10 +156,11 @@ func _on_core_ready(info:Dictionary) -> void:
 
 func _submit_action() -> void:
     var text := input.text.strip_edges()
-    if text == "" or pending_action_id > 0:
+    if text == "" or pending_action_id > 0 or pending_campaign:
         return
     input.text = ""
-    narration.append_text("\n\n[color=#c4a96b]› %s[/color]\n" % text)
+    narration.append_text("\n\n[color=#c4a96b]› [/color]")
+    narration.add_text(text + "\n")
     status.text = "Mistrz Gry rozstrzyga…"
     pending_action_id = core.request("/action", {"text": text, "mode": "freeform"})
     cancel_button.visible = true
@@ -168,27 +172,46 @@ func _cancel_action() -> void:
 func _on_request_cancelled(request_id:int) -> void:
     if request_id == pending_action_id:
         pending_action_id = -1
+        pending_campaign = true
         cancel_button.visible = false
-        status.text = "Odpowiedź anulowana. Akcja nie została zatwierdzona."
+        status.text = "Wysłano prośbę o anulowanie; sprawdzam zapisany stan."
 
 func _on_core_response(route:String, ok:bool, data:Dictionary) -> void:
     if route == "/state" and ok:
         state = data
-        _refresh_sidebars(data)
+        _restore_scene()
+        return
+
+    if route == "/action/cancel":
+        pending_campaign = false
+        status.text = "Odczytuję stan po anulowaniu." if ok else "Nie potwierdzono anulowania. Sprawdzam stan."
+        core.request("/state", {}, "GET")
+        return
+
+    if route == "/campaign/new":
+        pending_campaign = false
+        if ok:
+            save_id = -1
+            state = data.get("state", {})
+            _restore_scene()
+            status.text = "Nowa kampania • autosave aktywny"
+        else:
+            status.text = "Błąd kampanii: %s" % str(data.get("error", "brak odpowiedzi"))
         return
 
     if route == "/action":
         pending_action_id = -1
         cancel_button.visible = false
         if not ok:
-            status.text = "MGAI nie odpowiedział — stan gry nie został uszkodzony."
+            status.text = str(data.get("error", "Brak odpowiedzi. Sprawdzam zapisany stan."))
+            core.request("/state", {}, "GET")
             narration.append_text("\n[color=#b75b57]Rdzeń nie mógł zatwierdzić akcji.[/color]")
             return
         state = data.get("state", {})
         var source := str(data.get("source", "model"))
         status.text = "MGAI • %s" % ("lokalny fallback" if source == "local_fallback" else "model lokalny")
         var text := str(data.get("narration", ""))
-        narration.append_text("\n\n%s" % text)
+        narration.add_text("\n\n" + text)
         _set_suggestions(data.get("suggestions", []))
         _refresh_sidebars(state)
         return
@@ -205,12 +228,14 @@ func _on_core_response(route:String, ok:bool, data:Dictionary) -> void:
         _show_load_list(data.get("saves", []))
         return
 
-    if route == "/save/load" and ok:
+    if route == "/save/load":
+        pending_campaign = false
+        if not ok:
+            status.text = "Nie udało się wczytać zapisu."
+            return
         save_id = int(data.get("id", -1))
         state = data.get("state", {})
-        narration.text = str(state.get("last_narration", "Wczytano kampanię."))
-        _set_suggestions(state.get("last_suggestions", []))
-        _refresh_sidebars(state)
+        _restore_scene()
         status.text = "Wczytano zapis."
 
 func _set_suggestions(items:Array) -> void:
@@ -273,6 +298,8 @@ func _refresh_sidebars(s:Dictionary) -> void:
         ))
 
 func _save_game() -> void:
+    if pending_action_id > 0 or pending_campaign:
+        return
     var default_name := "Zapis"
     if state.has("character"):
         default_name = str(state.character.get("name", "Postać")) + " — " + str(state.get("world", {}).get("location", "Zapis"))
@@ -282,6 +309,8 @@ func _save_game() -> void:
     core.request("/save", payload)
 
 func _load_dialog() -> void:
+    if pending_action_id > 0 or pending_campaign:
+        return
     core.request("/saves", {}, "GET")
 
 func _show_load_list(saves:Array) -> void:
@@ -293,6 +322,71 @@ func _show_load_list(saves:Array) -> void:
         var id := int(save_row.get("id", -1))
         var name := str(save_row.get("name", "Zapis"))
         var b := _button("WCZYTAJ • " + name, func():
+            if pending_action_id > 0 or pending_campaign:
+                return
+            pending_campaign = true
             core.request("/save/load", {"id": id})
         )
         suggestions.add_child(b)
+
+
+func _restore_scene() -> void:
+    narration.clear()
+    narration.add_text(str(state.get("last_narration", "Wybierz NOWA KAMPANIA, aby rozpocząć przygodę.")))
+    _set_suggestions(state.get("suggestions", []))
+    _refresh_sidebars(state)
+
+func _new_campaign_dialog() -> void:
+    if pending_action_id > 0 or pending_campaign:
+        return
+    var dialog := ConfirmationDialog.new()
+    dialog.title = "Nowa kampania — Dzwon nad brodem"
+    dialog.ok_button_text = "Rozpocznij"
+    var box := VBoxContainer.new()
+    dialog.add_child(box)
+    box.add_child(_label("Przygoda o zaginionym kurierze. Zapisz bieżącą kampanię przed rozpoczęciem nowej."))
+    var character_name := LineEdit.new()
+    character_name.placeholder_text = "Imię bohatera"
+    box.add_child(character_name)
+    var campaign_title := LineEdit.new()
+    campaign_title.placeholder_text = "Tytuł kampanii (opcjonalnie)"
+    box.add_child(campaign_title)
+    var tone := LineEdit.new()
+    tone.placeholder_text = "Ton sesji, np. tajemnica i przygoda"
+    box.add_child(tone)
+    var boundaries := LineEdit.new()
+    boundaries.placeholder_text = "Tematy, których MG ma unikać"
+    box.add_child(boundaries)
+    dialog.confirmed.connect(func():
+        if pending_action_id > 0 or pending_campaign:
+            return
+        pending_campaign = true
+        core.request("/campaign/new", {"character_name": character_name.text, "title": campaign_title.text, "tone": tone.text, "boundaries": boundaries.text})
+        dialog.queue_free()
+    )
+    dialog.canceled.connect(dialog.queue_free)
+    add_child(dialog)
+    dialog.popup_centered(Vector2i(680, 300))
+
+func _show_journal() -> void:
+    var dialog := AcceptDialog.new()
+    dialog.title = "Dziennik kampanii"
+    var journal := RichTextLabel.new()
+    journal.custom_minimum_size = Vector2(680, 420)
+    journal.bbcode_enabled = false
+    var campaign:Dictionary = state.get("campaign", {})
+    var text := "%s • tur: %s\n\nWĄTKI\n" % [str(campaign.get("title", "Kampania")), str(campaign.get("turns", 0))]
+    for thread in campaign.get("threads", []):
+        text += "%s — %s\n" % [str(thread.get("title", "")), "rozwiązany" if thread.get("resolved", false) else "otwarty"]
+    text += "\nODKRYTE WSKAZÓWKI\n"
+    for clue in campaign.get("clues", []):
+        text += str(clue.get("text", "")) + "\n"
+    text += "\nOSTATNIE TURY\n"
+    for turn in state.get("recent_turns", []):
+        text += "› %s\n%s\n\n" % [str(turn.get("action", "")), str(turn.get("narration", ""))]
+    journal.text = text
+    dialog.add_child(journal)
+    dialog.confirmed.connect(dialog.queue_free)
+    dialog.canceled.connect(dialog.queue_free)
+    add_child(dialog)
+    dialog.popup_centered(Vector2i(720, 480))

@@ -49,6 +49,10 @@ fn deterministic_roll(seed: &str, revision: i64) -> i32 {
 }
 
 pub fn resolve_action(state: &GameState, action: &PlayerAction, intent: &Intent) -> Resolution {
+    let social_pressure = ["przekon", "groż", "groź", "kłam", "oszuk", "zastrasz"].iter().any(|w|action.text.to_lowercase().contains(w));
+    if matches!(intent.kind.as_str(), "observe" | "rest") || (intent.kind == "travel" && !intent.target.is_empty()) || (intent.kind == "social" && !social_pressure) {
+        return Resolution { ok:true, degree:"no_check".into(), duration_seconds:if intent.kind=="rest"{1800}else if intent.kind=="travel"{600}else{30}, ..Default::default() };
+    }
     let roll = deterministic_roll(&action.text, state.revision);
     let per = *state.character.attributes.get("PER").unwrap_or(&2);
     let int_ = *state.character.attributes.get("INT").unwrap_or(&2);
@@ -174,15 +178,16 @@ pub fn simulate_background(state: &mut GameState, elapsed_minutes: i64) -> Vec<S
     if elapsed_minutes <= 0 { return events; }
     advance_time(&mut state.world.clock, elapsed_minutes);
     for f in state.world.factions.values_mut() {
-        if f.clock_max > 0 && elapsed_minutes >= 60 {
+        if f.clock_max > 0 && f.clock < f.clock_max && elapsed_minutes >= 60 {
             f.clock = min(f.clock_max, f.clock + (elapsed_minutes / 180) as i32);
             if f.clock == f.clock_max { events.push(format!("Plan frakcji '{}' osiągnął punkt przełomowy.", f.name)); }
         }
     }
     for npc in state.world.npcs.values_mut().filter(|n| n.active) {
         if !npc.plan.is_empty() && elapsed_minutes >= 60 {
-            let step = npc.plan.remove(0);
-            events.push(format!("{} realizuje plan: {}", npc.name, step));
+            npc.plan.remove(0);
+            // Private plans are never player-visible narration input.
+            if npc.location == state.world.location { events.push(format!("{} zajmuje się swoimi sprawami.",npc.name)); }
         }
     }
     for q in state.world.quests.values_mut() {
@@ -287,3 +292,4 @@ mod tests {
         assert!(validate_ai_patch(&s, &p).is_err());
     }
 }
+

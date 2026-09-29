@@ -37,8 +37,8 @@ impl LocalAiRuntime {
             return Ok(false);
         }
 
+        let mut guard = self.child.lock().await;
         {
-            let mut guard = self.child.lock().await;
             if let Some(child) = guard.as_mut() {
                 match child.try_wait() {
                     Ok(None) => return Ok(true),
@@ -65,8 +65,29 @@ impl LocalAiRuntime {
         }
 
         let child = cmd.spawn().map_err(|e| format!("Nie można uruchomić lokalnego MGAI: {e}"))?;
-        *self.child.lock().await = Some(child);
+        *guard = Some(child);
         Ok(true)
+    }
+
+    pub async fn ensure_ready(&self) -> Result<bool, String> {
+        if !self.ensure_started().await? { return Ok(false); }
+        let client = reqwest::Client::builder().timeout(std::time::Duration::from_secs(2)).build().map_err(|e|e.to_string())?;
+        let wait = async {
+            loop {
+                if let Ok(r) = client.get("http://127.0.0.1:8080/health").send().await {
+                    if r.status().is_success() { return Ok(true); }
+                }
+                {
+                    let mut guard = self.child.lock().await;
+                    if let Some(child) = guard.as_mut() {
+                        if child.try_wait().map_err(|e|e.to_string())?.is_some() { return Err("Proces modelu zakończył pracę podczas ładowania.".into()); }
+                    } else { return Err("Proces modelu zatrzymany.".into()); }
+                }
+                tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+            }
+        };
+        tokio::time::timeout(std::time::Duration::from_secs(60),wait).await
+            .map_err(|_|"Model nadal się ładuje; ta tura użyje narratora awaryjnego.".to_string())?
     }
 
     pub async fn stop(&self) {
@@ -87,3 +108,4 @@ impl LocalAiRuntime {
         })
     }
 }
+

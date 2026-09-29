@@ -2,6 +2,7 @@ use axum::{extract::State, http::Method, routing::{get, post}, Json, Router};
 use kroniki_core::{
     ai::AiConfig,
     creator::{self, CreateCharacterRequest},
+    dm::{self, NewCampaign},
     domain::{state_summary, GameState, PlayerAction},
     engine::Engine,
     lore::{self, LoreQuery},
@@ -38,6 +39,8 @@ async fn main() {
         .route("/health", get(health))
         .route("/state", get(get_state).post(set_state))
         .route("/action", post(action))
+        .route("/action/cancel", post(cancel_action))
+        .route("/campaign/new", post(new_campaign))
         .route("/tick", post(tick))
         .route("/save", post(save))
         .route("/saves", get(list_saves))
@@ -85,15 +88,35 @@ async fn set_state(
     State(s): State<AppState>,
     Json(v): Json<GameState>,
 ) -> Json<Value> {
-    *s.engine.state.write().await = v.clone();
-    Json(json!({"ok":true,"state":v}))
+    match s.engine.replace(v,"import").await {
+        Ok(()) => { let st=s.engine.state.read().await; Json(json!({"ok":true,"state":state_summary(&st)})) },
+        Err(e) => Json(json!({"ok":false,"error":e})),
+    }
+}
+
+#[derive(Deserialize)]
+struct ActionReq {
+    #[serde(flatten)] action: PlayerAction,
+    #[serde(default)] request_id: String,
+}
+#[derive(Deserialize)]
+struct CancelReq { request_id: String }
+async fn cancel_action(State(s): State<AppState>, Json(p): Json<CancelReq>) -> Json<Value> {
+    s.engine.cancel(&p.request_id);
+    Json(json!({"ok":true,"cancel_requested":true}))
+}
+async fn new_campaign(State(s): State<AppState>, Json(p): Json<NewCampaign>) -> Json<Value> {
+    match s.engine.replace(dm::new_campaign(p),"new_campaign").await {
+        Ok(()) => { let st=s.engine.state.read().await; Json(json!({"ok":true,"state":state_summary(&st)})) },
+        Err(e) => Json(json!({"ok":false,"error":e})),
+    }
 }
 
 async fn action(
     State(s): State<AppState>,
-    Json(p): Json<PlayerAction>,
+    Json(p): Json<ActionReq>,
 ) -> Json<Value> {
-    match s.engine.act(p).await {
+    match s.engine.act_with_id(p.action,p.request_id).await {
         Ok(x) => Json(serde_json::to_value(x).unwrap_or(json!({"ok":false}))),
         Err(e) => Json(json!({"ok":false,"error":e})),
     }
@@ -108,7 +131,7 @@ async fn tick(
     State(s): State<AppState>,
     Json(p): Json<TickReq>,
 ) -> Json<Value> {
-    let events = s.engine.tick(p.minutes.max(0)).await;
+    let events = match s.engine.tick(p.minutes).await { Ok(e)=>e, Err(e)=>return Json(json!({"ok":false,"error":e})) };
     let guard = s.engine.state.read().await;
     Json(json!({
         "ok":true,
@@ -128,6 +151,7 @@ async fn save(
     State(s): State<AppState>,
     Json(p): Json<SaveReq>,
 ) -> Json<Value> {
+    let _single = s.engine.action_lock.lock().await;
     let st = match p.state {
         Some(x) => x,
         None => s.engine.state.read().await.clone(),
@@ -171,8 +195,10 @@ async fn load_save(
 ) -> Json<Value> {
     match s.engine.store.load(p.id) {
         Ok(st) => {
-            *s.engine.state.write().await = st.clone();
-            Json(json!({"ok":true,"id":p.id,"state":st}))
+            match s.engine.replace(st,"load").await {
+                Ok(()) => { let st=s.engine.state.read().await; Json(json!({"ok":true,"id":p.id,"state":state_summary(&st)})) },
+                Err(e)=>Json(json!({"ok":false,"error":e})),
+            }
         }
         Err(e) => Json(json!({"ok":false,"error":e})),
     }
@@ -213,13 +239,17 @@ async fn character_create(
     Json(req): Json<CreateCharacterRequest>,
 ) -> Json<Value> {
     let character = creator::create(&req);
-    let mut st = s.engine.state.write().await;
-    st.character = character.clone();
-    st.revision += 1;
-    Json(json!({"ok":true,"character":character,"state":state_summary(&st)}))
+    match s.engine.mutate("character", |st| {st.character=character.clone();Ok(())}).await {
+        Ok(())=> {let st=s.engine.state.read().await;Json(json!({"ok":true,"character":character,"state":state_summary(&st)}))},
+        Err(e)=>Json(json!({"ok":false,"error":e})),
+    }
 }
 
-async fn lore_search(Json(mut q): Json<LoreQuery>) -> Json<Value> {
+async fn lore_search(State(s): State<AppState>, Json(mut q): Json<LoreQuery>) -> Json<Value> {
+    let st=s.engine.state.read().await;
+    q.character_only=true;
+    q.known_fact_ids=st.character.knowledge.iter().map(|k|k.id.clone()).collect();
+    q.year=st.world.clock.year; q.month=st.world.clock.month; q.day=st.world.clock.day;
     if q.limit == 0 { q.limit = 6; }
     let facts = lore::starter_facts();
     let found = lore::search(&facts, &q);
@@ -247,8 +277,7 @@ async fn craft(
     State(s): State<AppState>,
     Json(p): Json<RecipeReq>,
 ) -> Json<Value> {
-    let mut st = s.engine.state.write().await;
-    match systems::craft(&mut st, &p.recipe) {
+    match s.engine.mutate("craft", |st| systems::craft(st, &p.recipe)).await {
         Ok(i) => Json(json!({"ok":true,"item":i})),
         Err(e) => Json(json!({"ok":false,"error":e})),
     }
@@ -258,8 +287,7 @@ async fn brew(
     State(s): State<AppState>,
     Json(p): Json<RecipeReq>,
 ) -> Json<Value> {
-    let mut st = s.engine.state.write().await;
-    match systems::brew(&mut st, &p.recipe) {
+    match s.engine.mutate("brew", |st| systems::brew(st, &p.recipe)).await {
         Ok(i) => Json(json!({"ok":true,"item":i})),
         Err(e) => Json(json!({"ok":false,"error":e})),
     }
@@ -275,13 +303,13 @@ async fn hunt_evidence(
     State(s): State<AppState>,
     Json(p): Json<EvidenceReq>,
 ) -> Json<Value> {
-    let mut st = s.engine.state.write().await;
-    systems::add_hunt_evidence(
-        &mut st,
-        &p.clue,
-        p.reliability.unwrap_or(60),
-    );
-    Json(json!({"ok":true,"hunt":st.world.hunt}))
+    match s.engine.mutate("hunt_evidence", |st| {
+        systems::add_hunt_evidence(st,&p.clue,p.reliability.unwrap_or(60));
+        Ok(state_summary(st)["hunt"].clone())
+    }).await {
+        Ok(hunt)=>Json(json!({"ok":true,"hunt":hunt})),
+        Err(e)=>Json(json!({"ok":false,"error":e})),
+    }
 }
 
 async fn shutdown(State(s): State<AppState>) -> Json<Value> {
@@ -293,3 +321,4 @@ async fn shutdown(State(s): State<AppState>) -> Json<Value> {
     });
     Json(json!({"ok":true}))
 }
+
