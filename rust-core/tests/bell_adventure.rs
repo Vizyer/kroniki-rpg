@@ -84,3 +84,15 @@ async fn offline_session_finishes_and_autosave_restores_epilogue() {
     assert!(restored.state.read().await.last_narration.starts_with("Epilog"));
     assert!(restored.act(action("Atakuję Jana")).await.is_err());
 }
+
+#[tokio::test]
+async fn tick_to_ending_restores_epilogue_without_an_extra_action() {
+    let store=Store::open(":memory:".into()).unwrap();let e=Engine::new(store.clone());
+    e.replace(start(),"new").await.unwrap();
+    let events=e.tick(120).await.unwrap();
+    assert_eq!(events.iter().filter(|e|e.starts_with("Epilog")).count(),1);
+    let restored=Engine::new(store);
+    let state=restored.state.read().await;
+    assert_eq!(outcome(&state),Some("too_late"));
+    assert!(state.last_narration.starts_with("Epilog"));assert!(state.last_suggestions.is_empty());
+}

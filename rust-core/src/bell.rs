@@ -81,6 +81,7 @@ fn finish(s:&mut GameState,id:&str,text:&str,events:&mut Vec<String>) {
     let Some(b)=s.campaign.bell.as_mut() else{return};
     if b.outcome.is_some(){return;}
     b.outcome=Some(id.into());b.epilogue=text.into();
+    s.last_narration=text.into();s.last_suggestions.clear();
     events.push(text.into());
     if let Some(t)=s.campaign.threads.get_mut("missing-courier"){t.resolved=true;}
     if let Some(q)=s.world.quests.get_mut("missing-courier") {
