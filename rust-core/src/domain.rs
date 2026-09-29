@@ -94,6 +94,8 @@ pub struct Relation {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Npc {
+    #[serde(default)]
+    pub canon: bool,
     pub id: String,
     pub name: String,
     pub role: String,
@@ -113,6 +115,8 @@ pub struct Npc {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Faction {
+    #[serde(default)]
+    pub canon: bool,
     pub id: String,
     pub name: String,
     pub power: i32,
@@ -136,6 +140,8 @@ pub struct QuestObjective {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Quest {
+    #[serde(default)]
+    pub canon: bool,
     pub id: String,
     pub title: String,
     pub kind: String,

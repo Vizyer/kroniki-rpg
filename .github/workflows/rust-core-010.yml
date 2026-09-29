@@ -6,12 +6,16 @@ on:
     paths:
       - "rust-core/**"
       - "godot/**"
+      - "launcher/**"
+      - "scripts/**"
       - "AI_MODEL_PROFILE.json"
       - ".github/workflows/rust-core-010.yml"
   pull_request:
     paths:
       - "rust-core/**"
       - "godot/**"
+      - "launcher/**"
+      - "scripts/**"
       - "AI_MODEL_PROFILE.json"
 
 permissions:
@@ -33,6 +37,9 @@ jobs:
       - name: Cargo test
         working-directory: rust-core
         run: cargo test
+      - name: Check launcher
+        working-directory: launcher
+        run: cargo check
 
   godot-parse:
     runs-on: ubuntu-latest

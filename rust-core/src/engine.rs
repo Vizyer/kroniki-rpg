@@ -2,6 +2,7 @@ use crate::ai::{local_fallback, propose_with_model, AiConfig};
 use crate::domain::*;
 use crate::systems::{apply_patch, infer_intent, resolve_action, simulate_background, validate_ai_patch};
 use crate::store::Store;
+use crate::runtime::LocalAiRuntime;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::{Mutex, RwLock};
@@ -12,6 +13,7 @@ pub struct Engine {
     pub store: Store,
     pub ai_config: Arc<RwLock<AiConfig>>,
     pub action_lock: Arc<Mutex<()>>,
+    pub local_ai: LocalAiRuntime,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -34,6 +36,7 @@ impl Engine {
             store,
             ai_config: Arc::new(RwLock::new(cfg)),
             action_lock: Arc::new(Mutex::new(())),
+            local_ai: LocalAiRuntime::default(),
         }
     }
 
@@ -47,16 +50,30 @@ impl Engine {
         let intent = infer_intent(&action.text);
         let resolution = resolve_action(&snapshot, &action, &intent);
         let cfg = self.ai_config.read().await.clone();
+        if cfg.mode == "local" {
+            let _ = self.local_ai.ensure_started().await;
+        }
 
-        let (mut proposal, source, ai_error) =
-            match propose_with_model(&cfg, &snapshot, &action, &resolution).await {
-                Ok(p) => (p, "model".to_string(), None),
-                Err(e) => (
-                    local_fallback(&snapshot, &action, &resolution),
-                    "local_fallback".to_string(),
-                    Some(e),
-                ),
-            };
+        let first = propose_with_model(&cfg, &snapshot, &action, &resolution).await;
+        let attempt = match first {
+            Ok(p) => Ok(p),
+            Err(first_error) => {
+                tokio::time::sleep(std::time::Duration::from_millis(250)).await;
+                match propose_with_model(&cfg, &snapshot, &action, &resolution).await {
+                    Ok(p) => Ok(p),
+                    Err(second_error) => Err(format!("{first_error}; retry: {second_error}")),
+                }
+            }
+        };
+
+        let (mut proposal, source, ai_error) = match attempt {
+            Ok(p) => (p, "model".to_string(), None),
+            Err(e) => (
+                local_fallback(&snapshot, &action, &resolution),
+                "local_fallback".to_string(),
+                Some(e),
+            ),
+        };
 
         proposal.interpretation = intent.clone();
         if proposal.patch.ops.is_empty() {
