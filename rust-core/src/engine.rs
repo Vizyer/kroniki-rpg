@@ -81,7 +81,9 @@ impl Engine {
         } else { dm::fallback_plan(&snapshot,action) };
         let (mut next,intent,resolution)=Self::resolve_turn(&snapshot,action,&plan)?;
         let (proposal,source)=if ready {
-            match propose_with_model(&cfg,&next,action,&resolution).await {
+            let narration=tokio::time::timeout(Duration::from_secs(65),propose_with_model(&cfg,&next,action,&resolution)).await
+                .unwrap_or_else(|_|Err("Model nie zakończył narracji w 65 sekund; użyto narracji awaryjnej.".into()));
+            match narration {
                 Ok(p)=>(p,"model"),Err(e)=>{errors.push(e);(local_fallback(&next,action,&resolution),"local_fallback")}
             }
         } else { (local_fallback(&next,action,&resolution),"local_fallback") };

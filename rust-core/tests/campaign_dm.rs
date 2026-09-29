@@ -99,3 +99,69 @@ async fn cancellation_and_database_failure_do_not_commit_a_turn() {
     assert!(e.act(action("Rozglądam się")).await.is_err());
     assert_eq!(e.state.read().await.revision,rev);
 }
+
+async fn mock_model(replies:Vec<String>) -> (String,tokio::task::JoinHandle<()>,std::sync::Arc<std::sync::Mutex<Vec<serde_json::Value>>>) {
+    use axum::{routing::post,Router,Json,extract::State};
+    use std::{sync::{Arc,Mutex},collections::VecDeque};
+    type Mock=(Arc<Mutex<VecDeque<String>>>,Arc<Mutex<Vec<serde_json::Value>>>);
+    async fn respond(State((queue,seen)):State<Mock>,Json(body):Json<serde_json::Value>)->Json<serde_json::Value>{
+        seen.lock().unwrap().push(body);
+        let content=queue.lock().unwrap().pop_front().unwrap();
+        Json(serde_json::json!({"choices":[{"message":{"content":content}}]}))
+    }
+    let seen=Arc::new(Mutex::new(Vec::new()));
+    let state=(Arc::new(Mutex::new(VecDeque::from(replies))),seen.clone());
+    let listener=tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let endpoint=format!("http://{}/completion",listener.local_addr().unwrap());
+    let app=Router::new().route("/completion",post(respond)).with_state(state);
+    let task=tokio::spawn(async move {axum::serve(listener,app).await.unwrap();});
+    (endpoint,task,seen)
+}
+#[tokio::test]
+async fn two_phase_model_receives_approved_moves_and_cannot_patch_resources() {
+    let (endpoint,server,seen)=mock_model(vec![
+        r#"{"intent_kind":"social","npc_moves":[{"npc_id":"marta","kind":"help"}]}"#.into(),
+        r#"{"narration":"Marta przysuwa lampę. «Pomogę ci szukać». Czeka na twoją decyzję.","suggestions":["Idę do miejsca Stary most"],"patch":{"hp":999}}"#.into()
+    ]).await;
+    let e=offline();e.replace(seeded(),"new").await.unwrap();
+    *e.ai_config.write().await=ai::AiConfig{mode:"test".into(),endpoint,..Default::default()};
+    let hp=e.state.read().await.character.hp;
+    let result=e.act(action("Pytam Martę o pomoc")).await.unwrap();
+    assert_eq!(result.source,"model");assert_eq!(e.state.read().await.character.hp,hp);
+    assert_eq!(e.state.read().await.world.npcs["marta"].memories.len(),1);
+    let requests=seen.lock().unwrap();assert_eq!(requests.len(),2);
+    let ctx:serde_json::Value=serde_json::from_str(requests[1]["messages"][1]["content"].as_str().unwrap().split("KONTEKST:\n").nth(1).unwrap().split("\n\n/no_think").next().unwrap()).unwrap();
+    assert!(ctx["approved_recent_events"].to_string().contains("deklaruje chęć pomocy"));
+    server.abort();
+}
+#[tokio::test]
+async fn invalid_plan_falls_back_without_accepting_unknown_npc() {
+    let (endpoint,server,_)=mock_model(vec![
+        r#"{"intent_kind":"social","npc_moves":[{"npc_id":"invented","kind":"help"}]}"#.into(),
+        r#"{"narration":"Deszcz bębni o dach. Marta czeka na pytanie.","suggestions":["Pytam o kuriera"]}"#.into()
+    ]).await;
+    let e=offline();e.replace(seeded(),"new").await.unwrap();
+    *e.ai_config.write().await=ai::AiConfig{mode:"test".into(),endpoint,..Default::default()};
+    let result=e.act(action("Pytam o kuriera")).await.unwrap();
+    assert!(result.ai_error.is_some());assert!(!e.state.read().await.world.npcs.contains_key("invented"));
+    server.abort();
+}
+#[tokio::test]
+async fn cancelling_while_model_is_working_leaves_autosave_unchanged() {
+    use axum::{Router,routing::post};
+    let entered=std::sync::Arc::new(tokio::sync::Notify::new());let notify=entered.clone();
+    let app=Router::new().route("/completion",post(move || {let n=notify.clone();async move {
+        n.notify_one();tokio::time::sleep(std::time::Duration::from_secs(60)).await;"{}"
+    }}));
+    let listener=tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let endpoint=format!("http://{}/completion",listener.local_addr().unwrap());
+    let server=tokio::spawn(async move{axum::serve(listener,app).await.unwrap();});
+    let e=offline();e.replace(seeded(),"new").await.unwrap();let rev=e.state.read().await.revision;
+    *e.ai_config.write().await=ai::AiConfig{mode:"test".into(),endpoint,..Default::default()};
+    let worker=e.clone();let turn=tokio::spawn(async move{worker.act_with_id(action("Pytam Martę"),"slow-turn".into()).await});
+    tokio::time::timeout(std::time::Duration::from_secs(5),entered.notified()).await.unwrap();
+    e.cancel("slow-turn");
+    assert!(tokio::time::timeout(std::time::Duration::from_secs(2),turn).await.unwrap().unwrap().is_err());
+    assert_eq!(e.state.read().await.revision,rev);assert_eq!(e.store.latest().unwrap().unwrap().revision,rev);
+    server.abort();
+}

@@ -9,7 +9,8 @@ var base_url := "http://127.0.0.1:17377"
 var core_pid := -1
 var _seq := 0
 var _requests := {}
-var timeout_seconds := 18.0
+var timeout_seconds := 20.0
+var _health_attempts := 0
 
 func _ready() -> void:
     _ensure_core()
@@ -35,9 +36,13 @@ func request(route:String, payload:Dictionary = {}, method:String = "POST") -> i
     _seq += 1
     var id := _seq
     var h := HTTPRequest.new()
-    h.timeout = timeout_seconds
+    h.timeout = 180.0 if route == "/action" else timeout_seconds
+    var token := "%s-%s" % [str(Time.get_unix_time_from_system()), str(id)]
+    payload = payload.duplicate(true)
+    if route == "/action":
+        payload["request_id"] = token
     add_child(h)
-    _requests[h] = {"route": route, "id": id}
+    _requests[h] = {"route": route, "id": id, "token": token}
     h.request_completed.connect(_on_completed.bind(h))
     var headers := PackedStringArray(["Content-Type: application/json"])
     var body := JSON.stringify(payload)
@@ -53,6 +58,8 @@ func cancel(request_id:int) -> void:
     for h in _requests.keys():
         var meta:Dictionary = _requests[h]
         if int(meta.get("id", -1)) == request_id:
+            if meta.get("route", "") == "/action":
+                request("/action/cancel", {"request_id": meta.get("token", "")})
             h.cancel_request()
             _requests.erase(h)
             h.queue_free()
@@ -66,8 +73,8 @@ func _on_completed(_result:int, code:int, _headers:PackedStringArray, body:Packe
     var id:int = int(meta.get("id", -1))
     var txt := body.get_string_from_utf8()
     var data = JSON.parse_string(txt)
-    if data == null:
-        data = {"raw": txt}
+    if not data is Dictionary:
+        data = {"ok": false, "error": "Brak poprawnej odpowiedzi rdzenia.", "raw": txt}
     if data is Dictionary:
         data["request_id"] = id
     var ok := code >= 200 and code < 300 and bool(data.get("ok", true))
@@ -75,8 +82,13 @@ func _on_completed(_result:int, code:int, _headers:PackedStringArray, body:Packe
     if route == "/health" and ok:
         core_ready.emit(data)
     h.queue_free()
+    if route == "/health" and not ok and _health_attempts < 12:
+        _health_attempts += 1
+        await get_tree().create_timer(0.5).timeout
+        request("/health", {}, "GET")
 
 func _exit_tree() -> void:
     if core_pid > 0:
         request("/shutdown", {})
         core_pid = -1
+

@@ -68,6 +68,7 @@ pub fn build_context(
         .npcs
         .values()
         .filter(|n| n.active && n.location == state.world.location)
+        .take(8)
         .map(|n| {
             json!({
                 "id": &n.id,
@@ -180,6 +181,24 @@ pub fn build_context(
             json!(null)
         },
     })
+}
+
+/// Conservative character budget; preserve complete JSON and authoritative resolution.
+fn bounded_context(config:&AiConfig, state:&GameState, action:&PlayerAction, resolution:&Resolution) -> Result<Value,String> {
+    let mut ctx=build_context(state,action,resolution);
+    let budget=config.max_context_tokens.clamp(2048,14000).saturating_sub(config.max_output_tokens.clamp(300,2000)+1800)*2;
+    for key in ["relevant_older_turns","session_summaries"] {
+        if ctx.to_string().chars().count()>budget { ctx["memory"][key]=json!([]); }
+    }
+    if ctx.to_string().chars().count()>budget {
+        if let Some(recent)=ctx["memory"]["recent_turns"].as_array_mut() {
+            while recent.len()>2 {recent.remove(0);}
+            for turn in recent {turn["narration"]=json!(crate::dm::short(turn["narration"].as_str().unwrap_or(""),500));}
+        }
+        ctx["continuity"]["last_narration"]=json!(crate::dm::short(&state.last_narration,500));
+    }
+    if ctx.to_string().chars().count()>budget {return Err("Kontekst przekracza budżet modelu; zachowano stan i użyto narratora awaryjnego.".into());}
+    Ok(ctx)
 }
 
 fn system_prompt() -> &'static str {
@@ -336,7 +355,7 @@ pub async fn propose_with_model(
         return Err("AI disabled".into());
     }
 
-    let ctx = build_context(state, action, resolution);
+    let ctx = bounded_context(config, state, action, resolution)?;
     let ctx_text = serde_json::to_string(&ctx).map_err(|e| e.to_string())?;
     let user_content = format!(
         "ZANARRUJ PONIŻSZĄ, JUŻ ROZSTRZYGNIĘTĄ SYTUACJĘ. Nie zmieniaj wyniku.\nKONTEKST:\n{}",
@@ -526,7 +545,7 @@ mod tests {
 /// Separate proposal phase. Its schema has no resource, truth, inventory or outcome fields.
 pub async fn plan_turn(config: &AiConfig, state: &GameState, action: &PlayerAction) -> Result<crate::dm::TurnPlan, String> {
     if config.mode == "off" { return Err("AI disabled".into()); }
-    let context = build_context(state, action, &Resolution::default());
+    let context = bounded_context(config, state, action, &Resolution::default())?;
     let client = Client::builder().timeout(Duration::from_secs(20)).build().map_err(|e|e.to_string())?;
     let body = json!({"model":config.model,"temperature":0.2,"max_tokens":450,
         "chat_template_kwargs":{"enable_thinking":false},"response_format":{"type":"json_object"},
