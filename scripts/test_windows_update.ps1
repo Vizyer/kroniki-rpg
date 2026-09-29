@@ -41,7 +41,8 @@ function Stop-Core {
 function Assert-Save([long]$id, [string]$marker) {
     $loaded = Invoke-RestMethod -Method Post 'http://127.0.0.1:17377/save/load' -ContentType 'application/json' -Body (@{id=$id}|ConvertTo-Json)
     if (!$loaded.ok -or $loaded.state.schema -ne 10 -or $loaded.state.character.name -ne $marker) { throw 'Save content was not preserved' }
-    if ($loaded.state.campaign.turns -ne 1 -or $loaded.state.recent_turns.Count -ne 1) { throw 'Campaign memory was not preserved' }
+    if ($loaded.state.campaign.adventure.outcome -ne 'rescued') { throw 'Adventure ending was not preserved' }
+    if ($loaded.state.campaign.turns -ne 4 -or $loaded.state.recent_turns.Count -ne 4) { throw 'Campaign memory was not preserved' }
 }
 try {
     if (Test-Path $install) { Remove-Item $install -Recurse -Force }
@@ -62,15 +63,20 @@ try {
     $null = Invoke-RestMethod -Method Post 'http://127.0.0.1:17377/ai/config' -ContentType 'application/json' -Body '{"mode":"off"}'
     $campaign = Invoke-RestMethod -Method Post 'http://127.0.0.1:17377/campaign/new' -ContentType 'application/json' -Body (@{character_name=$marker}|ConvertTo-Json)
     if (!$campaign.ok -or $campaign.state.campaign.threads.Count -ne 1) { throw 'Campaign creation failed' }
-    $turn = Invoke-RestMethod -Method Post 'http://127.0.0.1:17377/action' -ContentType 'application/json' -Body '{"text":"observe","mode":"freeform","request_id":"smoke-turn"}'
-    if (!$turn.ok -or $turn.state.campaign.turns -ne 1) { throw 'Campaign turn failed' }
+    $actions = @('Pytam Martę, co mogę zrobić dla kuriera', 'Idę do miejsca Młyn', 'Proszę Elę o pomoc w odnalezieniu kuriera', 'Pomagam kurierowi uciec z Elą leśną drogą')
+    foreach ($text in $actions) {
+        $body = @{text=$text; mode='freeform'; request_id=[guid]::NewGuid().ToString()} | ConvertTo-Json
+        $turn = Invoke-RestMethod -Method Post 'http://127.0.0.1:17377/action' -ContentType 'application/json; charset=utf-8' -Body $body
+        if (!$turn.ok) { throw 'Adventure turn failed' }
+    }
+    if ($turn.state.campaign.adventure.outcome -ne 'rescued' -or $turn.state.campaign.turns -ne 4) { throw 'Adventure did not reach rescue epilogue' }
     $saved = Invoke-RestMethod -Method Post 'http://127.0.0.1:17377/save' -ContentType 'application/json' -Body (@{name=$marker}|ConvertTo-Json)
     if (!$saved.ok -or !$saved.id) { throw 'Save failed' }
     Assert-Save $saved.id $marker
     Stop-Core
     $null = Start-Core
     $restored = Invoke-RestMethod 'http://127.0.0.1:17377/state'
-    if ($restored.campaign.turns -ne 1) { throw 'Autosave was not restored on startup' }
+    if ($restored.campaign.turns -ne 4) { throw 'Autosave was not restored on startup' }
     Assert-Save $saved.id $marker
     Stop-Core
 
@@ -85,7 +91,7 @@ try {
     Move-Item $stage (Join-Path $install 'app')
     $null = Start-Core
     $restored = Invoke-RestMethod 'http://127.0.0.1:17377/state'
-    if ($restored.campaign.turns -ne 1) { throw 'Autosave was not restored on startup' }
+    if ($restored.campaign.turns -ne 4) { throw 'Autosave was not restored on startup' }
     Assert-Save $saved.id $marker
     Stop-Core
     # Ensure returning to the previous binaries also preserves the save.
@@ -93,7 +99,7 @@ try {
     Move-Item (Join-Path $install '.rollback') (Join-Path $install 'app')
     $null = Start-Core
     $restored = Invoke-RestMethod 'http://127.0.0.1:17377/state'
-    if ($restored.campaign.turns -ne 1) { throw 'Autosave was not restored on startup' }
+    if ($restored.campaign.turns -ne 4) { throw 'Autosave was not restored on startup' }
     Assert-Save $saved.id $marker
     Stop-Core
     Write-Host 'Save survived restart, update and rollback. Starting Godot boot test.'

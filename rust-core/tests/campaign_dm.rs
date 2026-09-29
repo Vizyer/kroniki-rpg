@@ -1,4 +1,4 @@
-use kroniki_core::{ai, dm::{self, *}, domain::*, engine::Engine, store::Store};
+use kroniki_core::{ai, dm::*, domain::*, engine::Engine, store::Store};
 fn action(text:&str)->PlayerAction { PlayerAction{text:text.into(),mode:"freeform".into()} }
 fn seeded()->GameState { new_campaign(NewCampaign::default()) }
 fn offline()->Engine {
@@ -27,6 +27,9 @@ fn clues_require_discovery_and_campaign_can_be_completed() {
     assert!(bridge.campaign.clues["tracks"].discovered);
     let end=investigate(&travel(&bridge,"Młyn"));
     assert!(end.campaign.clues["courier"].discovered);
+    assert!(!end.campaign.threads["missing-courier"].resolved);
+    let rescue=action("Pomagam kurierowi uciec z Elą leśną drogą");
+    let end=Engine::resolve_turn(&end,&rescue,&fallback_plan(&end,&rescue)).unwrap().0;
     assert!(end.campaign.threads["missing-courier"].resolved);
     assert_eq!(end.world.quests["missing-courier"].status,"completed");
 }
@@ -35,7 +38,7 @@ fn model_and_player_views_do_not_contain_hidden_state() {
     let s=seeded();
     let context=ai::build_context(&s,&action("Rozglądam się"),&Resolution::default()).to_string();
     let public=state_summary(&s).to_string();
-    for npc in s.world.npcs.values() {assert!(!context.contains(&npc.secret));assert!(!public.contains(&npc.secret));}
+    for npc in s.world.npcs.values().filter(|n|!n.secret.is_empty()) {assert!(!context.contains(&npc.secret));assert!(!public.contains(&npc.secret));}
     for clue in s.campaign.clues.values() {assert!(!context.contains(&clue.text));assert!(!public.contains(&clue.text));}
     assert!(!public.contains("required_clues"));
 }

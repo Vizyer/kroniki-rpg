@@ -70,13 +70,16 @@ impl Engine {
 
     async fn prepare_turn(&self, action: &PlayerAction) -> Result<ActionResult,String> {
         let snapshot = self.state.read().await.clone();
+        if snapshot.campaign.bell.as_ref().and_then(|b|b.outcome.as_ref()).is_some() {return Err("Ta przygoda ma już zakończenie. Wczytaj wcześniejszy zapis albo rozpocznij nową kampanię.".into());}
         let cfg = self.ai_config.read().await.clone();
         let mut errors=Vec::new();
         let ready = if cfg.mode == "off" { false }
             else if cfg.mode == "local" {
                 match self.local_ai.ensure_ready().await { Ok(true)=>true,Ok(false)=>{errors.push("Brak lokalnego modelu; pobierz go w launcherze.".into());false},Err(e)=>{errors.push(e);false} }
             } else { true };
-        let plan = if ready {
+        let plan = if crate::bell::resolution(&snapshot,action).is_some() {
+            dm::fallback_plan(&snapshot,action)
+        } else if ready {
             match plan_turn(&cfg,&snapshot,action).await { Ok(p)=>p,Err(e)=>{errors.push(e);dm::fallback_plan(&snapshot,action)} }
         } else { dm::fallback_plan(&snapshot,action) };
         let (mut next,intent,resolution)=Self::resolve_turn(&snapshot,action,&plan)?;
@@ -93,6 +96,14 @@ impl Engine {
         if source=="local_fallback" {
             next.last_suggestions=next.campaign.exits.get(&next.world.location).into_iter().flatten().take(2)
                 .map(|p|format!("Idę do miejsca {p}")).chain(["Badam otoczenie w poszukiwaniu wskazówek".into(),"Rozglądam się".into()]).collect();
+        }
+        if next.campaign.bell.is_some() {
+            let mut suggestions:Vec<String>=crate::bell::choices(&next).iter().map(|c|c.text.to_string()).collect();
+            suggestions.extend(next.campaign.exits.get(&next.world.location).into_iter().flatten().map(|p|format!("Idę do miejsca {p}")));
+            next.last_suggestions=suggestions;
+            if let Some(b)=next.campaign.bell.as_ref().filter(|b|b.outcome.is_some()) {
+                next.last_narration=b.epilogue.clone();next.last_suggestions.clear();
+            }
         }
         let turn=TurnMemory {revision:next.revision,location:next.world.location.clone(),action:action.text.clone(),outcome:resolution.degree.clone(),
             narration:dm::short(&next.last_narration,3000),events:next.director.recent_events.clone()};
@@ -111,7 +122,7 @@ impl Engine {
     pub fn resolve_turn(snapshot: &GameState, action: &PlayerAction, plan: &TurnPlan) -> Result<(GameState,Intent,Resolution),String> {
         dm::validate_plan(snapshot,plan)?;
         let intent=dm::intent_from_plan(action,plan);
-        let mut resolution=resolve_action(snapshot,action,&intent);
+        let mut resolution=crate::bell::resolution(snapshot,action).unwrap_or_else(||resolve_action(snapshot,action,&intent));
         let mut next=snapshot.clone();
         apply_patch(&mut next,&default_mechanical_patch(&resolution))?;
         // Time was advanced by mechanics; simulate background without advancing it twice.
@@ -119,6 +130,8 @@ impl Engine {
         let mut events=simulate_background(&mut next,i64::from((resolution.duration_seconds.max(1)+59)/60));
         next.world.clock=clock;
         events.extend(dm::apply_turn(&mut next,plan,action,&intent,&mut resolution));
+        events.extend(crate::bell::apply_choice(&mut next,snapshot,action,&mut resolution));
+        if next.campaign.bell.as_ref().and_then(|b|b.outcome.as_ref()).is_some() {next.campaign.scene="epilogue".into();next.director.scene_goal="Przygoda zakończona. Opisz zapisany epilog, nie otwieraj ponownie sprawy.".into();}
         for f in &resolution.revealed {
             if !next.character.knowledge.iter().any(|k|k.statement==*f) {
                 next.character.knowledge.push(KnowledgeFact{id:format!("reveal:{}:{}",next.revision,next.character.knowledge.len()),statement:f.clone(),source:"observation".into(),confidence:80,canon:false});
@@ -145,7 +158,14 @@ impl Engine {
         let _single=self.action_lock.lock().await;
         let mut current=self.state.write().await;
         let mut next=current.clone();
+        let old_clock=&current.world.clock;
+        let ordinal=|c:&Clock| (((i64::from(c.year)*12+i64::from(c.month))*30+i64::from(c.day))*24+i64::from(c.hour))*60+i64::from(c.minute);
+        let before=ordinal(old_clock);
         let result=change(&mut next)?;
+        let elapsed=(ordinal(&next.world.clock)-before).max(0);
+        let events=crate::bell::advance(&mut next,elapsed);
+        if !events.is_empty(){next.director.recent_events=events;}
+
         next.revision+=1;
         self.store.checkpoint(&next,kind,"")?;
         *current=next;

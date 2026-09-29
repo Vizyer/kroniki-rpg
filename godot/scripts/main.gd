@@ -155,6 +155,10 @@ func _on_core_ready(info:Dictionary) -> void:
     core.request("/state", {}, "GET")
 
 func _submit_action() -> void:
+    var adventure = state.get("campaign", {}).get("adventure")
+    if adventure is Dictionary and adventure.get("outcome") != null:
+        status.text = "Przygoda zakończona. Wczytaj zapis lub rozpocznij nową kampanię."
+        return
     var text := input.text.strip_edges()
     if text == "" or pending_action_id > 0 or pending_campaign:
         return
@@ -378,6 +382,11 @@ func _show_journal() -> void:
     var text := "%s • tur: %s\n\nWĄTKI\n" % [str(campaign.get("title", "Kampania")), str(campaign.get("turns", 0))]
     for thread in campaign.get("threads", []):
         text += "%s — %s\n" % [str(thread.get("title", "")), "rozwiązany" if thread.get("resolved", false) else "otwarty"]
+    var adventure = campaign.get("adventure")
+    if adventure is Dictionary:
+        text += "\n" + str(adventure.get("epilogue", "")) + "\n"
+        for announcement in adventure.get("announcements", []):
+            text += str(announcement) + "\n"
     text += "\nODKRYTE WSKAZÓWKI\n"
     for clue in campaign.get("clues", []):
         text += str(clue.get("text", "")) + "\n"
