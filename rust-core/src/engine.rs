@@ -77,7 +77,9 @@ impl Engine {
             else if cfg.mode == "local" {
                 match self.local_ai.ensure_ready().await { Ok(true)=>true,Ok(false)=>{errors.push("Brak lokalnego modelu; pobierz go w launcherze.".into());false},Err(e)=>{errors.push(e);false} }
             } else { true };
-        let plan = if ready {
+        let plan = if crate::bell::resolution(&snapshot,action).is_some() {
+            dm::fallback_plan(&snapshot,action)
+        } else if ready {
             match plan_turn(&cfg,&snapshot,action).await { Ok(p)=>p,Err(e)=>{errors.push(e);dm::fallback_plan(&snapshot,action)} }
         } else { dm::fallback_plan(&snapshot,action) };
         let (mut next,intent,resolution)=Self::resolve_turn(&snapshot,action,&plan)?;

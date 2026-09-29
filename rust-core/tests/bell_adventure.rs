@@ -80,7 +80,7 @@ async fn offline_session_finishes_and_autosave_restores_epilogue() {
     for text in ["Pytam Martę, co mogę zrobić dla kuriera","Idę do miejsca Młyn","Proszę Elę o pomoc w odnalezieniu kuriera","Pomagam kurierowi uciec z Elą leśną drogą"] {
         e.act(action(text)).await.unwrap();
     }
-    let restored=Engine::new(store);assert_eq!(outcome(&restored.state.read().await),Some("rescued"));
+    let restored=Engine::new(store);assert_eq!(outcome(&*restored.state.read().await),Some("rescued"));
     assert!(restored.state.read().await.last_narration.starts_with("Epilog"));
     assert!(restored.act(action("Atakuję Jana")).await.is_err());
 }

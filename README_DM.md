@@ -28,3 +28,33 @@ Model może potrzebować do 60 sekund na załadowanie. Plan ma limit 20 sekund, 
 ## Granice tej wersji
 
 To działający fundament narratywnego MG, nie zamiennik doświadczonego człowieka we wszystkich systemach RPG. Scenariusz startowy jest autorsko ustalony. Brakuje generatora długich kampanii, pełnej walki taktycznej, rozbudowanych autonomicznych planów NPC, semantycznego wyszukiwania całej historii i przetestowanej wieloosobowej sesji sieciowej. Ton i granice są instrukcjami dla modelu, nie gwarantowanym filtrem treści. Proza modelu może zawierać niespójności, mimo że nie może zmieniać autorytatywnego stanu. Testy HTTP używają kontrolowanego modelu zastępczego; jakość dialogów i szybkość Qwen wymagają sesji na docelowym sprzęcie.
+
+## Pełna przygoda „Dzwon nad brodem” — nowy przebieg
+
+Dotyczy nowych kampanii. Stare zapisy zachowują dotychczasowy scenariusz; nie dodajemy do trwającej sesji nowych terminów bez wiedzy gracza.
+
+Przygoda ma ustaloną prawdę: Jan dostarczył lekarstwo rodzinie Eli, został ranny i ukrywa się w młynie. Poborca szuka go za zaległe myto. Marta może przekazać list, Bor wskazuje drogę, Ela może pomóc w ucieczce. Można pominąć śledztwo na moście i bezpośrednio poprosić Elę o pomoc.
+
+Czas jest czasem gry: rozmowa lub prosta obserwacja trwa co najmniej minutę, podróż 10 minut, odpoczynek 30 minut. Po 30 minutach pojawia się ostrzeżenie, po 60 poborca przyjmuje świadków na moście, po 90 kurier zostaje zatrzymany, po 120 eskorta odjeżdża. Ogłoszenia woźnego są jawne; przyszłe zdarzenia nie trafiają do kontekstu narratora. Zamknięcie aplikacji nie przesuwa czasu. W tej małej przygodzie działania NPC są napisanym scenariuszem z warunkami, nie jeszcze ogólnym generatorem planów.
+
+Ważne decyzje wybiera się z propozycji pod narracją lub wpisuje ich dokładny tekst. Model nadal obsługuje swobodne rozmowy, ale nie może sam zatwierdzić wydania kuriera czy zakończenia sprawy. Dostępne drogi:
+
+- rozmowa z Elą i pomoc Janowi w ucieczce;
+- list Marty oraz poręczenie u poborcy na moście;
+- świadome wydanie Jana;
+- próba odbicia po zatrzymaniu (rozstrzygnięcie mechaniczne, możliwa porażka);
+- opuszczenie okolicy;
+- utrata okazji do interwencji po odjeździe eskorty.
+
+Poznanie miejsca ukrycia samo w sobie nie kończy zadania. Zakończenie ma trwały epilog, stan kuriera oraz konsekwencje w relacjach świadków. Dalsza gra po epilogu wymaga nowej kampanii lub wczytania wcześniejszego zapisu. To zamknięta przygoda testowa, a nie otwarta, nieskończona kampania.
+
+### Próba z lokalnym modelem na komputerze gracza
+
+1. Pobierz model w launcherze i rozpocznij nową kampanię. Sprawdź, czy status po odpowiedzi wskazuje model, a nie tryb awaryjny.
+2. Porozmawiaj swobodnie z Martą przez kilka tur. Zapytaj, skąd zna Jana. Sprawdź, czy nie zmienia jego imienia, motywu poborcy lub losu lekarstwa.
+3. Wybierz prośbę o pomoc, następnie idź do młyna, poproś Elę o odnalezienie kuriera i pomóż w ucieczce. Przed decyzją zrób zapis.
+4. Zamknij i uruchom grę ponownie. Epilog oraz dziennik powinny pozostać takie same.
+5. Wczytaj zapis sprzed decyzji i wybierz wydanie kuriera. Sprawdź odmienne zakończenie i brak wspomnień z poprzedniej, cofniętej ścieżki.
+6. W nowej sesji poczekaj na poborcę, przedstaw list i poręcz za Jana. W kolejnej zignoruj sprawę do odjazdu eskorty.
+
+Testy automatyczne w `tests/bell_adventure.rs` sprawdzają gałęzie, upływ czasu, porażkę, zapis, stare schematy i granice wiedzy. Nie zastępują oceny dialogu rzeczywistego Qwen. Nie deklarujemy jej ukończenia na podstawie testów silnika.
